@@ -55,7 +55,7 @@ final class SessionManager extends BedrockEconomyOwned
         );
 
         $promise->onCompletion(
-            function (array $players): void {
+            function (?array $players): void {
                 if (!$players) {
                     return;
                 }
