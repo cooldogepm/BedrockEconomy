@@ -16,7 +16,7 @@ commands:
     name: balance
     description: Show your balance
     usage: "&cUsage /balance [player: string]"
-    aliases: []
+    aliases: [ ]
   pay:
     name: pay
     description: Pay others

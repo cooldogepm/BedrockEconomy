@@ -27,7 +27,7 @@ declare(strict_types=1);
 namespace cooldogedev\BedrockEconomy\config;
 
 use cooldogedev\BedrockEconomy\BedrockEconomy;
-use cooldogedev\BedrockEconomY\interfaces\BedrockEconomyOwned;
+use cooldogedev\BedrockEconomy\interfaces\BedrockEconomyOwned;
 
 final class ConfigManager extends BedrockEconomyOwned
 {

@@ -44,14 +44,14 @@ final class LanguageManager
         $languagesFolder = $plugin->getDataFolder() . "languages";
         @mkdir($languagesFolder);
         foreach (LanguageManager::LANGUAGES_MAP as $languageCode) {
-            $plugin->saveResource($languagesFolder . DIRECTORY_SEPARATOR . $languageCode . ".yml");
+            $plugin->saveResource("languages" . DIRECTORY_SEPARATOR . $languageCode . ".yml");
         }
         if (!isset(LanguageManager::LANGUAGES_MAP[$language]) || !$language) {
             $language = LanguageManager::DEFAULT_LANGUAGE;
         }
         LanguageManager::$language = $language;
         LanguageManager::$translations = yaml_parse_file(
-            $languagesFolder . DIRECTORY_SEPARATOR . LanguageManager::LANGUAGES_MAP[$language]
+            $languagesFolder . DIRECTORY_SEPARATOR . LanguageManager::LANGUAGES_MAP[$language] . ".yml"
         );
     }
 
