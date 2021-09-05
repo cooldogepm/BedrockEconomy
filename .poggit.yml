@@ -1,0 +1,16 @@
+--- # Poggit-CI Manifest. Open the CI at https://poggit.pmmp.io/ci/cooldogedev/BedrockEconomy
+build-by-default: true
+branches:
+- main
+projects:
+  BedrockEconomy:
+    path: ""
+    libs:
+      - src: cooldogedev/libPromise/libPromise
+        version: ^0.0.4
+      - src: cooldogedev/libSQL/libSQL
+        version: ^0.0.2
+      - src: CortexPE/Commando/Commando
+        version: ^3.0.0
+        branch: PM4
+...
