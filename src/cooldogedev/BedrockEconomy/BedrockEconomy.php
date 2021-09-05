@@ -72,17 +72,10 @@ final class BedrockEconomy extends PluginBase
 
     protected function onLoad(): void
     {
-        $languages = [];
-        @mkdir($this->getDataFolder() . "language");
         foreach ($this->getResources() as $resource) {
-            if (str_contains($resource->getFilename(), "lang")) {
-                $languages[strstr($resource->getFilename(), ".", true)] = yaml_parse_file($resource->getRealPath());
-                $this->saveResource("language" . DIRECTORY_SEPARATOR . $resource->getFilename());
-            } else {
-                $this->saveResource($resource->getFilename());
-            }
+            $this->saveResource($resource->getFilename());
         }
-        LanguageManager::init($this->getConfig()->get("language"), $languages);
+        LanguageManager::init($this, $this->getConfig()->get("language"));
     }
 
     protected function onEnable(): void

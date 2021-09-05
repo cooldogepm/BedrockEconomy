@@ -26,23 +26,33 @@ declare(strict_types=1);
 
 namespace cooldogedev\BedrockEconomy\language;
 
-use cooldogedev\BedrockEconomY\interfaces\BedrockEconomyOwned;
+use cooldogedev\BedrockEconomy\BedrockEconomy;
 use pocketmine\utils\TextFormat;
 
-final class LanguageManager extends BedrockEconomyOwned
+final class LanguageManager
 {
-    protected const DEFAULT_LANGUAGE = "en-US";
+    protected const DEFAULT_LANGUAGE = "english";
+    protected const LANGUAGES_MAP = [
+        "english" => "en-US"
+    ];
 
     protected static string $language;
     protected static array $translations;
 
-    public static function init(?string $language, array $languages)
+    public static function init(BedrockEconomy $plugin, ?string $language)
     {
-        if (!isset($languages[$language]) || !$language) {
+        $languagesFolder = $plugin->getDataFolder() . "languages";
+        @mkdir($languagesFolder);
+        foreach (LanguageManager::LANGUAGES_MAP as $languageCode) {
+            $plugin->saveResource($languagesFolder . DIRECTORY_SEPARATOR . $languageCode . ".yml");
+        }
+        if (!isset(LanguageManager::LANGUAGES_MAP[$language]) || !$language) {
             $language = LanguageManager::DEFAULT_LANGUAGE;
         }
         LanguageManager::$language = $language;
-        LanguageManager::$translations = $languages[$language];
+        LanguageManager::$translations = yaml_parse_file(
+            $languagesFolder . DIRECTORY_SEPARATOR . LanguageManager::LANGUAGES_MAP[$language]
+        );
     }
 
     public static function getTranslations(): array
