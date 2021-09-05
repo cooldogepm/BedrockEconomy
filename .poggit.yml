@@ -6,8 +6,6 @@ projects:
   BedrockEconomy:
     path: ""
     libs:
-      - src: cooldogedev/libPromise/libPromise
-        version: ^0.0.4
       - src: cooldogedev/libSQL/libSQL
         version: ^0.0.2
       - src: CortexPE/Commando/Commando
