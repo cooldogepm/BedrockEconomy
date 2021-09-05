@@ -56,6 +56,9 @@ final class SessionManager extends BedrockEconomyOwned
 
         $promise->onCompletion(
             function (array $players): void {
+                if (!$players) {
+                    return;
+                }
                 foreach ($players as $player) {
                     $this->createSession($player["username"], $player["xuid"], $player["balance"]);
                     $this->getPlugin()->getLogger()->debug("Cached " . $player["username"] . "'s session.");
