@@ -46,12 +46,15 @@ final class SessionManager extends BedrockEconomyOwned
         parent::__construct($plugin);
         $this->sessions = [];
 
-        $this->getPlugin()->getDatabaseManager()->getDatabaseConnector()->submitQuery(
+        $promise = $this->getPlugin()->getDatabaseManager()->getDatabaseConnector()->submitQuery(
             $this->getPlugin()
                 ->getDatabaseManager()
                 ->getQueryManager()
                 ->getBulkPlayersRetrievalQuery(),
-            TableConstants::DATA_TABLE_PLAYERS,
+            TableConstants::DATA_TABLE_PLAYERS
+        );
+
+        $promise->onCompletion(
             function (array $players): void {
                 foreach ($players as $player) {
                     $this->createSession($player["username"], $player["xuid"], $player["balance"]);
@@ -103,12 +106,15 @@ final class SessionManager extends BedrockEconomyOwned
             return false;
         }
 
-        $this->getPlugin()->getDatabaseManager()->getDatabaseConnector()->submitQuery(
+        $promise = $this->getPlugin()->getDatabaseManager()->getDatabaseConnector()->submitQuery(
             $this->getPlugin()
                 ->getDatabaseManager()
                 ->getQueryManager()
                 ->getPlayerDeletionQuery($xuid),
-            TableConstants::DATA_TABLE_PLAYERS,
+            TableConstants::DATA_TABLE_PLAYERS
+        );
+
+        $promise->onCompletion(
             function () use ($xuid) {
                 unset($this->sessions[$xuid]);
             }
