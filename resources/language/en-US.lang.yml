@@ -1,0 +1,45 @@
+---
+command-player-only: "&cThis command is runnable from game only!"
+player-not-found: "&f{PLAYER} was not found!"
+balance-insufficient: "&cYou don't have enough balance!"
+payment-send: "&aYou've paid {CURRENCY_SYMBOL}{AMOUNT} to &f{RECEIVER}&a!"
+payment-receive: "&aYou've received {CURRENCY_SYMBOL}{AMOUNT} from &f{PAYER}&a!"
+balance-info: "&aYour balance is &f{CURRENCY_SYMBOL}{AMOUNT}"
+balance-info-other: "&a{PLAYER}'s balance is &f{CURRENCY_SYMBOL}{AMOUNT}"
+balance-add: "&aYou've added {CURRENCY_SYMBOL}{AMOUNT} to &f{PLAYER}&a!"
+balance-remove: "&aYou've removed {CURRENCY_SYMBOL}{AMOUNT} from &f{PLAYER}&a!"
+balance-set: "&aYou've set &f{PLAYER}&a's balance to {CURRENCY_SYMBOL}{AMOUNT}!"
+account-delete: "&aYou've deleted &f{PLAYER}&a's account!"
+
+commands:
+  balance:
+    name: balance
+    description: Show your balance
+    usage: "&cUsage /balance [player: string]"
+    aliases: []
+  pay:
+    name: pay
+    description: Pay others
+    usage: "&cUsage /pay <player: string> <amount: number>"
+    aliases: [ ]
+  add-balance:
+    name: addbalance
+    description: Add points to others balance
+    usage: "&cUsage /addbalance [player: string] <amount: number>"
+    aliases: [ ]
+  remove-balance:
+    name: removebalance
+    description: Remove points from others balance
+    usage: "&cUsage /removebalance [player: string] <amount: number>"
+    aliases: [ ]
+  set-balance:
+    name: setbalance
+    description: Set others balance
+    usage: "&cUsage /setbalance [player: string] <amount: number>"
+    aliases: [ ]
+  delete-account:
+    name: deleteaccount
+    description: Delete an account
+    usage: "&cUsage /deleteaccount [player: string]"
+    aliases: [ ]
+...

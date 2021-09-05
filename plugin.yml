@@ -1,0 +1,26 @@
+name: BedrockEconomy
+version: 0.0.1
+api: [ 4.0.0 ]
+php: [ 8.0 ]
+author: cooldogedev
+main: cooldogedev\BedrockEconomy\BedrockEconomy
+description: Economy made easy for Minecraft Bedrock
+permissions:
+  bedrockeconomy.command.balance:
+    description: Allows users to view their balance
+    default: true
+  bedrockeconomy.command.pay:
+    description: Allows users to pay others with their balance
+    default: true
+  bedrockeconomy.command.addbalance:
+    description: Allows users to add balance points to others
+    default: op
+  bedrockeconomy.command.removebalance:
+    description: Allows users to remove balance points from others
+    default: op
+  bedrockeconomy.command.setbalance:
+    description: Allows users to set others balance
+    default: op
+  bedrockeconomy.command.deleteaccount:
+    description: Allows users to delete others account data
+    default: op

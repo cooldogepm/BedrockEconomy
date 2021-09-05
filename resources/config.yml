@@ -1,0 +1,38 @@
+---
+# Config version, don't play with this.
+config-version: 0.0.1
+
+language: en-US
+
+currency:
+  name: dogecoin
+  symbol: "$"
+
+  balance:
+    default-balance: 0
+    maximum-balance: 1000
+  payment:
+    minimum-payment: 10
+    maximum-payment: 100
+
+database:
+  provider: sqlite
+
+  mysql:
+    host: 127.0.0.1
+    username: root
+    password: ""
+    schema: ""
+    port: 3306
+
+  sqlite:
+    data-file: players.db
+
+  save-options:
+    # instantaneous = 0
+    # onDisconnect = 1
+    # fixed period = 2
+    update-mode: 1
+    # in seconds
+    update-fixed-period: 3000
+...

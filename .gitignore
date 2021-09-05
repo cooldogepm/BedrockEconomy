@@ -1,0 +1,8 @@
+# IDE
+.idea/*
+!.idea/codeStyles/
+!.idea/fileTemplates/
+nbproject/*
+src/CortexPE
+src/cooldogedev/libSQL
+src/cooldogedev/libPromise
