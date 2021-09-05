@@ -51,7 +51,7 @@ final class LanguageManager
         }
         LanguageManager::$language = $language;
         LanguageManager::$translations = yaml_parse_file(
-            $languagesFolder . DIRECTORY_SEPARATOR . LanguageManager::LANGUAGES_MAP[$language]
+            $languagesFolder . DIRECTORY_SEPARATOR . LanguageManager::LANGUAGES_MAP[$language] . ".yml"
         );
     }
 
