@@ -27,10 +27,10 @@ declare(strict_types=1);
 namespace cooldogedev\BedrockEconomy\database\query;
 
 use cooldogedev\BedrockEconomy\database\query\player\sqlite\SQLiteBulkPlayersRetrievalQuery;
-use cooldogedev\BedrockEconomy\database\query\player\SQLite\SQLitePlayerCreationQuery;
-use cooldogedev\BedrockEconomy\database\query\player\SQLite\SQLitePlayerDeletionQuery;
-use cooldogedev\BedrockEconomy\database\query\player\SQLite\SQLitePlayerRetrievalQuery;
-use cooldogedev\BedrockEconomy\database\query\player\SQLite\SQLitePlayerSaveQuery;
+use cooldogedev\BedrockEconomy\database\query\player\sqlite\SQLitePlayerCreationQuery;
+use cooldogedev\BedrockEconomy\database\query\player\sqlite\SQLitePlayerDeletionQuery;
+use cooldogedev\BedrockEconomy\database\query\player\sqlite\SQLitePlayerRetrievalQuery;
+use cooldogedev\BedrockEconomy\database\query\player\sqlite\SQLitePlayerSaveQuery;
 use cooldogedev\BedrockEconomy\database\query\table\SQLiteTableCreationQuery;
 use cooldogedev\libSQL\query\SQLQuery;
 
