@@ -51,7 +51,7 @@ final class BalanceCommand extends BaseCommand
             return;
         }
 
-        $session = $this->getOwningPlugin()->getSessionManager()->getSession($player ?? $sender, SearchConstants::SEARCH_MODE_USERNAME);
+        $session = $this->getOwningPlugin()->getSessionManager()->getSession($player ?? $sender->getName(), SearchConstants::SEARCH_MODE_USERNAME);
 
         if (!$session) {
             $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::PLAYER_NOT_FOUND, [
