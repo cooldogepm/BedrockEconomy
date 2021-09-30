@@ -81,7 +81,7 @@ final class DatabaseManager extends BedrockEconomyOwned
         return $this->saveMode;
     }
 
-    public function getUpdatePeriod(): mixed
+    public function getUpdatePeriod(): int
     {
         return $this->updatePeriod;
     }
