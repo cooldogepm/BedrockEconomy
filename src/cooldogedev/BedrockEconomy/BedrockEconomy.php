@@ -40,15 +40,26 @@ use cooldogedev\BedrockEconomy\listener\PlayerListener;
 use cooldogedev\BedrockEconomy\session\SessionManager;
 use CortexPE\Commando\BaseCommand;
 use pocketmine\plugin\PluginBase;
+use pocketmine\utils\SingletonTrait;
 use pocketmine\utils\TextFormat;
 
 final class BedrockEconomy extends PluginBase
 {
+    use SingletonTrait {
+        getInstance as protected _getInstance;
+        setInstance as protected;
+    }
+
     protected LanguageManager $languageManager;
     protected ConfigManager $configManager;
     protected CurrencyManager $currencyManager;
     protected DatabaseManager $databaseManager;
     protected SessionManager $sessionManager;
+
+    public static function getInstance(): BedrockEconomy
+    {
+        return BedrockEconomy::_getInstance();
+    }
 
     public function getDatabaseManager(): DatabaseManager
     {
@@ -76,6 +87,7 @@ final class BedrockEconomy extends PluginBase
             $this->saveResource($resource->getFilename());
         }
         LanguageManager::init($this, $this->getConfig()->get("language"));
+        BedrockEconomy::setInstance($this);
     }
 
     protected function onEnable(): void
