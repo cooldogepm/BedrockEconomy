@@ -93,6 +93,8 @@ final class PayCommand extends BaseCommand
         $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::PAYMENT_SEND, [
                 TranslationKeys::AMOUNT => $amount,
                 TranslationKeys::PAYER => $sender->getName(),
+                TranslationKeys::CURRENCY_NAME => $this->getOwningPlugin()->getCurrencyManager()->getName(),
+                TranslationKeys::CURRENCY_SYMBOL => $this->getOwningPlugin()->getCurrencyManager()->getSymbol()
             ]
         ));
     }
