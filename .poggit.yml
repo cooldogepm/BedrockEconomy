@@ -7,7 +7,7 @@ projects:
     path: ""
     libs:
       - src: cooldogedev/libSQL/libSQL
-        version: ^0.0.2
+        version: ^0.0.3
       - src: CortexPE/Commando/Commando
         version: ^3.0.0
         branch: PM4
