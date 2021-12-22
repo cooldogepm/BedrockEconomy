@@ -24,18 +24,11 @@
 
 declare(strict_types=1);
 
-namespace cooldogedev\BedrockEconomy\event\balance;
+namespace cooldogedev\BedrockEconomy\constant;
 
-use cooldogedev\BedrockEconomy\session\Session;
-use pocketmine\event\Cancellable;
-use pocketmine\event\CancellableTrait;
-use pocketmine\event\Event;
-
-abstract class BalanceEvent extends Event implements Cancellable
+final class SaveConstants
 {
-    use CancellableTrait;
-
-    public function __construct(protected Session $session, protected int $newBalance)
-    {
-    }
+    public const SAVE_MODE_INSTANTANEOUS = 0;
+    public const SAVE_MODE_UPON_DISCONNECTION = 1;
+    public const SAVE_MODE_FIXED_PERIOD = 2;
 }

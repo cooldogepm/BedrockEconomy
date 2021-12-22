@@ -28,20 +28,18 @@ namespace cooldogedev\BedrockEconomy\database;
 
 use cooldogedev\BedrockEconomY\api\BedrockEconomyOwned;
 use cooldogedev\BedrockEconomy\BedrockEconomy;
-use cooldogedev\BedrockEconomy\constant\SessionConstants;
 use cooldogedev\BedrockEconomy\database\query\MySQLQueryManager;
 use cooldogedev\BedrockEconomy\database\query\QueryManager;
 use cooldogedev\BedrockEconomy\database\query\SQLiteQueryManager;
-use cooldogedev\BedrockEconomy\task\BulkSessionsSaveTask;
 use cooldogedev\libSQL\constant\DataProviderConstants;
 use cooldogedev\libSQL\DatabaseConnector;
 
 final class DatabaseManager extends BedrockEconomyOwned
 {
-    protected DatabaseConnector $databaseConnector;
+    protected DatabaseConnector $connector;
     protected QueryManager $queryManager;
-    protected int $saveMode;
-    protected int $saveFixedPeriod;
+//    protected int $saveMode;
+//    protected int $saveFixedPeriod;
 
     public function __construct(BedrockEconomy $plugin)
     {
@@ -49,42 +47,42 @@ final class DatabaseManager extends BedrockEconomyOwned
 
         $databaseConfig = $this->getPlugin()->getConfigManager()->getDatabaseConfig();
 
-        $this->databaseConnector = new DatabaseConnector($this->getPlugin(), $databaseConfig);
-        $this->saveMode = $databaseConfig["save-options"]["save-mode"];
-        $this->saveFixedPeriod = $databaseConfig["save-options"]["save-fixed-period"];
+        $this->connector = new DatabaseConnector($this->getPlugin(), $databaseConfig);
+//        $this->saveMode = $databaseConfig["options"]["save-mode"];
+//        $this->saveFixedPeriod = $databaseConfig["options"]["save-fixed-period"];
 
-        $this->queryManager = match ($this->getDatabaseConnector()->getDataProvider()->getName(true)) {
+        $this->queryManager = match ($this->getConnector()->getDataProvider()->getName(true)) {
             DataProviderConstants::getLowercaseMySQL() => new MySQLQueryManager(),
             DataProviderConstants::getLowercaseSQLite() => new SQLiteQueryManager()
         };
 
-        if ($this->getSaveMode() === SessionConstants::SESSION_SAVE_MODE_FIXED_PERIOD) {
-            $this->getPlugin()->getScheduler()->scheduleRepeatingTask(
-                new BulkSessionsSaveTask($this->getPlugin()->getSessionManager()), $this->getSaveFixedPeriod()
-            );
-        }
+//        if ($this->getSaveMode() === SaveConstants::SAVE_MODE_FIXED_PERIOD) {
+//            $this->getPlugin()->getScheduler()->scheduleRepeatingTask(
+//                new FixedAccountSaveTask($this->getPlugin()->getAccountManager()), $this->getSaveFixedPeriod()
+//            );
+//        }
 
-        $this->getDatabaseConnector()->submitQuery(
+        $this->getConnector()->submitQuery(
             $this->getQueryManager()->getTableCreationQuery(
                 $this->getPlugin()->getCurrencyManager()->getDefaultBalance()
             )
         );
     }
 
-    public function getDatabaseConnector(): DatabaseConnector
+    public function getConnector(): DatabaseConnector
     {
-        return $this->databaseConnector;
+        return $this->connector;
     }
 
-    public function getSaveMode(): int
-    {
-        return $this->saveMode;
-    }
-
-    public function getSaveFixedPeriod(): int
-    {
-        return $this->saveFixedPeriod;
-    }
+//    public function getSaveMode(): int
+//    {
+//        return $this->saveMode;
+//    }
+//
+//    public function getSaveFixedPeriod(): int
+//    {
+//        return $this->saveFixedPeriod;
+//    }
 
     public function getQueryManager(): QueryManager
     {

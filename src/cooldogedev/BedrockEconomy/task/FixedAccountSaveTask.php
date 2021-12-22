@@ -24,23 +24,29 @@
 
 declare(strict_types=1);
 
-namespace cooldogedev\BedrockEconomy\event\session;
+namespace cooldogedev\BedrockEconomy\task;
 
-use cooldogedev\BedrockEconomy\session\Session;
-use pocketmine\event\Cancellable;
-use pocketmine\event\CancellableTrait;
-use pocketmine\event\Event;
+use cooldogedev\BedrockEconomy\account\AccountManager;
+use pocketmine\scheduler\Task;
 
-abstract class SessionEvent extends Event implements Cancellable
+// WIP
+final class FixedAccountSaveTask extends Task
 {
-    use CancellableTrait;
-
-    public function __construct(protected Session $session)
+    public function __construct(protected AccountManager $sessionManager)
     {
     }
 
-    public function getSession(): Session
+    public function onRun(): void
     {
-        return $this->session;
+//        foreach ($this->getSessionManager()->getAccounts() as $session) {
+//            if ($session->onSave()) {
+//                $session->getPlugin()->getLogger()->debug("Saving " . $session->getUsername() . "'s session.");
+//            }
+//        }
+    }
+
+    public function getSessionManager(): AccountManager
+    {
+        return $this->sessionManager;
     }
 }

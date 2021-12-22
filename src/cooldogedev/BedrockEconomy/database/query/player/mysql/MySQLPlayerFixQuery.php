@@ -26,7 +26,6 @@ declare(strict_types=1);
 
 namespace cooldogedev\BedrockEconomy\database\query\player\mysql;
 
-use cooldogedev\BedrockEconomy\constant\TableConstants;
 use cooldogedev\libSQL\query\MySQLQuery;
 use mysqli;
 
@@ -41,16 +40,6 @@ class MySQLPlayerFixQuery extends MySQLQuery
         parent::__construct();
     }
 
-    public function getPlayerName(): string
-    {
-        return $this->playerName;
-    }
-
-    public function getXuid(): string
-    {
-        return $this->xuid;
-    }
-
     public function handleIncomingConnection(mysqli $connection): bool
     {
         $xuid = $this->getXuid();
@@ -62,8 +51,18 @@ class MySQLPlayerFixQuery extends MySQLQuery
         return true;
     }
 
+    public function getXuid(): string
+    {
+        return $this->xuid;
+    }
+
+    public function getPlayerName(): string
+    {
+        return $this->playerName;
+    }
+
     public function getQuery(): string
     {
-        return "UPDATE " . TableConstants::DATA_TABLE_PLAYERS . " SET xuid = ? WHERE username = ?";
+        return "UPDATE " . $this->getTable() . " SET xuid = ? WHERE username = ?";
     }
 }

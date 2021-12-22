@@ -26,6 +26,7 @@ declare(strict_types=1);
 
 namespace cooldogedev\BedrockEconomy;
 
+use cooldogedev\BedrockEconomy\account\AccountManager;
 use cooldogedev\BedrockEconomy\api\BedrockEconomyAPI;
 use cooldogedev\BedrockEconomy\command\admin\AddBalanceCommand;
 use cooldogedev\BedrockEconomy\command\admin\DeleteAccountCommand;
@@ -38,7 +39,6 @@ use cooldogedev\BedrockEconomy\currency\CurrencyManager;
 use cooldogedev\BedrockEconomy\database\DatabaseManager;
 use cooldogedev\BedrockEconomy\language\LanguageManager;
 use cooldogedev\BedrockEconomy\listener\PlayerListener;
-use cooldogedev\BedrockEconomy\session\SessionManager;
 use CortexPE\Commando\BaseCommand;
 use pocketmine\plugin\PluginBase;
 use pocketmine\utils\SingletonTrait;
@@ -54,7 +54,7 @@ final class BedrockEconomy extends PluginBase
     protected ConfigManager $configManager;
     protected CurrencyManager $currencyManager;
     protected DatabaseManager $databaseManager;
-    protected SessionManager $sessionManager;
+    protected AccountManager $accountManager;
 
     public static function getInstance(): BedrockEconomy
     {
@@ -66,9 +66,9 @@ final class BedrockEconomy extends PluginBase
         return $this->databaseManager;
     }
 
-    public function getSessionManager(): SessionManager
+    public function getAccountManager(): AccountManager
     {
-        return $this->sessionManager;
+        return $this->accountManager;
     }
 
     public function getConfigManager(): ConfigManager
@@ -101,7 +101,7 @@ final class BedrockEconomy extends PluginBase
         $this->configManager = new ConfigManager($this);
         $this->currencyManager = new CurrencyManager($this);
         $this->databaseManager = new DatabaseManager($this);
-        $this->sessionManager = new SessionManager($this);
+        $this->accountManager = new AccountManager($this);
 
         $this->getServer()->getPluginManager()->registerEvents(new PlayerListener($this), $this);
 

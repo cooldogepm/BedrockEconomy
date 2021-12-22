@@ -6,3 +6,6 @@ nbproject/*
 src/CortexPE
 src/cooldogedev/libSQL
 src/cooldogedev/libPromise
+resources/config.new.yml
+tools/migration/Money.yml
+tools/migration/players.db

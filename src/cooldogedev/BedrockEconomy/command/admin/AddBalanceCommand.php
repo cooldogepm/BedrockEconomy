@@ -28,10 +28,13 @@ namespace cooldogedev\BedrockEconomy\command\admin;
 
 use cooldogedev\BedrockEconomy\BedrockEconomy;
 use cooldogedev\BedrockEconomy\constant\SearchConstants;
+use cooldogedev\BedrockEconomy\constant\TableConstants;
+use cooldogedev\BedrockEconomy\constant\TransactionConstants;
 use cooldogedev\BedrockEconomy\language\KnownTranslations;
 use cooldogedev\BedrockEconomy\language\LanguageManager;
 use cooldogedev\BedrockEconomy\language\TranslationKeys;
 use cooldogedev\BedrockEconomy\permission\BedrockEconomyPermissions;
+use cooldogedev\BedrockEconomy\transaction\Transaction;
 use CortexPE\Commando\args\IntegerArgument;
 use CortexPE\Commando\args\RawStringArgument;
 use CortexPE\Commando\BaseCommand;
@@ -49,16 +52,6 @@ final class AddBalanceCommand extends BaseCommand
         $player = $args[AddBalanceCommand::ARGUMENT_PLAYER];
         $amount = $args[AddBalanceCommand::ARGUMENT_AMOUNT];
 
-        $session = $this->getOwningPlugin()->getSessionManager()->getSession($player, SearchConstants::SEARCH_MODE_USERNAME);
-
-        if (!$session) {
-            $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::PLAYER_NOT_FOUND, [
-                    TranslationKeys::PLAYER => $player
-                ]
-            ));
-            return;
-        }
-
         if (!is_numeric($amount)) {
             $sender->sendMessage($this->getUsage());
             return;
@@ -66,15 +59,35 @@ final class AddBalanceCommand extends BaseCommand
 
         $amount = (int)floor($amount);
 
-        $session->getCache()->addToBalance($amount);
+        $this->getOwningPlugin()->getDatabaseManager()->getConnector()->submitQuery(
+            $this->getOwningPlugin()->getDatabaseManager()->getQueryManager()->getPlayerSaveQuery(
+                $player,
+                new Transaction(TransactionConstants::TRANSACTION_TYPE_INCREMENT, $amount, time()),
+                SearchConstants::SEARCH_MODE_USERNAME
+            ),
+            TableConstants::DATA_TABLE_PLAYERS,
+            onSuccess: function ($success) use ($sender, $player, $amount): void {
+                if (!$success) {
+                    $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::PLAYER_NOT_FOUND, [
+                            TranslationKeys::PLAYER => $player
+                        ]
+                    ));
+                    return;
+                }
 
-        $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::BALANCE_ADD, [
-                TranslationKeys::PLAYER => $session->getUsername(),
-                TranslationKeys::AMOUNT => $amount,
-                TranslationKeys::CURRENCY_NAME => $this->getOwningPlugin()->getCurrencyManager()->getName(),
-                TranslationKeys::CURRENCY_SYMBOL => $this->getOwningPlugin()->getCurrencyManager()->getSymbol()
-            ]
-        ));
+                $session = $this->getOwningPlugin()->getAccountManager()->getAccount($player, SearchConstants::SEARCH_MODE_USERNAME);
+
+                $session?->incrementBalance($amount);
+
+                $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::BALANCE_ADD, [
+                        TranslationKeys::PLAYER => $player,
+                        TranslationKeys::AMOUNT => $amount,
+                        TranslationKeys::CURRENCY_NAME => $this->getOwningPlugin()->getCurrencyManager()->getName(),
+                        TranslationKeys::CURRENCY_SYMBOL => $this->getOwningPlugin()->getCurrencyManager()->getSymbol()
+                    ]
+                ));
+            }
+        );
     }
 
     /**

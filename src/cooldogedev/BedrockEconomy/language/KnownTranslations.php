@@ -43,4 +43,5 @@ final class KnownTranslations
     public const BALANCE_REMOVE = "balance-remove";
     public const BALANCE_SET = "balance-set";
     public const ACCOUNT_DELETE = "account-delete";
+    public const NO_ACCOUNT = "no-account";
 }

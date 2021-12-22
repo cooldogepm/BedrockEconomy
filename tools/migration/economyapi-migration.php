@@ -45,7 +45,8 @@ $schema = "";
 $password = "";
 $port = 3306;
 
-function migrateToMySQL(array $accounts): void {
+function migrateToMySQL(array $accounts): void
+{
     $connection = new mysqli($GLOBALS["hostname"], $GLOBALS["username"], $GLOBALS["password"], $GLOBALS["schema"], $GLOBALS["port"]);
 
     foreach ($accounts as $username => $balance) {
@@ -58,7 +59,8 @@ function migrateToMySQL(array $accounts): void {
     $connection->close();
 }
 
-function migrateToSQLite(array $accounts): void {
+function migrateToSQLite(array $accounts): void
+{
     $connection = new SQLite3(__DIR__ . DIRECTORY_SEPARATOR . "players.db");
 
     foreach ($accounts as $username => $balance) {
@@ -76,7 +78,8 @@ function migrateToSQLite(array $accounts): void {
 /**
  * @throws Exception
  */
-function parseFromEconomyAPI(int $economyAPIProvider): ?array {
+function parseFromEconomyAPI(int $economyAPIProvider): ?array
+{
     switch ($economyAPIProvider) {
         case ECONOMYAPI_PROVIDER_YAML:
             return yaml_parse_file(__DIR__ . DIRECTORY_SEPARATOR . "Money.yml")["money"];
@@ -86,7 +89,7 @@ function parseFromEconomyAPI(int $economyAPIProvider): ?array {
 
             $data = [];
 
-            foreach($statement->fetch_all() as $value){
+            foreach ($statement->fetch_all() as $value) {
                 $data[$value[0]] = $value[1];
             }
 
@@ -101,7 +104,8 @@ function parseFromEconomyAPI(int $economyAPIProvider): ?array {
 /**
  * @throws Exception
  */
-function main(): void {
+function main(): void
+{
     // EDIT THIS ACCORDING TO YOUR ECONOMYAPI CONFIGURATIONS
     $economyAPIProvider = ECONOMYAPI_PROVIDER_YAML;
 

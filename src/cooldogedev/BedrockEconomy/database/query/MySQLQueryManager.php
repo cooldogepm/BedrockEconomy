@@ -26,13 +26,15 @@ declare(strict_types=1);
 
 namespace cooldogedev\BedrockEconomy\database\query;
 
+use cooldogedev\BedrockEconomy\constant\SearchConstants;
 use cooldogedev\BedrockEconomy\database\query\player\mysql\MySQLBulkPlayersRetrievalQuery;
 use cooldogedev\BedrockEconomy\database\query\player\mysql\MySQLPlayerCreationQuery;
 use cooldogedev\BedrockEconomy\database\query\player\mysql\MySQLPlayerDeletionQuery;
 use cooldogedev\BedrockEconomy\database\query\player\mysql\MySQLPlayerFixQuery;
 use cooldogedev\BedrockEconomy\database\query\player\mysql\MySQLPlayerRetrievalQuery;
-use cooldogedev\BedrockEconomy\database\query\player\mysql\MySQLPlayerSaveQuery;
+use cooldogedev\BedrockEconomy\database\query\player\mysql\MySQLPlayerUpdateQuery;
 use cooldogedev\BedrockEconomy\database\query\table\MySQLTableCreationQuery;
+use cooldogedev\BedrockEconomy\transaction\Transaction;
 use cooldogedev\libSQL\query\SQLQuery;
 
 final class MySQLQueryManager extends QueryManager
@@ -44,12 +46,12 @@ final class MySQLQueryManager extends QueryManager
 
     public function getPlayerCreationQuery(string $xuid, string $username, int $balance): SQLQuery
     {
-        return new MySQLPlayerCreationQuery($xuid, $username, $balance);
+        return new MySQLPlayerCreationQuery($xuid, strtolower($username), $balance);
     }
 
     public function getPlayerFixQuery(string $xuid, string $username): SQLQuery
     {
-        return new MySQLPlayerFixQuery($xuid, $username);
+        return new MySQLPlayerFixQuery($xuid, strtolower($username));
     }
 
     public function getPlayerDeletionQuery(string $xuid): SQLQuery
@@ -57,14 +59,14 @@ final class MySQLQueryManager extends QueryManager
         return new MySQLPlayerDeletionQuery($xuid);
     }
 
-    public function getPlayerRetrievalQuery(string $xuid): SQLQuery
+    public function getPlayerRetrievalQuery(string $searchValue, int $searchMode = SearchConstants::SEARCH_MODE_XUID): SQLQuery
     {
-        return new MySQLPlayerRetrievalQuery($xuid);
+        return new MySQLPlayerRetrievalQuery(strtolower($searchValue), $searchMode);
     }
 
-    public function getPlayerSaveQuery(string $xuid, int $balance, int $searchMode): SQLQuery
+    public function getPlayerSaveQuery(string $searchValue, Transaction $transaction, int $searchMode = SearchConstants::SEARCH_MODE_XUID): SQLQuery
     {
-        return new MySQLPlayerSaveQuery($xuid, $balance, $searchMode);
+        return new MySQLPlayerUpdateQuery(strtolower($searchValue), $transaction, $searchMode);
     }
 
     public function getTableCreationQuery(int $defaultBalance): SQLQuery

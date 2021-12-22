@@ -1,6 +1,6 @@
 ---
 # Configuration version, don't edit this.
-config-version: 0.0.5
+config-version: 1.0.0
 
 language: en-US
 
@@ -29,12 +29,4 @@ database:
 
   sqlite:
     data-file: players.db
-
-  save-options:
-    # instantaneous = 0
-    # onDisconnection = 1
-    # fixed period = 2
-    save-mode: 1
-    # Configuration for the "Fixed Period" update mode
-    save-fixed-period: 3000
 ...

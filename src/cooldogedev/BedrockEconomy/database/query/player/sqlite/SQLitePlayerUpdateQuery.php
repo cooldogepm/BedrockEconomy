@@ -27,26 +27,37 @@ declare(strict_types=1);
 namespace cooldogedev\BedrockEconomy\database\query\player\sqlite;
 
 use cooldogedev\BedrockEconomy\constant\SearchConstants;
+use cooldogedev\BedrockEconomy\constant\TransactionConstants;
+use cooldogedev\BedrockEconomy\transaction\Transaction;
 use cooldogedev\libSQL\query\SQLiteQuery;
 use SQLite3;
 
-final class SQLitePlayerRetrievalQuery extends SQLiteQuery
+final class SQLitePlayerUpdateQuery extends SQLiteQuery
 {
-    public function __construct(protected string $searchValue, protected int $searchMode = SearchConstants::SEARCH_MODE_XUID)
+    public function __construct(protected string $searchValue, protected Transaction $transaction, protected int $searchMode = SearchConstants::SEARCH_MODE_XUID)
     {
         parent::__construct();
     }
 
-    public function handleIncomingConnection(SQLite3 $connection): ?array
+    public function handleIncomingConnection(SQLite3 $connection): bool
     {
-        $statement = $connection->prepare($this->getQuery());
+        // There's a bug with SQLite3::prepare()
+        $statement = $connection->prepare($this->getSecondaryQuery());
         $statement->bindValue(":searchValue", $this->getSearchValue());
         $result = $statement->execute()?->fetchArray(SQLITE3_ASSOC) ?: null;
         $statement->close();
-        return $result;
+        $hasAccount = $result !== null;
+
+        $statement = $connection->prepare($this->getQuery());
+        $statement->bindValue(":searchValue", $this->getSearchValue());
+        // There's a bug with SQLite3::prepare() that causes the statement to be executed multiple times
+        $statement->execute()?->finalize();
+        $statement->close();
+
+        return $hasAccount;
     }
 
-    public function getQuery(): string
+    public function getSecondaryQuery(): string
     {
         return "SELECT * FROM " . $this->getTable() . " WHERE " . ($this->getSearchMode() === SearchConstants::SEARCH_MODE_XUID ? "xuid" : "username") . " = :searchValue";
     }
@@ -59,5 +70,20 @@ final class SQLitePlayerRetrievalQuery extends SQLiteQuery
     public function getSearchValue(): string
     {
         return $this->searchValue;
+    }
+
+    public function getQuery(): string
+    {
+        $statement = match ($this->getTransaction()->getType()) {
+            TransactionConstants::TRANSACTION_TYPE_INCREMENT => "balance + " . $this->getTransaction()->getValue(),
+            TransactionConstants::TRANSACTION_TYPE_DECREMENT => "balance - " . $this->getTransaction()->getValue(),
+            TransactionConstants::TRANSACTION_TYPE_SET => $this->getTransaction()->getValue()
+        };
+        return "UPDATE " . $this->getTable() . " SET balance = " . $statement . " WHERE " . ($this->getSearchMode() === SearchConstants::SEARCH_MODE_XUID ? "xuid" : "username") . " = :searchValue";
+    }
+
+    public function getTransaction(): Transaction
+    {
+        return $this->transaction;
     }
 }

@@ -22,7 +22,8 @@
  *  SOFTWARE.
  */
 
-function main(): void {
+function main(): void
+{
 
     $translations = yaml_parse_file(__DIR__ . DIRECTORY_SEPARATOR . "en-US.yml");
 

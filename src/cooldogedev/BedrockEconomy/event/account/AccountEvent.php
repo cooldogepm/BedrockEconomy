@@ -24,8 +24,23 @@
 
 declare(strict_types=1);
 
-namespace cooldogedev\BedrockEconomy\event\balance;
+namespace cooldogedev\BedrockEconomy\event\account;
 
-final class BalanceChangeEvent extends BalanceEvent
+use cooldogedev\BedrockEconomy\account\Account;
+use pocketmine\event\Cancellable;
+use pocketmine\event\CancellableTrait;
+use pocketmine\event\Event;
+
+abstract class AccountEvent extends Event implements Cancellable
 {
+    use CancellableTrait;
+
+    public function __construct(protected Account $session)
+    {
+    }
+
+    public function getSession(): Account
+    {
+        return $this->session;
+    }
 }

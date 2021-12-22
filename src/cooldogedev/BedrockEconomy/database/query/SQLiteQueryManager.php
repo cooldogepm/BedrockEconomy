@@ -26,13 +26,15 @@ declare(strict_types=1);
 
 namespace cooldogedev\BedrockEconomy\database\query;
 
+use cooldogedev\BedrockEconomy\constant\SearchConstants;
 use cooldogedev\BedrockEconomy\database\query\player\sqlite\SQLiteBulkPlayersRetrievalQuery;
 use cooldogedev\BedrockEconomy\database\query\player\sqlite\SQLitePlayerCreationQuery;
 use cooldogedev\BedrockEconomy\database\query\player\sqlite\SQLitePlayerDeletionQuery;
 use cooldogedev\BedrockEconomy\database\query\player\sqlite\SQLitePlayerFixQuery;
 use cooldogedev\BedrockEconomy\database\query\player\sqlite\SQLitePlayerRetrievalQuery;
-use cooldogedev\BedrockEconomy\database\query\player\sqlite\SQLitePlayerSaveQuery;
+use cooldogedev\BedrockEconomy\database\query\player\sqlite\SQLitePlayerUpdateQuery;
 use cooldogedev\BedrockEconomy\database\query\table\SQLiteTableCreationQuery;
+use cooldogedev\BedrockEconomy\transaction\Transaction;
 use cooldogedev\libSQL\query\SQLQuery;
 
 final class SQLiteQueryManager extends QueryManager
@@ -44,12 +46,12 @@ final class SQLiteQueryManager extends QueryManager
 
     public function getPlayerCreationQuery(string $xuid, string $username, int $balance): SQLQuery
     {
-        return new SQLitePlayerCreationQuery($xuid, $username, $balance);
+        return new SQLitePlayerCreationQuery($xuid, strtolower($username), $balance);
     }
 
     public function getPlayerFixQuery(string $xuid, string $username): SQLQuery
     {
-        return new SQLitePlayerFixQuery($xuid, $username);
+        return new SQLitePlayerFixQuery($xuid, strtolower($username));
     }
 
     public function getPlayerDeletionQuery(string $xuid): SQLQuery
@@ -57,14 +59,14 @@ final class SQLiteQueryManager extends QueryManager
         return new SQLitePlayerDeletionQuery($xuid);
     }
 
-    public function getPlayerRetrievalQuery(string $xuid): SQLQuery
+    public function getPlayerRetrievalQuery(string $searchValue, int $searchMode = SearchConstants::SEARCH_MODE_XUID): SQLQuery
     {
-        return new SQLitePlayerRetrievalQuery($xuid);
+        return new SQLitePlayerRetrievalQuery(strtolower($searchValue), $searchMode);
     }
 
-    public function getPlayerSaveQuery(string $xuid, int $balance, int $searchMode): SQLQuery
+    public function getPlayerSaveQuery(string $searchValue, Transaction $transaction, int $searchMode = SearchConstants::SEARCH_MODE_XUID): SQLQuery
     {
-        return new SQLitePlayerSaveQuery($xuid, $balance, $searchMode);
+        return new SQLitePlayerUpdateQuery(strtolower($searchValue), $transaction, $searchMode);
     }
 
     public function getTableCreationQuery(int $defaultBalance): SQLQuery

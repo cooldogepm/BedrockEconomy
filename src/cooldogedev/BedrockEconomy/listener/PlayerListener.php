@@ -26,13 +26,10 @@ declare(strict_types=1);
 
 namespace cooldogedev\BedrockEconomy\listener;
 
-use cooldogedev\BedrockEconomy\api\BedrockEconomyAPI;
 use cooldogedev\BedrockEconomY\api\BedrockEconomyOwned;
 use cooldogedev\BedrockEconomy\constant\SearchConstants;
-use cooldogedev\BedrockEconomy\constant\SessionConstants;
 use pocketmine\event\Listener;
 use pocketmine\event\player\PlayerLoginEvent;
-use pocketmine\event\player\PlayerQuitEvent;
 
 final class PlayerListener extends BedrockEconomyOwned implements Listener
 {
@@ -43,25 +40,23 @@ final class PlayerListener extends BedrockEconomyOwned implements Listener
     public function onPlayerLogin(PlayerLoginEvent $event): void
     {
         $player = $event->getPlayer();
-        if (!$this->getPlugin()->getSessionManager()->hasSession($player->getXuid()) && !$this->getPlugin()->getSessionManager()->hasSession($player->getName(), SearchConstants::SEARCH_MODE_USERNAME)) {
-            $this->getPlugin()->getSessionManager()->createSession($player->getXuid(), $player->getName());
+        if (!$this->getPlugin()->getAccountManager()->hasAccount($player->getXuid()) && !$this->getPlugin()->getAccountManager()->hasAccount($player->getName(), SearchConstants::SEARCH_MODE_USERNAME)) {
+            $this->getPlugin()->getAccountManager()->addAccount($player->getXuid(), $player->getName());
             $this->getPlugin()->getLogger()->debug("Creating a new record for " . $player->getName() . ".");
         } else {
-            $session = $this->getPlugin()->getSessionManager()->getSession($player->getName(), SearchConstants::SEARCH_MODE_USERNAME);
-            if ($session->isAwaitingFix()) {
+            $session = $this->getPlugin()->getAccountManager()->getAccount($player->getName(), SearchConstants::SEARCH_MODE_USERNAME);
+            if ($session->isXuidIsInvalid()) {
                 $session->attemptXuidFix($player->getXuid());
                 $this->getPlugin()->getLogger()->debug("Fixing " . $player->getName() . "'s account data (xuid).");
             }
         }
     }
 
-    public function onPlayerQuit(PlayerQuitEvent $event): void
-    {
-        $player = $event->getPlayer();
-        $session = $this->getPlugin()->getSessionManager()->getSession($player->getXuid());
-        var_dump(BedrockEconomyAPI::getInstance()->getPlayerSession($player));
-        if ($this->getPlugin()->getDatabaseManager()->getSaveMode() === SessionConstants::SESSION_SAVE_MODE_UPON_DISCONNECTION && $session->onSave()) {
-            $this->getPlugin()->getLogger()->debug("Saving " . $player->getName() . "'s account data.");
-        }
-    }
+//    public function onPlayerQuit(PlayerQuitEvent $event): void
+//    {
+//        $player = $event->getPlayer();
+//        if ($this->getPlugin()->getDatabaseManager()->getSaveMode() === SaveConstants::SAVE_MODE_UPON_DISCONNECTION) {
+//            $this->getPlugin()->getLogger()->debug("Saving " . $player->getName() . "'s account data.");
+//        }
+//    }
 }

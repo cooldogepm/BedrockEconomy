@@ -26,34 +26,40 @@ declare(strict_types=1);
 
 namespace cooldogedev\BedrockEconomy\database\query\player\mysql;
 
+use cooldogedev\BedrockEconomy\constant\SearchConstants;
 use cooldogedev\libSQL\query\MySQLQuery;
 use mysqli;
 
 final class MySQLPlayerRetrievalQuery extends MySQLQuery
 {
-    public function __construct(protected string $searchValue)
+    public function __construct(protected string $searchValue, protected int $searchMode = SearchConstants::SEARCH_MODE_XUID)
     {
         parent::__construct();
     }
 
     public function handleIncomingConnection(mysqli $connection): ?array
     {
-        $xuid = $this->getXuid();
+        $searchValue = $this->getSearchValue();
         $statement = $connection->prepare($this->getQuery());
-        $statement->bind_param("s", $xuid);
+        $statement->bind_param("s", $searchValue);
         $statement->execute();
         $result = $statement->get_result()?->fetch_assoc();
         $statement->close();
         return $result;
     }
 
-    public function getXuid(): string
+    public function getSearchValue(): string
     {
         return $this->searchValue;
     }
 
     public function getQuery(): string
     {
-        return "SELECT * FROM " . $this->getTable() . " WHERE xuid = ?";
+        return "SELECT * FROM " . $this->getTable() . " WHERE " . ($this->getSearchMode() === SearchConstants::SEARCH_MODE_XUID ? "xuid" : "username") . " = ?";
+    }
+
+    public function getSearchMode(): int
+    {
+        return $this->searchMode;
     }
 }

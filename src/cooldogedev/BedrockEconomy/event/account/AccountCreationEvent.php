@@ -24,8 +24,9 @@
 
 declare(strict_types=1);
 
-namespace cooldogedev\BedrockEconomy\event\balance;
+namespace cooldogedev\BedrockEconomy\event\account;
 
-final class BalanceSaveEvent extends BalanceEvent
+final class AccountCreationEvent extends AccountEvent
 {
+
 }

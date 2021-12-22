@@ -27,12 +27,14 @@ declare(strict_types=1);
 namespace cooldogedev\BedrockEconomy\database\query\player\mysql;
 
 use cooldogedev\BedrockEconomy\constant\SearchConstants;
+use cooldogedev\BedrockEconomy\constant\TransactionConstants;
+use cooldogedev\BedrockEconomy\transaction\Transaction;
 use cooldogedev\libSQL\query\MySQLQuery;
 use mysqli;
 
-final class MySQLPlayerSaveQuery extends MySQLQuery
+final class MySQLPlayerUpdateQuery extends MySQLQuery
 {
-    public function __construct(protected string $searchValue, protected int $balance, protected int $searchMode = SearchConstants::SEARCH_MODE_XUID)
+    public function __construct(protected string $searchValue, protected Transaction $transaction, protected int $searchMode = SearchConstants::SEARCH_MODE_XUID)
     {
         parent::__construct();
     }
@@ -40,12 +42,12 @@ final class MySQLPlayerSaveQuery extends MySQLQuery
     public function handleIncomingConnection(mysqli $connection): bool
     {
         $xuid = $this->getSearchValue();
-        $balance = $this->getBalance();
         $statement = $connection->prepare($this->getQuery());
-        $statement->bind_param("ss", $balance, $xuid);
+        $statement->bind_param("s", $xuid);
         $statement->execute();
+        $successful = $statement->affected_rows > 0;
         $statement->close();
-        return true;
+        return $successful;
     }
 
     public function getSearchValue(): string
@@ -53,18 +55,23 @@ final class MySQLPlayerSaveQuery extends MySQLQuery
         return $this->searchValue;
     }
 
-    public function getBalance(): int
+    public function getQuery(): string
     {
-        return $this->balance;
+        $statement = match ($this->getTransaction()->getType()) {
+            TransactionConstants::TRANSACTION_TYPE_INCREMENT => "balance + " . $this->getTransaction()->getValue(),
+            TransactionConstants::TRANSACTION_TYPE_DECREMENT => "balance - " . $this->getTransaction()->getValue(),
+            TransactionConstants::TRANSACTION_TYPE_SET => $this->getTransaction()->getValue()
+        };
+        return "UPDATE " . $this->getTable() . " SET balance = " . $statement . " WHERE " . ($this->getSearchMode() === SearchConstants::SEARCH_MODE_XUID ? "xuid" : "username") . " = ?";
+    }
+
+    public function getTransaction(): Transaction
+    {
+        return $this->transaction;
     }
 
     public function getSearchMode(): int
     {
         return $this->searchMode;
-    }
-
-    public function getQuery(): string
-    {
-        return "UPDATE " . $this->getTable() . " SET balance = ? WHERE " . ($this->getSearchMode() === SearchConstants::SEARCH_MODE_XUID ? "xuid" : "username") . " = ?";
     }
 }

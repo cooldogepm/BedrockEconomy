@@ -6,7 +6,7 @@ player-not-found: "&f{PLAYER} &cwas not found!"
 # Called when attempting to send a payment without having sufficient balance
 balance-insufficient: "&cYou don't have enough balance!"
 # Called when attempting to pay a user who already has reached the balance limit
-balance-cap: "&f{PLAYER} &chas already reached the balance limit!"
+balance-cap: "&f{PLAYER} &chas already reached the balance limit of {LIMIT}!"
 # Called when sending a successful transaction
 payment-send: "&aYou've paid {CURRENCY_SYMBOL}{AMOUNT} to &f{RECEIVER}&a!"
 # Called when receiving a successful transaction
@@ -29,6 +29,8 @@ balance-remove: "&aYou've removed {CURRENCY_SYMBOL}{AMOUNT} from &f{PLAYER}&a!"
 balance-set: "&aYou've set &f{PLAYER}&a's balance to {CURRENCY_SYMBOL}{AMOUNT}!"
 # Called when deleting someone's account
 account-delete: "&aYou've deleted &f{PLAYER}&a's account!"
+# Called when a user executes a command while they don't have an account in the database
+no-account: "&cYou don't have an account!"
 
 commands:
   balance:

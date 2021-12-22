@@ -52,98 +52,126 @@ final class PayCommand extends BaseCommand
             return;
         }
 
+        var_dump("executed");
+
         $receiver = $args[PayCommand::ARGUMENT_RECEIVER];
         $amount = $args[PayCommand::ARGUMENT_AMOUNT];
 
         if (strtolower($receiver) === strtolower($sender->getName())) {
-            $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::PAYMENT_SEND_SELF, [
-                    TranslationKeys::PLAYER => $receiver
-                ]
-            ));
-            return;
-        }
+            var_dump("executed 1");
 
-        $session = $this->getOwningPlugin()->getSessionManager()->getSession($sender->getXuid());
-
-        if (!$this->getOwningPlugin()->getSessionManager()->hasSession($receiver, SearchConstants::SEARCH_MODE_USERNAME)) {
-            $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::PLAYER_NOT_FOUND, [
-                    TranslationKeys::PLAYER => $receiver
-                ]
-            ));
+            $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::PAYMENT_SEND_SELF));
             return;
         }
 
         if (!is_numeric($amount)) {
+            var_dump("executed 2");
             $sender->sendMessage($this->getUsage());
             return;
         }
 
         $amount = (int)floor($amount);
 
-        if ($amount > $session->getCache()->getBalance()) {
-            $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::BALANCE_INSUFFICIENT));
+        $session = $this->getOwningPlugin()->getAccountManager()->getAccount($sender->getXuid());
+
+        if (!$session) {
+            var_dump("executed 3");
+            $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::NO_ACCOUNT));
             return;
         }
 
-        $receiver = $this->getOwningPlugin()->getSessionManager()->getSession($receiver, SearchConstants::SEARCH_MODE_USERNAME);
+        $this->getOwningPlugin()->getDatabaseManager()->getConnector()->appendQueryToPool(
+            $session->getBalanceFromDatabase(
+                function (?array $data) use ($sender, $amount, $receiver, $session): void {
+                    if (!$data) {
+                        var_dump("executed 4");
+                        $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::NO_ACCOUNT));
+                        return;
+                    }
 
-        if ($amount > $this->getOwningPlugin()->getCurrencyManager()->getMaximumPayment()) {
-            $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::PAYMENT_SEND_EXCEED_LIMIT, [
-                    TranslationKeys::AMOUNT => $amount,
-                    TranslationKeys::LIMIT => $this->getOwningPlugin()->getCurrencyManager()->getMaximumPayment(),
-                    TranslationKeys::CURRENCY_NAME => $this->getOwningPlugin()->getCurrencyManager()->getName(),
-                    TranslationKeys::CURRENCY_SYMBOL => $this->getOwningPlugin()->getCurrencyManager()->getSymbol()
-                ]
-            ));
-            return;
-        }
+                    $balance = $data["balance"];
 
-        if ($amount < $this->getOwningPlugin()->getCurrencyManager()->getMinimumPayment()) {
-            $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::PAYMENT_SEND_INSUFFICIENT, [
-                    TranslationKeys::AMOUNT => $amount,
-                    TranslationKeys::LIMIT => $this->getOwningPlugin()->getCurrencyManager()->getMinimumPayment(),
-                    TranslationKeys::CURRENCY_NAME => $this->getOwningPlugin()->getCurrencyManager()->getName(),
-                    TranslationKeys::CURRENCY_SYMBOL => $this->getOwningPlugin()->getCurrencyManager()->getSymbol()
-                ]
-            ));
-            return;
-        }
+                    if ($amount > $balance) {
+                        var_dump("executed 5");
+                        $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::BALANCE_INSUFFICIENT));
+                        return;
+                    }
 
-        if (
-            $this->getOwningPlugin()->getCurrencyManager()->hasBalanceCap() &&
-            $receiver->getCache()->getBalance() >= $this->getOwningPlugin()->getCurrencyManager()->getBalanceCap()
-        ) {
-            $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::BALANCE_CAP, [
-                    TranslationKeys::AMOUNT => $amount,
-                    TranslationKeys::BALANCE_CAP => $this->getOwningPlugin()->getCurrencyManager()->getBalanceCap(),
-                    TranslationKeys::PLAYER => $receiver->getUsername(),
-                    TranslationKeys::CURRENCY_NAME => $this->getOwningPlugin()->getCurrencyManager()->getName(),
-                    TranslationKeys::CURRENCY_SYMBOL => $this->getOwningPlugin()->getCurrencyManager()->getSymbol()
-                ]
-            ));
-            return;
-        }
+                    if (!$this->getOwningPlugin()->getAccountManager()->hasAccount($receiver, SearchConstants::SEARCH_MODE_USERNAME)) {
+                        var_dump("executed 6");
+                        $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::PLAYER_NOT_FOUND, [
+                                TranslationKeys::PLAYER => $receiver
+                            ]
+                        ));
+                        return;
+                    }
 
-        $session->getCache()->subtractFromBalance($amount);
-        $receiver->getCache()->addToBalance($amount);
+                    $receiver = $this->getOwningPlugin()->getAccountManager()->getAccount($receiver, SearchConstants::SEARCH_MODE_USERNAME);
 
-        if ($receiver->getPlayer()) {
-            $receiver->getPlayer()->sendMessage(LanguageManager::getTranslation(KnownTranslations::PAYMENT_RECEIVE, [
-                    TranslationKeys::AMOUNT => $amount,
-                    TranslationKeys::PAYER => $sender->getName(),
-                    TranslationKeys::CURRENCY_NAME => $this->getOwningPlugin()->getCurrencyManager()->getName(),
-                    TranslationKeys::CURRENCY_SYMBOL => $this->getOwningPlugin()->getCurrencyManager()->getSymbol()
-                ]
-            ));
-        }
+                    if ($amount > $this->getOwningPlugin()->getCurrencyManager()->getMaximumPayment()) {
+                        var_dump("executed 7");
+                        $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::PAYMENT_SEND_EXCEED_LIMIT, [
+                                TranslationKeys::AMOUNT => $amount,
+                                TranslationKeys::LIMIT => $this->getOwningPlugin()->getCurrencyManager()->getMaximumPayment(),
+                                TranslationKeys::CURRENCY_NAME => $this->getOwningPlugin()->getCurrencyManager()->getName(),
+                                TranslationKeys::CURRENCY_SYMBOL => $this->getOwningPlugin()->getCurrencyManager()->getSymbol()
+                            ]
+                        ));
+                        return;
+                    }
 
-        $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::PAYMENT_SEND, [
-                TranslationKeys::AMOUNT => $amount,
-                TranslationKeys::RECEIVER => $receiver->getUsername(),
-                TranslationKeys::CURRENCY_NAME => $this->getOwningPlugin()->getCurrencyManager()->getName(),
-                TranslationKeys::CURRENCY_SYMBOL => $this->getOwningPlugin()->getCurrencyManager()->getSymbol()
-            ]
-        ));
+                    if ($amount < $this->getOwningPlugin()->getCurrencyManager()->getMinimumPayment()) {
+                        var_dump("executed 8");
+                        $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::PAYMENT_SEND_INSUFFICIENT, [
+                                TranslationKeys::AMOUNT => $amount,
+                                TranslationKeys::LIMIT => $this->getOwningPlugin()->getCurrencyManager()->getMinimumPayment(),
+                                TranslationKeys::CURRENCY_NAME => $this->getOwningPlugin()->getCurrencyManager()->getName(),
+                                TranslationKeys::CURRENCY_SYMBOL => $this->getOwningPlugin()->getCurrencyManager()->getSymbol()
+                            ]
+                        ));
+                        return;
+                    }
+
+                    if (
+                        $this->getOwningPlugin()->getCurrencyManager()->hasBalanceCap() &&
+                        $balance >= $this->getOwningPlugin()->getCurrencyManager()->getBalanceCap()
+                    ) {
+                        var_dump("executed 9");
+                        $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::BALANCE_CAP, [
+                                TranslationKeys::AMOUNT => $amount,
+                                TranslationKeys::LIMIT => $this->getOwningPlugin()->getCurrencyManager()->getBalanceCap(),
+                                TranslationKeys::PLAYER => $receiver->getUsername(),
+                                TranslationKeys::CURRENCY_NAME => $this->getOwningPlugin()->getCurrencyManager()->getName(),
+                                TranslationKeys::CURRENCY_SYMBOL => $this->getOwningPlugin()->getCurrencyManager()->getSymbol()
+                            ]
+                        ));
+                        return;
+                    }
+
+                    $session->decrementBalance($amount);
+                    $receiver->incrementBalance($amount);
+
+                    if ($receiver->getPlayer()) {
+                        var_dump("executed 10");
+                        $receiver->getPlayer()->sendMessage(LanguageManager::getTranslation(KnownTranslations::PAYMENT_RECEIVE, [
+                                TranslationKeys::AMOUNT => $amount,
+                                TranslationKeys::PAYER => $sender->getName(),
+                                TranslationKeys::CURRENCY_NAME => $this->getOwningPlugin()->getCurrencyManager()->getName(),
+                                TranslationKeys::CURRENCY_SYMBOL => $this->getOwningPlugin()->getCurrencyManager()->getSymbol()
+                            ]
+                        ));
+                    }
+                    var_dump("executed 11");
+                    $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::PAYMENT_SEND, [
+                            TranslationKeys::AMOUNT => $amount,
+                            TranslationKeys::RECEIVER => $receiver->getUsername(),
+                            TranslationKeys::CURRENCY_NAME => $this->getOwningPlugin()->getCurrencyManager()->getName(),
+                            TranslationKeys::CURRENCY_SYMBOL => $this->getOwningPlugin()->getCurrencyManager()->getSymbol()
+                        ]
+                    ));
+                }
+            )
+        );
     }
 
     /**

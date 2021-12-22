@@ -24,30 +24,29 @@
 
 declare(strict_types=1);
 
-namespace cooldogedev\BedrockEconomy\session;
+namespace cooldogedev\BedrockEconomy\account;
 
 use cooldogedev\BedrockEconomY\api\BedrockEconomyOwned;
 use cooldogedev\BedrockEconomy\BedrockEconomy;
 use cooldogedev\BedrockEconomy\constant\SearchConstants;
-use cooldogedev\BedrockEconomy\constant\SessionConstants;
 use cooldogedev\BedrockEconomy\constant\TableConstants;
-use cooldogedev\BedrockEconomy\event\session\SessionCreationEvent;
-use cooldogedev\BedrockEconomy\event\session\SessionDeletionEvent;
-use cooldogedev\libPromise\error\ThreadedPromiseError;
+use cooldogedev\BedrockEconomy\event\account\AccountCacheEvent;
+use cooldogedev\BedrockEconomy\event\account\AccountDeletionEvent;
 
-final class SessionManager extends BedrockEconomyOwned
+final class AccountManager extends BedrockEconomyOwned
 {
+    protected int $lastSnapshotDate;
     /**
-     * @var Session[]
+     * @var Account[]
      */
-    protected array $sessions;
+    protected array $accounts;
 
     public function __construct(BedrockEconomy $plugin)
     {
         parent::__construct($plugin);
-        $this->sessions = [];
+        $this->accounts = [];
 
-        $this->getPlugin()->getDatabaseManager()->getDatabaseConnector()->submitQuery(
+        $this->getPlugin()->getDatabaseManager()->getConnector()->submitQuery(
             $this->getPlugin()
                 ->getDatabaseManager()
                 ->getQueryManager()
@@ -58,100 +57,96 @@ final class SessionManager extends BedrockEconomyOwned
                     return;
                 }
                 foreach ($players as $player) {
-                    $this->createSession($player["username"], $player["xuid"], $player["balance"]);
+                    $this->addAccount($player["xuid"], $player["username"], $player["balance"]);
                     $this->getPlugin()->getLogger()->debug("Cached " . $player["username"] . "'s session.");
                 }
             }
         );
     }
 
-    public function createSession(string $xuid, string $username, ?int $balance = null): bool
+    public function addAccount(string $xuid, string $username, ?int $balance = null): bool
     {
-        if ($this->hasSession($xuid)) {
+        if ($this->hasAccount($xuid)) {
             return false;
         }
-        $session = new Session($this->getPlugin(), $username, $xuid, $balance);
+        $session = new Account($this->getPlugin(), $username, $xuid, $balance);
 
-        $event = new SessionCreationEvent($session);
+        $event = new AccountCacheEvent($session);
         $event->call();
 
         if ($event->isCancelled()) {
             return false;
         }
 
-        $this->sessions[$xuid] = $session;
+        $this->accounts[$xuid] = $session;
+
         return true;
     }
 
-    public function removeSession(string $xuid): bool
-    {
-        if (!$this->hasSession($xuid)) {
-            return false;
-        }
-        unset($this->sessions[$xuid]);
-        return true;
-    }
-
-    public function hasSession(string $searchValue, int $searchMode = SearchConstants::SEARCH_MODE_XUID): bool
+    public function hasAccount(string $searchValue, int $searchMode = SearchConstants::SEARCH_MODE_XUID): bool
     {
         return match ($searchMode) {
-            SearchConstants::SEARCH_MODE_XUID => isset($this->sessions[$searchValue]),
-            SearchConstants::SEARCH_MODE_USERNAME => count(array_filter($this->sessions, fn(Session $session): bool => strtolower($session->getUsername()) === strtolower($searchValue))) > 0,
+            SearchConstants::SEARCH_MODE_XUID => isset($this->accounts[$searchValue]),
+            SearchConstants::SEARCH_MODE_USERNAME => count(array_filter($this->getAccounts(), fn(Account $session): bool => strtolower($session->getUsername()) === strtolower($searchValue))) > 0,
             default => false
         };
     }
 
-    public function deleteAccount(string $xuid): bool
+    /**
+     * @return Account[]
+     */
+    public function getAccounts(): array
     {
-        if (!$this->hasSession($xuid)) {
+        return $this->accounts;
+    }
+
+    public function removeFromCache(string $xuid): bool
+    {
+        if (!$this->hasAccount($xuid)) {
+            return false;
+        }
+        unset($this->accounts[$xuid]);
+        return true;
+    }
+
+    public function deleteAccount(string $xuid, int $mode = SearchConstants::SEARCH_MODE_XUID): bool
+    {
+        if (!$this->hasAccount($xuid, $mode)) {
             return false;
         }
 
-        $session = $this->getSession($xuid);
+        $session = $this->getAccount($xuid, $mode);
 
-        $event = new SessionDeletionEvent($session);
+        $event = new AccountDeletionEvent($session);
         $event->call();
 
         if ($event->isCancelled()) {
             return false;
         }
 
-        $this->getPlugin()->getDatabaseManager()->getDatabaseConnector()->submitQuery(
+        $this->getPlugin()->getDatabaseManager()->getConnector()->submitQuery(
             $this->getPlugin()
                 ->getDatabaseManager()
                 ->getQueryManager()
                 ->getPlayerDeletionQuery($xuid),
             TableConstants::DATA_TABLE_PLAYERS,
             onSuccess: function () use ($xuid) {
-                unset($this->sessions[$xuid]);
+                unset($this->accounts[$xuid]);
             }
         );
 
         return true;
     }
 
-    public function getSession(string $searchValue, int $searchMode = SearchConstants::SEARCH_MODE_XUID): ?Session
+    public function getAccount(string $searchValue, int $searchMode = SearchConstants::SEARCH_MODE_XUID): ?Account
     {
         if ($searchMode === SearchConstants::SEARCH_MODE_USERNAME) {
-            if (!$this->hasSession($searchValue, SearchConstants::SEARCH_MODE_USERNAME)) {
+            if (!$this->hasAccount($searchValue, SearchConstants::SEARCH_MODE_USERNAME)) {
                 return null;
             }
-            $sessions = array_filter($this->getSessions(), fn(Session $session): bool => strtolower($session->getUsername()) === strtolower($searchValue));
+            $sessions = array_filter($this->getAccounts(), fn(Account $session): bool => strtolower($session->getUsername()) === strtolower($searchValue));
             return $sessions[array_key_first($sessions)];
         }
-        return $this->sessions[$searchValue] ?? null;
-    }
-
-    /**
-     * @param int|null $type
-     * @return Session[]
-     */
-    public function getSessions(?int $type = null): array
-    {
-        return match ($type) {
-            SessionConstants::SESSION_TYPE_DEFAULT => array_filter($this->sessions, fn(Session $session): bool => $session->getCache()->isAwaitingSave()),
-            SessionConstants::SESSION_TYPE_AWAITING_SAVE => array_filter($this->sessions, fn(Session $session): bool => !$session->getCache()->isAwaitingSave()),
-            default => $this->sessions
-        };
+        return $this->accounts[$searchValue] ?? null;
     }
 }

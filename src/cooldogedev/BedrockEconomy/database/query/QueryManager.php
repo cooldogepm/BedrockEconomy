@@ -26,6 +26,8 @@ declare(strict_types=1);
 
 namespace cooldogedev\BedrockEconomy\database\query;
 
+use cooldogedev\BedrockEconomy\constant\SearchConstants;
+use cooldogedev\BedrockEconomy\transaction\Transaction;
 use cooldogedev\libSQL\query\SQLQuery;
 
 abstract class QueryManager
@@ -38,9 +40,9 @@ abstract class QueryManager
 
     abstract public function getPlayerDeletionQuery(string $xuid): SQLQuery;
 
-    abstract public function getPlayerRetrievalQuery(string $xuid): SQLQuery;
+    abstract public function getPlayerRetrievalQuery(string $searchValue, int $searchMode = SearchConstants::SEARCH_MODE_XUID): SQLQuery;
 
-    abstract public function getPlayerSaveQuery(string $xuid, int $balance, int $searchMode): SQLQuery;
+    abstract public function getPlayerSaveQuery(string $searchValue, Transaction $transaction, int $searchMode = SearchConstants::SEARCH_MODE_XUID): SQLQuery;
 
     abstract public function getTableCreationQuery(int $defaultBalance): SQLQuery;
 }

@@ -24,29 +24,9 @@
 
 declare(strict_types=1);
 
-namespace cooldogedev\BedrockEconomy\task;
+namespace cooldogedev\BedrockEconomy\event\account;
 
-use cooldogedev\BedrockEconomy\constant\SessionConstants;
-use cooldogedev\BedrockEconomy\session\SessionManager;
-use pocketmine\scheduler\Task;
-
-final class BulkSessionsSaveTask extends Task
+final class AccountDeletionEvent extends AccountEvent
 {
-    public function __construct(protected SessionManager $sessionManager)
-    {
-    }
 
-    public function onRun(): void
-    {
-        foreach ($this->getSessionManager()->getSessions(SessionConstants::SESSION_TYPE_AWAITING_SAVE) as $session) {
-            if ($session->onSave()) {
-                $session->getPlugin()->getLogger()->debug("Saving " . $session->getUsername() . "'s session.");
-            }
-        }
-    }
-
-    public function getSessionManager(): SessionManager
-    {
-        return $this->sessionManager;
-    }
 }

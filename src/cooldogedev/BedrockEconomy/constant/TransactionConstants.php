@@ -24,8 +24,11 @@
 
 declare(strict_types=1);
 
-namespace cooldogedev\BedrockEconomy\event\session;
+namespace cooldogedev\BedrockEconomy\constant;
 
-final class SessionDeletionEvent extends SessionEvent
+final class TransactionConstants
 {
+    public const TRANSACTION_TYPE_INCREMENT = 0;
+    public const TRANSACTION_TYPE_DECREMENT = 1;
+    public const TRANSACTION_TYPE_SET = 2;
 }

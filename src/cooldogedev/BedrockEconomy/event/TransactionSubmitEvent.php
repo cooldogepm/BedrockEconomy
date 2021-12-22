@@ -24,14 +24,29 @@
 
 declare(strict_types=1);
 
-namespace cooldogedev\BedrockEconomy\constant;
+namespace cooldogedev\BedrockEconomy\event;
 
-final class SessionConstants
+use cooldogedev\BedrockEconomy\account\Account;
+use cooldogedev\BedrockEconomy\transaction\Transaction;
+use pocketmine\event\Cancellable;
+use pocketmine\event\CancellableTrait;
+use pocketmine\event\Event;
+
+final class TransactionSubmitEvent extends Event implements Cancellable
 {
-    public const SESSION_TYPE_DEFAULT = 0;
-    public const SESSION_TYPE_AWAITING_SAVE = 1;
+    use CancellableTrait;
 
-    public const SESSION_SAVE_MODE_INSTANTANEOUS = 0;
-    public const SESSION_SAVE_MODE_UPON_DISCONNECTION = 1;
-    public const SESSION_SAVE_MODE_FIXED_PERIOD = 2;
+    public function __construct(protected Account $session, protected Transaction $transaction)
+    {
+    }
+
+    public function getSession(): Account
+    {
+        return $this->session;
+    }
+
+    public function getTransaction(): Transaction
+    {
+        return $this->transaction;
+    }
 }

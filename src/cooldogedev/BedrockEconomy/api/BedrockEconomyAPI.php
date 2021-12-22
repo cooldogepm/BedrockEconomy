@@ -26,10 +26,9 @@ declare(strict_types=1);
 
 namespace cooldogedev\BedrockEconomy\api;
 
+use cooldogedev\BedrockEconomy\account\Account;
 use cooldogedev\BedrockEconomy\BedrockEconomy;
-use cooldogedev\BedrockEconomy\session\cache\SessionCache;
-use cooldogedev\BedrockEconomy\session\Session;
-use pocketmine\player\Player;
+use cooldogedev\BedrockEconomy\constant\SearchConstants;
 use pocketmine\utils\SingletonTrait;
 
 final class BedrockEconomyAPI
@@ -72,14 +71,14 @@ final class BedrockEconomyAPI
         return BedrockEconomyAPI::_getInstance();
     }
 
-    public function getPlayerCache(Player $player): SessionCache
+    public function getPlayerBalance(string $player, int $mode = SearchConstants::SEARCH_MODE_USERNAME): int
     {
-        return $this->getPlayerSession($player)->getCache();
+        return $this->getPlayerSession($player, $mode)->getBalance();
     }
 
-    public function getPlayerSession(Player $player): Session
+    public function getPlayerSession(string $player, int $mode = SearchConstants::SEARCH_MODE_USERNAME): Account
     {
-        return BedrockEconomyAPI::getBedrockEconomy()->getSessionManager()->getSession($player->getXuid());
+        return BedrockEconomyAPI::getBedrockEconomy()->getAccountManager()->getAccount($player, $mode);
     }
 
     protected static function getBedrockEconomy(): ?BedrockEconomy
@@ -92,28 +91,23 @@ final class BedrockEconomyAPI
         BedrockEconomyAPI::$bedrockEconomy = $bedrockEconomy;
     }
 
-    public function getPlayerBalance(Player $player): int
+    public function setPlayerBalance(string $player, int $newBalance, int $mode = SearchConstants::SEARCH_MODE_USERNAME): void
     {
-        return $this->getPlayerSession($player)->getCache()->getBalance();
+        $this->getPlayerSession($player, $mode)->setBalance($newBalance);
     }
 
-    public function setPlayerBalance(Player $player, int $newBalance): void
+    public function addToPlayerBalance(string $player, int $amount, int $mode = SearchConstants::SEARCH_MODE_USERNAME): void
     {
-        $this->getPlayerSession($player)->getCache()->setBalance($newBalance);
+        $this->getPlayerSession($player, $mode)->incrementBalance($amount);
     }
 
-    public function addToPlayerBalance(Player $player, int $amount): void
+    public function subtractFromPlayerBalance(string $player, int $amount, int $mode = SearchConstants::SEARCH_MODE_USERNAME): void
     {
-        $this->getPlayerSession($player)->getCache()->addToBalance($amount);
+        $this->getPlayerSession($player, $mode)->decrementBalance($amount);
     }
 
-    public function subtractFromPlayerBalance(Player $player, int $amount): void
+    public function deletePlayerAccount(string $player, int $mode = SearchConstants::SEARCH_MODE_USERNAME): void
     {
-        $this->getPlayerSession($player)->getCache()->subtractFromBalance($amount);
-    }
-
-    public function deletePlayerAccount(Player $player): void
-    {
-        BedrockEconomyAPI::getBedrockEconomy()->getSessionManager()->deleteAccount($player->getXuid());
+        BedrockEconomyAPI::getBedrockEconomy()->getAccountManager()->deleteAccount($player, $mode);
     }
 }

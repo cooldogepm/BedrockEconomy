@@ -24,8 +24,9 @@
 
 declare(strict_types=1);
 
-namespace cooldogedev\BedrockEconomy\event\session;
+namespace cooldogedev\BedrockEconomy\event\account;
 
-final class SessionCreationEvent extends SessionEvent
+final class AccountCacheEvent extends AccountEvent
 {
+
 }

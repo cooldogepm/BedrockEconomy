@@ -45,7 +45,7 @@ final class DeleteAccountCommand extends BaseCommand
     public function onRun(CommandSender $sender, string $aliasUsed, array $args): void
     {
         $player = $args[DeleteAccountCommand::ARGUMENT_PLAYER];
-        $session = $this->getOwningPlugin()->getSessionManager()->getSession($player, SearchConstants::SEARCH_MODE_USERNAME);
+        $session = $this->getOwningPlugin()->getAccountManager()->getAccount($player, SearchConstants::SEARCH_MODE_USERNAME);
 
         if (!$session) {
             $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::PLAYER_NOT_FOUND, [
@@ -55,13 +55,10 @@ final class DeleteAccountCommand extends BaseCommand
             return;
         }
 
-        $this->getOwningPlugin()->getSessionManager()->deleteAccount($session->getXuid());
+        $this->getOwningPlugin()->getAccountManager()->deleteAccount($session->getXuid());
 
         $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::ACCOUNT_DELETE, [
                 TranslationKeys::PLAYER => $session->getUsername(),
-                TranslationKeys::AMOUNT => $session->getCache()->getBalance(),
-                TranslationKeys::CURRENCY_NAME => $this->getOwningPlugin()->getCurrencyManager()->getName(),
-                TranslationKeys::CURRENCY_SYMBOL => $this->getOwningPlugin()->getCurrencyManager()->getSymbol()
             ]
         ));
     }
