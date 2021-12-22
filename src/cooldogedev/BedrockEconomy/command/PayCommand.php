@@ -52,20 +52,16 @@ final class PayCommand extends BaseCommand
             return;
         }
 
-        var_dump("executed");
-
         $receiver = $args[PayCommand::ARGUMENT_RECEIVER];
         $amount = $args[PayCommand::ARGUMENT_AMOUNT];
 
         if (strtolower($receiver) === strtolower($sender->getName())) {
-            var_dump("executed 1");
 
             $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::PAYMENT_SEND_SELF));
             return;
         }
 
         if (!is_numeric($amount)) {
-            var_dump("executed 2");
             $sender->sendMessage($this->getUsage());
             return;
         }
@@ -75,7 +71,6 @@ final class PayCommand extends BaseCommand
         $session = $this->getOwningPlugin()->getAccountManager()->getAccount($sender->getXuid());
 
         if (!$session) {
-            var_dump("executed 3");
             $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::NO_ACCOUNT));
             return;
         }
@@ -84,7 +79,6 @@ final class PayCommand extends BaseCommand
             $session->getBalanceFromDatabase(
                 function (?array $data) use ($sender, $amount, $receiver, $session): void {
                     if (!$data) {
-                        var_dump("executed 4");
                         $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::NO_ACCOUNT));
                         return;
                     }
@@ -92,13 +86,11 @@ final class PayCommand extends BaseCommand
                     $balance = $data["balance"];
 
                     if ($amount > $balance) {
-                        var_dump("executed 5");
                         $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::BALANCE_INSUFFICIENT));
                         return;
                     }
 
                     if (!$this->getOwningPlugin()->getAccountManager()->hasAccount($receiver, SearchConstants::SEARCH_MODE_USERNAME)) {
-                        var_dump("executed 6");
                         $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::PLAYER_NOT_FOUND, [
                                 TranslationKeys::PLAYER => $receiver
                             ]
@@ -109,7 +101,6 @@ final class PayCommand extends BaseCommand
                     $receiver = $this->getOwningPlugin()->getAccountManager()->getAccount($receiver, SearchConstants::SEARCH_MODE_USERNAME);
 
                     if ($amount > $this->getOwningPlugin()->getCurrencyManager()->getMaximumPayment()) {
-                        var_dump("executed 7");
                         $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::PAYMENT_SEND_EXCEED_LIMIT, [
                                 TranslationKeys::AMOUNT => $amount,
                                 TranslationKeys::LIMIT => $this->getOwningPlugin()->getCurrencyManager()->getMaximumPayment(),
@@ -121,7 +112,6 @@ final class PayCommand extends BaseCommand
                     }
 
                     if ($amount < $this->getOwningPlugin()->getCurrencyManager()->getMinimumPayment()) {
-                        var_dump("executed 8");
                         $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::PAYMENT_SEND_INSUFFICIENT, [
                                 TranslationKeys::AMOUNT => $amount,
                                 TranslationKeys::LIMIT => $this->getOwningPlugin()->getCurrencyManager()->getMinimumPayment(),
@@ -136,7 +126,6 @@ final class PayCommand extends BaseCommand
                         $this->getOwningPlugin()->getCurrencyManager()->hasBalanceCap() &&
                         $balance >= $this->getOwningPlugin()->getCurrencyManager()->getBalanceCap()
                     ) {
-                        var_dump("executed 9");
                         $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::BALANCE_CAP, [
                                 TranslationKeys::AMOUNT => $amount,
                                 TranslationKeys::LIMIT => $this->getOwningPlugin()->getCurrencyManager()->getBalanceCap(),
@@ -152,7 +141,6 @@ final class PayCommand extends BaseCommand
                     $receiver->incrementBalance($amount);
 
                     if ($receiver->getPlayer()) {
-                        var_dump("executed 10");
                         $receiver->getPlayer()->sendMessage(LanguageManager::getTranslation(KnownTranslations::PAYMENT_RECEIVE, [
                                 TranslationKeys::AMOUNT => $amount,
                                 TranslationKeys::PAYER => $sender->getName(),
@@ -161,7 +149,6 @@ final class PayCommand extends BaseCommand
                             ]
                         ));
                     }
-                    var_dump("executed 11");
                     $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::PAYMENT_SEND, [
                             TranslationKeys::AMOUNT => $amount,
                             TranslationKeys::RECEIVER => $receiver->getUsername(),
