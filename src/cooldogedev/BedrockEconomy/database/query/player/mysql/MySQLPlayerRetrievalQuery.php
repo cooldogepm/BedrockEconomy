@@ -31,7 +31,7 @@ use mysqli;
 
 final class MySQLPlayerRetrievalQuery extends MySQLQuery
 {
-    public function __construct(protected string $xuid)
+    public function __construct(protected string $searchValue)
     {
         parent::__construct();
     }
@@ -49,7 +49,7 @@ final class MySQLPlayerRetrievalQuery extends MySQLQuery
 
     public function getXuid(): string
     {
-        return $this->xuid;
+        return $this->searchValue;
     }
 
     public function getQuery(): string

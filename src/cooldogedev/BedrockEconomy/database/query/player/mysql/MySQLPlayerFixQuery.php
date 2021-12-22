@@ -24,34 +24,46 @@
 
 declare(strict_types=1);
 
-namespace cooldogedev\BedrockEconomy\database\query\player\sqlite;
+namespace cooldogedev\BedrockEconomy\database\query\player\mysql;
 
-use cooldogedev\libSQL\query\SQLiteQuery;
-use SQLite3;
+use cooldogedev\BedrockEconomy\constant\TableConstants;
+use cooldogedev\libSQL\query\MySQLQuery;
+use mysqli;
 
-final class SQLitePlayerRetrievalQuery extends SQLiteQuery
+/**
+ * Used to insert the player's xuid if they don't have one set already due to
+ * the stupidity of EconomyAPI.
+ */
+class MySQLPlayerFixQuery extends MySQLQuery
 {
-    public function __construct(protected string $searchValue)
+    public function __construct(protected string $xuid, protected string $playerName)
     {
         parent::__construct();
     }
 
-    public function handleIncomingConnection(SQLite3 $connection): ?array
+    public function getPlayerName(): string
     {
-        $statement = $connection->prepare($this->getQuery());
-        $statement->bindValue(":xuid", $this->getXuid());
-        $result = $statement->execute()?->fetchArray(SQLITE3_ASSOC) ?: null;
-        $statement->close();
-        return $result;
-    }
-
-    public function getQuery(): string
-    {
-        return "SELECT * FROM " . $this->getTable() . " WHERE xuid = :xuid";
+        return $this->playerName;
     }
 
     public function getXuid(): string
     {
-        return $this->searchValue;
+        return $this->xuid;
+    }
+
+    public function handleIncomingConnection(mysqli $connection): bool
+    {
+        $xuid = $this->getXuid();
+        $username = $this->getPlayerName();
+        $statement = $connection->prepare($this->getQuery());
+        $statement->bind_param("ss", $xuid, $username);
+        $statement->execute();
+        $statement->close();
+        return true;
+    }
+
+    public function getQuery(): string
+    {
+        return "UPDATE " . TableConstants::DATA_TABLE_PLAYERS . " SET xuid = ? WHERE username = ?";
     }
 }

@@ -24,34 +24,18 @@
 
 declare(strict_types=1);
 
-namespace cooldogedev\BedrockEconomy\database\query\player\sqlite;
+namespace cooldogedev\BedrockEconomy\api;
 
-use cooldogedev\libSQL\query\SQLiteQuery;
-use SQLite3;
+use cooldogedev\BedrockEconomy\BedrockEconomy;
 
-final class SQLitePlayerRetrievalQuery extends SQLiteQuery
+abstract class BedrockEconomyOwned
 {
-    public function __construct(protected string $searchValue)
+    public function __construct(protected BedrockEconomy $plugin)
     {
-        parent::__construct();
     }
 
-    public function handleIncomingConnection(SQLite3 $connection): ?array
+    public function getPlugin(): BedrockEconomy
     {
-        $statement = $connection->prepare($this->getQuery());
-        $statement->bindValue(":xuid", $this->getXuid());
-        $result = $statement->execute()?->fetchArray(SQLITE3_ASSOC) ?: null;
-        $statement->close();
-        return $result;
-    }
-
-    public function getQuery(): string
-    {
-        return "SELECT * FROM " . $this->getTable() . " WHERE xuid = :xuid";
-    }
-
-    public function getXuid(): string
-    {
-        return $this->searchValue;
+        return $this->plugin;
     }
 }

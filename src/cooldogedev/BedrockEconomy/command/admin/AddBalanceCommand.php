@@ -37,6 +37,7 @@ use CortexPE\Commando\args\RawStringArgument;
 use CortexPE\Commando\BaseCommand;
 use Exception;
 use pocketmine\command\CommandSender;
+use pocketmine\plugin\Plugin;
 
 final class AddBalanceCommand extends BaseCommand
 {
@@ -76,7 +77,10 @@ final class AddBalanceCommand extends BaseCommand
         ));
     }
 
-    public function getOwningPlugin(): BedrockEconomy
+    /**
+     * @return BedrockEconomy
+     */
+    public function getOwningPlugin(): Plugin
     {
         return parent::getOwningPlugin();
     }

@@ -26,12 +26,13 @@ declare(strict_types=1);
 
 namespace cooldogedev\BedrockEconomy\database\query\player\sqlite;
 
+use cooldogedev\BedrockEconomy\constant\SearchConstants;
 use cooldogedev\libSQL\query\SQLiteQuery;
 use SQLite3;
 
 final class SQLitePlayerSaveQuery extends SQLiteQuery
 {
-    public function __construct(protected string $xuid, protected int $balance)
+    public function __construct(protected string $searchValue, protected int $balance, protected int $searchMode = SearchConstants::SEARCH_MODE_XUID)
     {
         parent::__construct();
     }
@@ -39,21 +40,26 @@ final class SQLitePlayerSaveQuery extends SQLiteQuery
     public function handleIncomingConnection(SQLite3 $connection): bool
     {
         $statement = $connection->prepare($this->getQuery());
-        $statement->bindValue(":xuid", $this->getXuid());
+        $statement->bindValue(":searchValue", $this->getXuid());
         $statement->bindValue(":balance", $this->getBalance());
         $statement->execute();
         $statement->close();
         return true;
     }
 
+    public function getSearchMode(): int
+    {
+        return $this->searchMode;
+    }
+
     public function getQuery(): string
     {
-        return "UPDATE " . $this->getTable() . " SET balance = :balance WHERE xuid = :xuid";
+        return "UPDATE " . $this->getTable() . " SET balance = :balance WHERE " . ($this->getSearchMode() === SearchConstants::SEARCH_MODE_XUID ? "xuid" : "username") . " = :searchValue";
     }
 
     public function getXuid(): string
     {
-        return $this->xuid;
+        return $this->searchValue;
     }
 
     public function getBalance(): int

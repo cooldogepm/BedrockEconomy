@@ -26,31 +26,42 @@ declare(strict_types=1);
 
 namespace cooldogedev\BedrockEconomy\currency;
 
+use cooldogedev\BedrockEconomy\api\BedrockEconomyOwned;
 use cooldogedev\BedrockEconomy\BedrockEconomy;
-use cooldogedev\BedrockEconomy\interfaces\BedrockEconomyOwned;
 
 final class CurrencyManager extends BedrockEconomyOwned
 {
     protected string $name;
     protected string $symbol;
+
     protected int $defaultBalance;
-    protected int $maximumBalance;
+    protected int $balanceCap;
+    protected bool $hasBalanceCap;
+
     protected int $minimumPayment;
     protected int $maximumPayment;
+
 
     public function __construct(BedrockEconomy $plugin)
     {
         parent::__construct($plugin);
+
         $this->name = $this->getPlugin()->getConfigManager()->getCurrencyConfig()["name"];
         $this->symbol = $this->getPlugin()->getConfigManager()->getCurrencyConfig()["symbol"];
 
         $balanceConfig = $this->getPlugin()->getConfigManager()->getCurrencyConfig()["balance"];
         $this->defaultBalance = $balanceConfig["default-balance"];
-        $this->maximumBalance = $balanceConfig["maximum-balance"];
+        $this->balanceCap = $balanceConfig["balance-cap"];
+        $this->hasBalanceCap = $balanceConfig["enable-balance-cap"];
 
         $paymentConfig = $this->getPlugin()->getConfigManager()->getCurrencyConfig()["payment"];
         $this->minimumPayment = $paymentConfig["minimum-payment"];
         $this->maximumPayment = $paymentConfig["maximum-payment"];
+    }
+
+    public function hasBalanceCap(): bool
+    {
+        return $this->hasBalanceCap;
     }
 
     public function getSymbol(): string
@@ -75,12 +86,12 @@ final class CurrencyManager extends BedrockEconomyOwned
 
     public function hasBalanceLimit(): bool
     {
-        return $this->getMaximumBalance() > -1;
+        return $this->getBalanceCap() > -1;
     }
 
-    public function getMaximumBalance(): int
+    public function getBalanceCap(): int
     {
-        return $this->maximumBalance;
+        return $this->balanceCap;
     }
 
     public function hasPaymentLimit(): bool

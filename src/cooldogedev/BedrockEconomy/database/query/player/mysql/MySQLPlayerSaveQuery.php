@@ -26,19 +26,20 @@ declare(strict_types=1);
 
 namespace cooldogedev\BedrockEconomy\database\query\player\mysql;
 
+use cooldogedev\BedrockEconomy\constant\SearchConstants;
 use cooldogedev\libSQL\query\MySQLQuery;
 use mysqli;
 
 final class MySQLPlayerSaveQuery extends MySQLQuery
 {
-    public function __construct(protected string $xuid, protected int $balance)
+    public function __construct(protected string $searchValue, protected int $balance, protected int $searchMode = SearchConstants::SEARCH_MODE_XUID)
     {
         parent::__construct();
     }
 
     public function handleIncomingConnection(mysqli $connection): bool
     {
-        $xuid = $this->getXuid();
+        $xuid = $this->getSearchValue();
         $balance = $this->getBalance();
         $statement = $connection->prepare($this->getQuery());
         $statement->bind_param("ss", $balance, $xuid);
@@ -47,9 +48,9 @@ final class MySQLPlayerSaveQuery extends MySQLQuery
         return true;
     }
 
-    public function getXuid(): string
+    public function getSearchValue(): string
     {
-        return $this->xuid;
+        return $this->searchValue;
     }
 
     public function getBalance(): int
@@ -57,8 +58,13 @@ final class MySQLPlayerSaveQuery extends MySQLQuery
         return $this->balance;
     }
 
+    public function getSearchMode(): int
+    {
+        return $this->searchMode;
+    }
+
     public function getQuery(): string
     {
-        return "UPDATE " . $this->getTable() . " SET balance = ? WHERE xuid = ?";
+        return "UPDATE " . $this->getTable() . " SET balance = ? WHERE " . ($this->getSearchMode() === SearchConstants::SEARCH_MODE_XUID ? "xuid" : "username") . " = ?";
     }
 }

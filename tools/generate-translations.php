@@ -22,36 +22,45 @@
  *  SOFTWARE.
  */
 
+function main(): void {
+
+    $translations = yaml_parse_file(__DIR__ . DIRECTORY_SEPARATOR . "en-US.yml");
+
+    $template = "<?php
+
 declare(strict_types=1);
 
-namespace cooldogedev\BedrockEconomy\database\query\player\sqlite;
+namespace cooldogedev\BedrockEconomy\language;
 
-use cooldogedev\libSQL\query\SQLiteQuery;
-use SQLite3;
-
-final class SQLitePlayerRetrievalQuery extends SQLiteQuery
+final class KnownTranslations
 {
-    public function __construct(protected string $searchValue)
-    {
-        parent::__construct();
-    }
-
-    public function handleIncomingConnection(SQLite3 $connection): ?array
-    {
-        $statement = $connection->prepare($this->getQuery());
-        $statement->bindValue(":xuid", $this->getXuid());
-        $result = $statement->execute()?->fetchArray(SQLITE3_ASSOC) ?: null;
-        $statement->close();
-        return $result;
-    }
-
-    public function getQuery(): string
-    {
-        return "SELECT * FROM " . $this->getTable() . " WHERE xuid = :xuid";
-    }
-
-    public function getXuid(): string
-    {
-        return $this->searchValue;
-    }
+__CODE__
 }
+";
+
+    $code = "";
+    $indentation = str_repeat(" ", 5);
+
+    $first = true;
+
+    foreach ($translations as $key => $message) {
+
+        if (is_array($message)) {
+            continue;
+        }
+
+        $message = str_replace("-", "_", strtoupper($key));
+
+        !$first && $code .= PHP_EOL;
+
+        $code .= $indentation . "public const " . $message . " = \"$key\";";
+
+        if ($first) {
+            $first = false;
+        }
+    }
+
+    file_put_contents("KnownTranslations.php", str_replace("__CODE__", $code, $template));
+}
+
+main();

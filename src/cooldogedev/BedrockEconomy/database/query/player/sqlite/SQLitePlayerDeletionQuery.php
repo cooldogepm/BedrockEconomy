@@ -31,7 +31,7 @@ use SQLite3;
 
 final class SQLitePlayerDeletionQuery extends SQLiteQuery
 {
-    public function __construct(protected string $xuid)
+    public function __construct(protected string $searchValue)
     {
         parent::__construct();
     }
@@ -52,6 +52,6 @@ final class SQLitePlayerDeletionQuery extends SQLiteQuery
 
     public function getXuid(): string
     {
-        return $this->xuid;
+        return $this->searchValue;
     }
 }

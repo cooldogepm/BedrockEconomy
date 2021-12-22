@@ -35,7 +35,7 @@ final class MySQLBulkPlayersRetrievalQuery extends MySQLQuery
     {
         $statement = $connection->prepare($this->getQuery());
         $statement->execute();
-        $result = $statement->get_result()?->fetch_assoc();
+        $result = $statement->get_result()?->fetch_all(MYSQLI_ASSOC);
         $statement->close();
         return $result;
     }

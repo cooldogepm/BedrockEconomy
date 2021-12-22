@@ -38,6 +38,7 @@ use CortexPE\Commando\BaseCommand;
 use Exception;
 use pocketmine\command\CommandSender;
 use pocketmine\player\Player;
+use pocketmine\plugin\Plugin;
 
 final class PayCommand extends BaseCommand
 {
@@ -53,6 +54,14 @@ final class PayCommand extends BaseCommand
 
         $receiver = $args[PayCommand::ARGUMENT_RECEIVER];
         $amount = $args[PayCommand::ARGUMENT_AMOUNT];
+
+        if (strtolower($receiver) === strtolower($sender->getName())) {
+            $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::PAYMENT_SEND_SELF, [
+                    TranslationKeys::PLAYER => $receiver
+                ]
+            ));
+            return;
+        }
 
         $session = $this->getOwningPlugin()->getSessionManager()->getSession($sender->getXuid());
 
@@ -78,8 +87,46 @@ final class PayCommand extends BaseCommand
 
         $receiver = $this->getOwningPlugin()->getSessionManager()->getSession($receiver, SearchConstants::SEARCH_MODE_USERNAME);
 
+        if ($amount > $this->getOwningPlugin()->getCurrencyManager()->getMaximumPayment()) {
+            $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::PAYMENT_SEND_EXCEED_LIMIT, [
+                    TranslationKeys::AMOUNT => $amount,
+                    TranslationKeys::BALANCE_CAP => $this->getOwningPlugin()->getCurrencyManager()->getBalanceCap(),
+                    TranslationKeys::CURRENCY_NAME => $this->getOwningPlugin()->getCurrencyManager()->getName(),
+                    TranslationKeys::CURRENCY_SYMBOL => $this->getOwningPlugin()->getCurrencyManager()->getSymbol()
+                ]
+            ));
+            return;
+        }
+
+        if ($amount < $this->getOwningPlugin()->getCurrencyManager()->getMinimumPayment()) {
+            $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::PAYMENT_SEND_INSUFFICIENT, [
+                    TranslationKeys::AMOUNT => $amount,
+                    TranslationKeys::LIMIT => $this->getOwningPlugin()->getCurrencyManager()->getBalanceCap(),
+                    TranslationKeys::CURRENCY_NAME => $this->getOwningPlugin()->getCurrencyManager()->getName(),
+                    TranslationKeys::CURRENCY_SYMBOL => $this->getOwningPlugin()->getCurrencyManager()->getSymbol()
+                ]
+            ));
+            return;
+        }
+
+        if (
+            $this->getOwningPlugin()->getCurrencyManager()->hasBalanceCap() &&
+            $receiver->getCache()->getBalance() >= $this->getOwningPlugin()->getCurrencyManager()->getBalanceCap()
+        ) {
+            $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::BALANCE_CAP, [
+                    TranslationKeys::AMOUNT => $amount,
+                    TranslationKeys::BALANCE_CAP => $this->getOwningPlugin()->getCurrencyManager()->getBalanceCap(),
+                    TranslationKeys::PLAYER => $receiver->getUsername(),
+                    TranslationKeys::CURRENCY_NAME => $this->getOwningPlugin()->getCurrencyManager()->getName(),
+                    TranslationKeys::CURRENCY_SYMBOL => $this->getOwningPlugin()->getCurrencyManager()->getSymbol()
+                ]
+            ));
+            return;
+        }
+
         $session->getCache()->subtractFromBalance($amount);
         $receiver->getCache()->addToBalance($amount);
+
         if ($receiver->getPlayer()) {
             $receiver->getPlayer()->sendMessage(LanguageManager::getTranslation(KnownTranslations::PAYMENT_RECEIVE, [
                     TranslationKeys::AMOUNT => $amount,
@@ -99,7 +146,10 @@ final class PayCommand extends BaseCommand
         ));
     }
 
-    public function getOwningPlugin(): BedrockEconomy
+    /**
+     * @return BedrockEconomy
+     */
+    public function getOwningPlugin(): Plugin
     {
         return parent::getOwningPlugin();
     }

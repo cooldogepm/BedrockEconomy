@@ -26,13 +26,14 @@ declare(strict_types=1);
 
 namespace cooldogedev\BedrockEconomy\session;
 
+use cooldogedev\BedrockEconomY\api\BedrockEconomyOwned;
 use cooldogedev\BedrockEconomy\BedrockEconomy;
 use cooldogedev\BedrockEconomy\constant\SearchConstants;
 use cooldogedev\BedrockEconomy\constant\SessionConstants;
 use cooldogedev\BedrockEconomy\constant\TableConstants;
 use cooldogedev\BedrockEconomy\event\session\SessionCreationEvent;
 use cooldogedev\BedrockEconomy\event\session\SessionDeletionEvent;
-use cooldogedev\BedrockEconomY\interfaces\BedrockEconomyOwned;
+use cooldogedev\libPromise\error\ThreadedPromiseError;
 
 final class SessionManager extends BedrockEconomyOwned
 {
@@ -46,16 +47,13 @@ final class SessionManager extends BedrockEconomyOwned
         parent::__construct($plugin);
         $this->sessions = [];
 
-        $promise = $this->getPlugin()->getDatabaseManager()->getDatabaseConnector()->submitQuery(
+        $this->getPlugin()->getDatabaseManager()->getDatabaseConnector()->submitQuery(
             $this->getPlugin()
                 ->getDatabaseManager()
                 ->getQueryManager()
                 ->getBulkPlayersRetrievalQuery(),
-            TableConstants::DATA_TABLE_PLAYERS
-        );
-
-        $promise->onCompletion(
-            function (?array $players): void {
+            TableConstants::DATA_TABLE_PLAYERS,
+            onSuccess: function (?array $players): void {
                 if (!$players) {
                     return;
                 }
@@ -85,6 +83,15 @@ final class SessionManager extends BedrockEconomyOwned
         return true;
     }
 
+    public function removeSession(string $xuid): bool
+    {
+        if (!$this->hasSession($xuid)) {
+            return false;
+        }
+        unset($this->sessions[$xuid]);
+        return true;
+    }
+
     public function hasSession(string $searchValue, int $searchMode = SearchConstants::SEARCH_MODE_XUID): bool
     {
         return match ($searchMode) {
@@ -94,7 +101,7 @@ final class SessionManager extends BedrockEconomyOwned
         };
     }
 
-    public function deleteSession(string $xuid): bool
+    public function deleteAccount(string $xuid): bool
     {
         if (!$this->hasSession($xuid)) {
             return false;
@@ -109,16 +116,13 @@ final class SessionManager extends BedrockEconomyOwned
             return false;
         }
 
-        $promise = $this->getPlugin()->getDatabaseManager()->getDatabaseConnector()->submitQuery(
+        $this->getPlugin()->getDatabaseManager()->getDatabaseConnector()->submitQuery(
             $this->getPlugin()
                 ->getDatabaseManager()
                 ->getQueryManager()
                 ->getPlayerDeletionQuery($xuid),
-            TableConstants::DATA_TABLE_PLAYERS
-        );
-
-        $promise->onCompletion(
-            function () use ($xuid) {
+            TableConstants::DATA_TABLE_PLAYERS,
+            onSuccess: function () use ($xuid) {
                 unset($this->sessions[$xuid]);
             }
         );

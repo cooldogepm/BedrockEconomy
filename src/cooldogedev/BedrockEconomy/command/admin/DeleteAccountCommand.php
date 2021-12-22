@@ -36,6 +36,7 @@ use CortexPE\Commando\args\RawStringArgument;
 use CortexPE\Commando\BaseCommand;
 use Exception;
 use pocketmine\command\CommandSender;
+use pocketmine\plugin\Plugin;
 
 final class DeleteAccountCommand extends BaseCommand
 {
@@ -54,7 +55,7 @@ final class DeleteAccountCommand extends BaseCommand
             return;
         }
 
-        $this->getOwningPlugin()->getSessionManager()->deleteSession($session->getXuid());
+        $this->getOwningPlugin()->getSessionManager()->deleteAccount($session->getXuid());
 
         $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::ACCOUNT_DELETE, [
                 TranslationKeys::PLAYER => $session->getUsername(),
@@ -65,7 +66,10 @@ final class DeleteAccountCommand extends BaseCommand
         ));
     }
 
-    public function getOwningPlugin(): BedrockEconomy
+    /**
+     * @return BedrockEconomy
+     */
+    public function getOwningPlugin(): Plugin
     {
         return parent::getOwningPlugin();
     }

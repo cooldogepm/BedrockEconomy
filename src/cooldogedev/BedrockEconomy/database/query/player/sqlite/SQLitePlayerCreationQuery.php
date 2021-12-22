@@ -31,7 +31,7 @@ use SQLite3;
 
 final class SQLitePlayerCreationQuery extends SQLiteQuery
 {
-    public function __construct(protected string $xuid, protected string $username, protected int $balance)
+    public function __construct(protected string $searchValue, protected string $playerName, protected int $balance)
     {
         parent::__construct();
     }
@@ -54,12 +54,12 @@ final class SQLitePlayerCreationQuery extends SQLiteQuery
 
     public function getXuid(): string
     {
-        return $this->xuid;
+        return $this->searchValue;
     }
 
     public function getUsername(): string
     {
-        return $this->username;
+        return $this->playerName;
     }
 
     public function getBalance(): int

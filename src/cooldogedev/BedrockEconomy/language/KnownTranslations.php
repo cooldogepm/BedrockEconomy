@@ -28,12 +28,15 @@ namespace cooldogedev\BedrockEconomy\language;
 
 final class KnownTranslations
 {
-    public const COMMANDS = "commands";
     public const COMMAND_PLAYER_ONLY = "command-player-only";
     public const PLAYER_NOT_FOUND = "player-not-found";
     public const BALANCE_INSUFFICIENT = "balance-insufficient";
+    public const BALANCE_CAP = "balance-cap";
     public const PAYMENT_SEND = "payment-send";
     public const PAYMENT_RECEIVE = "payment-receive";
+    public const PAYMENT_SEND_EXCEED_LIMIT = "payment-send-exceed-limit";
+    public const PAYMENT_SEND_INSUFFICIENT = "payment-send-insufficient";
+    public const PAYMENT_SEND_SELF = "payment-send-self";
     public const BALANCE_INFO = "balance-info";
     public const BALANCE_INFO_OTHER = "balance-info-other";
     public const BALANCE_ADD = "balance-add";

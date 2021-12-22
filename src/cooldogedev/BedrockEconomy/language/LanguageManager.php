@@ -31,9 +31,9 @@ use pocketmine\utils\TextFormat;
 
 final class LanguageManager
 {
-    protected const DEFAULT_LANGUAGE = "english";
-    protected const LANGUAGES_MAP = [
-        "english" => "en-US"
+    protected const DEFAULT_LANGUAGE = "en-US";
+    protected const SUPPORTED_LANGUAGES = [
+        "en-US"
     ];
 
     protected static string $language;
@@ -43,15 +43,18 @@ final class LanguageManager
     {
         $languagesFolder = $plugin->getDataFolder() . "languages";
         @mkdir($languagesFolder);
-        foreach (LanguageManager::LANGUAGES_MAP as $languageCode) {
+
+        foreach (LanguageManager::SUPPORTED_LANGUAGES as $languageCode) {
             $plugin->saveResource("languages" . DIRECTORY_SEPARATOR . $languageCode . ".yml");
         }
-        if (!isset(LanguageManager::LANGUAGES_MAP[$language]) || !$language) {
+
+        if (!$language || !isset(LanguageManager::SUPPORTED_LANGUAGES[$language])) {
             $language = LanguageManager::DEFAULT_LANGUAGE;
         }
+
         LanguageManager::$language = $language;
         LanguageManager::$translations = yaml_parse_file(
-            $languagesFolder . DIRECTORY_SEPARATOR . LanguageManager::LANGUAGES_MAP[$language] . ".yml"
+            $languagesFolder . DIRECTORY_SEPARATOR . $language . ".yml"
         );
     }
 

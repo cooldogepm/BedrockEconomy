@@ -29,6 +29,7 @@ namespace cooldogedev\BedrockEconomy\database\query;
 use cooldogedev\BedrockEconomy\database\query\player\sqlite\SQLiteBulkPlayersRetrievalQuery;
 use cooldogedev\BedrockEconomy\database\query\player\sqlite\SQLitePlayerCreationQuery;
 use cooldogedev\BedrockEconomy\database\query\player\sqlite\SQLitePlayerDeletionQuery;
+use cooldogedev\BedrockEconomy\database\query\player\sqlite\SQLitePlayerFixQuery;
 use cooldogedev\BedrockEconomy\database\query\player\sqlite\SQLitePlayerRetrievalQuery;
 use cooldogedev\BedrockEconomy\database\query\player\sqlite\SQLitePlayerSaveQuery;
 use cooldogedev\BedrockEconomy\database\query\table\SQLiteTableCreationQuery;
@@ -46,6 +47,11 @@ final class SQLiteQueryManager extends QueryManager
         return new SQLitePlayerCreationQuery($xuid, $username, $balance);
     }
 
+    public function getPlayerFixQuery(string $xuid, string $username): SQLQuery
+    {
+        return new SQLitePlayerFixQuery($xuid, $username);
+    }
+
     public function getPlayerDeletionQuery(string $xuid): SQLQuery
     {
         return new SQLitePlayerDeletionQuery($xuid);
@@ -56,9 +62,9 @@ final class SQLiteQueryManager extends QueryManager
         return new SQLitePlayerRetrievalQuery($xuid);
     }
 
-    public function getPlayerSaveQuery(string $xuid, int $balance): SQLQuery
+    public function getPlayerSaveQuery(string $xuid, int $balance, int $searchMode): SQLQuery
     {
-        return new SQLitePlayerSaveQuery($xuid, $balance);
+        return new SQLitePlayerSaveQuery($xuid, $balance, $searchMode);
     }
 
     public function getTableCreationQuery(int $defaultBalance): SQLQuery

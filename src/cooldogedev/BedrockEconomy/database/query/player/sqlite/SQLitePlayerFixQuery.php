@@ -24,18 +24,41 @@
 
 declare(strict_types=1);
 
-namespace cooldogedev\BedrockEconomy\interfaces;
+namespace cooldogedev\BedrockEconomy\database\query\player\sqlite;
 
-use cooldogedev\BedrockEconomy\BedrockEconomy;
+use cooldogedev\BedrockEconomy\constant\TableConstants;
+use cooldogedev\libSQL\query\SQLiteQuery;
+use SQLite3;
 
-abstract class BedrockEconomyOwned
+class SQLitePlayerFixQuery extends SQLiteQuery
 {
-    public function __construct(protected BedrockEconomy $plugin)
+    public function __construct(protected string $xuid, protected string $playerName)
     {
+        parent::__construct();
     }
 
-    public function getPlugin(): BedrockEconomy
+    public function getUsername(): string
     {
-        return $this->plugin;
+        return $this->playerName;
+    }
+
+    public function getXuid(): string
+    {
+        return $this->xuid;
+    }
+
+    public function handleIncomingConnection(SQLite3 $connection): bool
+    {
+        $statement = $connection->prepare($this->getQuery());
+        $statement->bindValue(":xuid", $this->getXuid());
+        $statement->bindValue(":username", $this->getUsername());
+        $statement->execute();
+        $statement->close();
+        return true;
+    }
+
+    public function getQuery(): string
+    {
+        return "UPDATE " . TableConstants::DATA_TABLE_PLAYERS . " SET xuid = ? WHERE username = ?";
     }
 }

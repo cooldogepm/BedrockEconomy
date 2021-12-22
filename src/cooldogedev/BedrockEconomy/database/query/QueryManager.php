@@ -34,11 +34,13 @@ abstract class QueryManager
 
     abstract public function getPlayerCreationQuery(string $xuid, string $username, int $balance): SQLQuery;
 
+    abstract public function getPlayerFixQuery(string $xuid, string $username): SQLQuery;
+
     abstract public function getPlayerDeletionQuery(string $xuid): SQLQuery;
 
     abstract public function getPlayerRetrievalQuery(string $xuid): SQLQuery;
 
-    abstract public function getPlayerSaveQuery(string $xuid, int $balance): SQLQuery;
+    abstract public function getPlayerSaveQuery(string $xuid, int $balance, int $searchMode): SQLQuery;
 
     abstract public function getTableCreationQuery(int $defaultBalance): SQLQuery;
 }

@@ -31,7 +31,9 @@ final class TranslationKeys
     public const RECEIVER = "{RECEIVER}";
     public const PAYER = "{PAYER}";
     public const AMOUNT = "{AMOUNT}";
+    public const LIMIT = "{LIMIT}";
     public const PLAYER = "{PLAYER}";
     public const CURRENCY_SYMBOL = "{CURRENCY_SYMBOL}";
     public const CURRENCY_NAME = "{CURRENCY_NAME}";
+    public const BALANCE_CAP = "{BALANCE_CAP}";
 }

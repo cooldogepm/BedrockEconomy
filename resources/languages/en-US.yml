@@ -1,14 +1,33 @@
 ---
+# Called when a player-only command ran by the console
 command-player-only: "&cThis command is runnable from game only!"
-player-not-found: "&f{PLAYER} was not found!"
+# Called when trying to interact with non-existing account
+player-not-found: "&f{PLAYER} &cwas not found!"
+# Called when attempting to send a payment without having sufficient balance
 balance-insufficient: "&cYou don't have enough balance!"
+# Called when attempting to pay a user who already has reached the balance limit
+balance-cap: "&f{PLAYER} &chas already reached the balance limit!"
+# Called when sending a successful transaction
 payment-send: "&aYou've paid {CURRENCY_SYMBOL}{AMOUNT} to &f{RECEIVER}&a!"
+# Called when receiving a successful transaction
 payment-receive: "&aYou've received {CURRENCY_SYMBOL}{AMOUNT} from &f{PAYER}&a!"
+# Called when attempting to send a payment that exceeds the maximum limit
+payment-send-exceed-limit: "&cYou've exceeded the payment limit of &f{LIMIT}!"
+# Called when attempting to send a payment below the minimum
+payment-send-insufficient: "&cYour payment is below the minimum requirement of &f{LIMIT}&c!"
+# Called when attempting to pay yourself
+payment-send-self: "&cYou can't pay yourself!"
+# Called when users attempts to view their own balance
 balance-info: "&aYour balance is &f{CURRENCY_SYMBOL}{AMOUNT}"
+# Called when users attempts to view someone's balance
 balance-info-other: "&a{PLAYER}'s balance is &f{CURRENCY_SYMBOL}{AMOUNT}"
+# Called when incrementing someone's balance
 balance-add: "&aYou've added {CURRENCY_SYMBOL}{AMOUNT} to &f{PLAYER}&a!"
+# Called when decrementing someone's balance
 balance-remove: "&aYou've removed {CURRENCY_SYMBOL}{AMOUNT} from &f{PLAYER}&a!"
+# Called when updating someone's balance to a new value
 balance-set: "&aYou've set &f{PLAYER}&a's balance to {CURRENCY_SYMBOL}{AMOUNT}!"
+# Called when deleting someone's account
 account-delete: "&aYou've deleted &f{PLAYER}&a's account!"
 
 commands:

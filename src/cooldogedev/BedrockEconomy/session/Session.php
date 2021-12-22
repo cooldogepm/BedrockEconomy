@@ -26,16 +26,18 @@ declare(strict_types=1);
 
 namespace cooldogedev\BedrockEconomy\session;
 
+use cooldogedev\BedrockEconomY\api\BedrockEconomyOwned;
 use cooldogedev\BedrockEconomy\BedrockEconomy;
+use cooldogedev\BedrockEconomy\constant\SearchConstants;
 use cooldogedev\BedrockEconomy\constant\TableConstants;
 use cooldogedev\BedrockEconomy\event\balance\BalanceChangeEvent;
-use cooldogedev\BedrockEconomY\interfaces\BedrockEconomyOwned;
 use cooldogedev\BedrockEconomy\session\cache\SessionCache;
 use pocketmine\player\Player;
 
 final class Session extends BedrockEconomyOwned
 {
     protected SessionCache $cache;
+    protected bool $awaitingFix;
 
     public function __construct(
         BedrockEconomy   $plugin,
@@ -46,6 +48,9 @@ final class Session extends BedrockEconomyOwned
     {
         parent::__construct($plugin);
         $this->plugin = $plugin;
+
+        $this->awaitingFix = $xuid === $this->username;
+
         $this->cache = new SessionCache(
             $this,
             time(),
@@ -56,6 +61,11 @@ final class Session extends BedrockEconomyOwned
         );
     }
 
+    public function isAwaitingFix(): bool
+    {
+        return $this->awaitingFix;
+    }
+
     public function getPlayer(): ?Player
     {
         return $this->getPlugin()->getServer()->getPlayerByPrefix($this->getUsername());
@@ -64,6 +74,32 @@ final class Session extends BedrockEconomyOwned
     public function getUsername(): string
     {
         return $this->username;
+    }
+
+    public function setXuid(string $xuid): void
+    {
+        $this->xuid = $xuid;
+    }
+
+    public function attemptXuidFix(string $xuid): void
+    {
+        $this->getPlugin()->getDatabaseManager()->getDatabaseConnector()->submitQuery(
+            $this->getPlugin()
+                ->getDatabaseManager()
+                ->getQueryManager()
+                ->getPlayerFixQuery($xuid, $this->getUsername()),
+            TableConstants::DATA_TABLE_PLAYERS,
+            onSuccess: function () use ($xuid) : void {
+                $this->getPlugin()->getSessionManager()->createSession($xuid, $this->getUsername(), $this->getCache()->getBalance());
+                $this->getPlugin()->getSessionManager()->removeSession($this->getXuid());
+                $this->setAwaitingFix(false);
+            }
+        );
+    }
+
+    public function setAwaitingFix(bool $awaitingFix): void
+    {
+        $this->awaitingFix = $awaitingFix;
     }
 
     public function onSave(): bool
@@ -95,7 +131,7 @@ final class Session extends BedrockEconomyOwned
                 $this->getPlugin()
                     ->getDatabaseManager()
                     ->getQueryManager()
-                    ->getPlayerSaveQuery($this->getXuid(), $this->getCache()->getBalance()),
+                    ->getPlayerSaveQuery($this->isAwaitingFix() ? $this->getUsername() : $this->getXuid(), $this->getCache()->getBalance(), $this->isAwaitingFix() ? SearchConstants::SEARCH_MODE_USERNAME : SearchConstants::SEARCH_MODE_XUID),
                 TableConstants::DATA_TABLE_PLAYERS
             );
         }

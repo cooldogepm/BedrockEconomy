@@ -26,6 +26,7 @@ declare(strict_types=1);
 
 namespace cooldogedev\BedrockEconomy;
 
+use cooldogedev\BedrockEconomy\api\BedrockEconomyAPI;
 use cooldogedev\BedrockEconomy\command\admin\AddBalanceCommand;
 use cooldogedev\BedrockEconomy\command\admin\DeleteAccountCommand;
 use cooldogedev\BedrockEconomy\command\admin\RemoveBalanceCommand;
@@ -50,7 +51,6 @@ final class BedrockEconomy extends PluginBase
         setInstance as protected;
     }
 
-    protected LanguageManager $languageManager;
     protected ConfigManager $configManager;
     protected CurrencyManager $currencyManager;
     protected DatabaseManager $databaseManager;
@@ -81,6 +81,11 @@ final class BedrockEconomy extends PluginBase
         return $this->currencyManager;
     }
 
+    public function getAPI(): BedrockEconomyAPI
+    {
+        return BedrockEconomyAPI::getInstance();
+    }
+
     protected function onLoad(): void
     {
         foreach ($this->getResources() as $resource) {
@@ -88,6 +93,7 @@ final class BedrockEconomy extends PluginBase
         }
         LanguageManager::init($this, $this->getConfig()->get("language"));
         BedrockEconomy::setInstance($this);
+        BedrockEconomyAPI::register($this);
     }
 
     protected function onEnable(): void

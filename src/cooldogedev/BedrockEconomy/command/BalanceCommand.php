@@ -37,6 +37,7 @@ use CortexPE\Commando\BaseCommand;
 use Exception;
 use pocketmine\command\CommandSender;
 use pocketmine\player\Player;
+use pocketmine\plugin\Plugin;
 
 final class BalanceCommand extends BaseCommand
 {
@@ -70,7 +71,10 @@ final class BalanceCommand extends BaseCommand
         ));
     }
 
-    public function getOwningPlugin(): BedrockEconomy
+    /**
+     * @return BedrockEconomy
+     */
+    public function getOwningPlugin(): Plugin
     {
         return parent::getOwningPlugin();
     }

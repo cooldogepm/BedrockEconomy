@@ -26,8 +26,10 @@ declare(strict_types=1);
 
 namespace cooldogedev\BedrockEconomy\listener;
 
+use cooldogedev\BedrockEconomy\api\BedrockEconomyAPI;
+use cooldogedev\BedrockEconomY\api\BedrockEconomyOwned;
+use cooldogedev\BedrockEconomy\constant\SearchConstants;
 use cooldogedev\BedrockEconomy\constant\SessionConstants;
-use cooldogedev\BedrockEconomY\interfaces\BedrockEconomyOwned;
 use pocketmine\event\Listener;
 use pocketmine\event\player\PlayerLoginEvent;
 use pocketmine\event\player\PlayerQuitEvent;
@@ -41,8 +43,15 @@ final class PlayerListener extends BedrockEconomyOwned implements Listener
     public function onPlayerLogin(PlayerLoginEvent $event): void
     {
         $player = $event->getPlayer();
-        if (!$this->getPlugin()->getSessionManager()->hasSession($player->getXuid())) {
+        if (!$this->getPlugin()->getSessionManager()->hasSession($player->getXuid()) && !$this->getPlugin()->getSessionManager()->hasSession($player->getName(), SearchConstants::SEARCH_MODE_USERNAME)) {
             $this->getPlugin()->getSessionManager()->createSession($player->getXuid(), $player->getName());
+            $this->getPlugin()->getLogger()->debug("Creating a new record for " . $player->getName() . ".");
+        } else {
+            $session = $this->getPlugin()->getSessionManager()->getSession($player->getName(), SearchConstants::SEARCH_MODE_USERNAME);
+            if ($session->isAwaitingFix()) {
+                $session->attemptXuidFix($player->getXuid());
+                $this->getPlugin()->getLogger()->debug("Fixing " . $player->getName() . "'s account data (xuid).");
+            }
         }
     }
 
@@ -50,8 +59,9 @@ final class PlayerListener extends BedrockEconomyOwned implements Listener
     {
         $player = $event->getPlayer();
         $session = $this->getPlugin()->getSessionManager()->getSession($player->getXuid());
+        var_dump(BedrockEconomyAPI::getInstance()->getPlayerSession($player));
         if ($this->getPlugin()->getDatabaseManager()->getSaveMode() === SessionConstants::SESSION_SAVE_MODE_UPON_DISCONNECTION && $session->onSave()) {
-            $this->getPlugin()->getLogger()->debug("Saving " . $player->getName() . "'s session.");
+            $this->getPlugin()->getLogger()->debug("Saving " . $player->getName() . "'s account data.");
         }
     }
 }

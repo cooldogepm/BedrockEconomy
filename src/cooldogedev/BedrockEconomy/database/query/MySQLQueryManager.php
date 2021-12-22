@@ -29,6 +29,7 @@ namespace cooldogedev\BedrockEconomy\database\query;
 use cooldogedev\BedrockEconomy\database\query\player\mysql\MySQLBulkPlayersRetrievalQuery;
 use cooldogedev\BedrockEconomy\database\query\player\mysql\MySQLPlayerCreationQuery;
 use cooldogedev\BedrockEconomy\database\query\player\mysql\MySQLPlayerDeletionQuery;
+use cooldogedev\BedrockEconomy\database\query\player\mysql\MySQLPlayerFixQuery;
 use cooldogedev\BedrockEconomy\database\query\player\mysql\MySQLPlayerRetrievalQuery;
 use cooldogedev\BedrockEconomy\database\query\player\mysql\MySQLPlayerSaveQuery;
 use cooldogedev\BedrockEconomy\database\query\table\MySQLTableCreationQuery;
@@ -46,6 +47,11 @@ final class MySQLQueryManager extends QueryManager
         return new MySQLPlayerCreationQuery($xuid, $username, $balance);
     }
 
+    public function getPlayerFixQuery(string $xuid, string $username): SQLQuery
+    {
+        return new MySQLPlayerFixQuery($xuid, $username);
+    }
+
     public function getPlayerDeletionQuery(string $xuid): SQLQuery
     {
         return new MySQLPlayerDeletionQuery($xuid);
@@ -56,9 +62,9 @@ final class MySQLQueryManager extends QueryManager
         return new MySQLPlayerRetrievalQuery($xuid);
     }
 
-    public function getPlayerSaveQuery(string $xuid, int $balance): SQLQuery
+    public function getPlayerSaveQuery(string $xuid, int $balance, int $searchMode): SQLQuery
     {
-        return new MySQLPlayerSaveQuery($xuid, $balance);
+        return new MySQLPlayerSaveQuery($xuid, $balance, $searchMode);
     }
 
     public function getTableCreationQuery(int $defaultBalance): SQLQuery

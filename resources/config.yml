@@ -1,8 +1,8 @@
 ---
-# Config version, don't play with this.
-config-version: 0.0.3
+# Configuration version, don't edit this.
+config-version: 0.0.5
 
-language: english
+language: en-US
 
 currency:
   name: dogecoin
@@ -10,7 +10,9 @@ currency:
 
   balance:
     default-balance: 0
-    maximum-balance: 1000
+    balance-cap: 1000 # Has no effect if enable-balance-cap is left false
+    enable-balance-cap: false
+
   payment:
     minimum-payment: 10
     maximum-payment: 100
@@ -30,9 +32,9 @@ database:
 
   save-options:
     # instantaneous = 0
-    # onDisconnect = 1
+    # onDisconnection = 1
     # fixed period = 2
-    update-mode: 1
-    # in seconds
-    update-fixed-period: 3000
+    save-mode: 1
+    # Configuration for the "Fixed Period" update mode
+    save-fixed-period: 3000
 ...

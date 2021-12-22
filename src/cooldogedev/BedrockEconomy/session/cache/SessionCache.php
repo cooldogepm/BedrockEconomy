@@ -26,6 +26,7 @@ declare(strict_types=1);
 
 namespace cooldogedev\BedrockEconomy\session\cache;
 
+use cooldogedev\BedrockEconomy\constant\SessionConstants;
 use cooldogedev\BedrockEconomy\event\balance\BalanceChangeEvent;
 use cooldogedev\BedrockEconomy\session\Session;
 
@@ -79,6 +80,10 @@ final class SessionCache
 
     public function setAwaitingSave(bool $awaitingSave): void
     {
+        if ($awaitingSave && $this->getSession()->getPlugin()->getDatabaseManager()->getSaveMode() === SessionConstants::SESSION_SAVE_MODE_INSTANTANEOUS) {
+            $this->getSession()->onSave();
+        }
+
         $this->awaitingSave = $awaitingSave;
     }
 

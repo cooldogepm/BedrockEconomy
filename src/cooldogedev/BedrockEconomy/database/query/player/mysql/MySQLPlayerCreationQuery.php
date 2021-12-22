@@ -32,8 +32,8 @@ use mysqli;
 final class MySQLPlayerCreationQuery extends MySQLQuery
 {
     public function __construct(
-        protected string $xuid,
-        protected string $username,
+        protected string $searchValue,
+        protected string $playerName,
         protected int    $balance
     )
     {
@@ -43,7 +43,7 @@ final class MySQLPlayerCreationQuery extends MySQLQuery
     public function handleIncomingConnection(mysqli $connection): bool
     {
         $xuid = $this->getXuid();
-        $username = $this->getUsername();
+        $username = $this->getPlayerName();
         $balance = $this->getBalance();
         $statement = $connection->prepare($this->getQuery());
         $statement->bind_param("sss", $xuid, $username, $balance);
@@ -54,12 +54,12 @@ final class MySQLPlayerCreationQuery extends MySQLQuery
 
     public function getXuid(): string
     {
-        return $this->xuid;
+        return $this->searchValue;
     }
 
-    public function getUsername(): string
+    public function getPlayerName(): string
     {
-        return $this->username;
+        return $this->playerName;
     }
 
     public function getBalance(): int

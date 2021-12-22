@@ -26,12 +26,12 @@ declare(strict_types=1);
 
 namespace cooldogedev\BedrockEconomy\database;
 
+use cooldogedev\BedrockEconomY\api\BedrockEconomyOwned;
 use cooldogedev\BedrockEconomy\BedrockEconomy;
 use cooldogedev\BedrockEconomy\constant\SessionConstants;
 use cooldogedev\BedrockEconomy\database\query\MySQLQueryManager;
 use cooldogedev\BedrockEconomy\database\query\QueryManager;
 use cooldogedev\BedrockEconomy\database\query\SQLiteQueryManager;
-use cooldogedev\BedrockEconomY\interfaces\BedrockEconomyOwned;
 use cooldogedev\BedrockEconomy\task\BulkSessionsSaveTask;
 use cooldogedev\libSQL\constant\DataProviderConstants;
 use cooldogedev\libSQL\DatabaseConnector;
@@ -41,7 +41,7 @@ final class DatabaseManager extends BedrockEconomyOwned
     protected DatabaseConnector $databaseConnector;
     protected QueryManager $queryManager;
     protected int $saveMode;
-    protected int $updatePeriod;
+    protected int $saveFixedPeriod;
 
     public function __construct(BedrockEconomy $plugin)
     {
@@ -50,8 +50,8 @@ final class DatabaseManager extends BedrockEconomyOwned
         $databaseConfig = $this->getPlugin()->getConfigManager()->getDatabaseConfig();
 
         $this->databaseConnector = new DatabaseConnector($this->getPlugin(), $databaseConfig);
-        $this->saveMode = $databaseConfig["save-options"]["update-mode"];
-        $this->updatePeriod = $databaseConfig["save-options"]["update-fixed-period"];
+        $this->saveMode = $databaseConfig["save-options"]["save-mode"];
+        $this->saveFixedPeriod = $databaseConfig["save-options"]["save-fixed-period"];
 
         $this->queryManager = match ($this->getDatabaseConnector()->getDataProvider()->getName(true)) {
             DataProviderConstants::getLowercaseMySQL() => new MySQLQueryManager(),
@@ -60,7 +60,7 @@ final class DatabaseManager extends BedrockEconomyOwned
 
         if ($this->getSaveMode() === SessionConstants::SESSION_SAVE_MODE_FIXED_PERIOD) {
             $this->getPlugin()->getScheduler()->scheduleRepeatingTask(
-                new BulkSessionsSaveTask($this->getPlugin()->getSessionManager()), $this->getUpdatePeriod()
+                new BulkSessionsSaveTask($this->getPlugin()->getSessionManager()), $this->getSaveFixedPeriod()
             );
         }
 
@@ -81,9 +81,9 @@ final class DatabaseManager extends BedrockEconomyOwned
         return $this->saveMode;
     }
 
-    public function getUpdatePeriod(): int
+    public function getSaveFixedPeriod(): int
     {
-        return $this->updatePeriod;
+        return $this->saveFixedPeriod;
     }
 
     public function getQueryManager(): QueryManager
