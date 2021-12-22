@@ -90,7 +90,7 @@ final class PayCommand extends BaseCommand
         if ($amount > $this->getOwningPlugin()->getCurrencyManager()->getMaximumPayment()) {
             $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::PAYMENT_SEND_EXCEED_LIMIT, [
                     TranslationKeys::AMOUNT => $amount,
-                    TranslationKeys::BALANCE_CAP => $this->getOwningPlugin()->getCurrencyManager()->getBalanceCap(),
+                    TranslationKeys::LIMIT => $this->getOwningPlugin()->getCurrencyManager()->getMaximumPayment(),
                     TranslationKeys::CURRENCY_NAME => $this->getOwningPlugin()->getCurrencyManager()->getName(),
                     TranslationKeys::CURRENCY_SYMBOL => $this->getOwningPlugin()->getCurrencyManager()->getSymbol()
                 ]
@@ -101,7 +101,7 @@ final class PayCommand extends BaseCommand
         if ($amount < $this->getOwningPlugin()->getCurrencyManager()->getMinimumPayment()) {
             $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::PAYMENT_SEND_INSUFFICIENT, [
                     TranslationKeys::AMOUNT => $amount,
-                    TranslationKeys::LIMIT => $this->getOwningPlugin()->getCurrencyManager()->getBalanceCap(),
+                    TranslationKeys::LIMIT => $this->getOwningPlugin()->getCurrencyManager()->getMinimumPayment(),
                     TranslationKeys::CURRENCY_NAME => $this->getOwningPlugin()->getCurrencyManager()->getName(),
                     TranslationKeys::CURRENCY_SYMBOL => $this->getOwningPlugin()->getCurrencyManager()->getSymbol()
                 ]
