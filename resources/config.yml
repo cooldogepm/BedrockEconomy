@@ -5,7 +5,7 @@ config-version: 0.0.5
 language: en-US
 
 currency:
-  name: dogecoin
+  name: USD
   symbol: $
 
   balance:
