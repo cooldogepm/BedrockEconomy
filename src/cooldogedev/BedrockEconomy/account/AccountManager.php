@@ -64,12 +64,12 @@ final class AccountManager extends BedrockEconomyOwned
         );
     }
 
-    public function addAccount(string $xuid, string $username, ?int $balance = null): bool
+    public function addAccount(string $xuid, string $username, ?int $balance = null, bool $submitForCreation = false): bool
     {
         if ($this->hasAccount($xuid)) {
             return false;
         }
-        $session = new Account($this->getPlugin(), $username, $xuid, $balance);
+        $session = new Account($this->getPlugin(), $username, $xuid, $balance, $submitForCreation);
 
         $event = new AccountCacheEvent($session);
         $event->call();

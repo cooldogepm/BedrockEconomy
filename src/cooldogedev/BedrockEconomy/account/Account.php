@@ -50,7 +50,8 @@ final class Account extends BedrockEconomyOwned
         BedrockEconomy   $plugin,
         protected string $username,
         protected string $xuid,
-        ?int             $balance = null
+        ?int             $balance = null,
+        bool $submitForCreation = false
     )
     {
         parent::__construct($plugin);
@@ -61,7 +62,7 @@ final class Account extends BedrockEconomyOwned
         $this->transactions = [];
 
         // New account
-        if ($balance === null) {
+        if ($balance === null || $submitForCreation) {
 
             $event = new AccountCreationEvent($this);
             $event->call();
