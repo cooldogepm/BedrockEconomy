@@ -39,10 +39,10 @@ const MIGRATION_TYPE_SQLITE = 1;
 /*
  * MySQL credentials, required if you use EconomyAPI's mysql provider or trying to output to mysql.
  */
-$hostname = "135.148.27.160";
-$username = "dev";
-$schema = "development";
-$password = "test$69666";
+$hostname = "127.0.0.1";
+$username = "root";
+$schema = "";
+$password = "";
 $port = 3306;
 
 function migrateToMySQL(array $accounts): void {
@@ -103,10 +103,10 @@ function parseFromEconomyAPI(int $economyAPIProvider): ?array {
  */
 function main(): void {
     // EDIT THIS ACCORDING TO YOUR ECONOMYAPI CONFIGURATIONS
-    $economyAPIProvider = ECONOMYAPI_PROVIDER_MYSQL;
+    $economyAPIProvider = ECONOMYAPI_PROVIDER_YAML;
 
     // EDIT THIS ACCORDING TO YOUR BEDROCKECONOMY CONFIGURATIONS
-    $migrationType = MIGRATION_TYPE_MYSQL;
+    $migrationType = MIGRATION_TYPE_SQLITE;
 
     $parsedData = parseFromEconomyAPI($economyAPIProvider);
 
