@@ -1,5 +1,5 @@
 # BedrockEconomy
-Economy made easy for Minecraft Bedrock
+BedrockEconomy is an amazing economy plugin made for PocketMine-MP focused on stability and simplicity
 
 ## Commands
 | Name | Description | Usage | Permission |
@@ -10,3 +10,8 @@ Economy made easy for Minecraft Bedrock
 | removebalance | Remove points from others balance | `removebalance <player: string> <amount: number>`  | `bedrockeconomy.command.removebalance` |
 | setbalance | Set others balance | `setbalance <player: string> <balance: number>`  | `bedrockeconomy.command.setbalance` |
 | deleteaccount | Delete others account data | `deleteaccount <player: string>`  | `bedrockeconomy.command.deleteaccount` |
+
+## API
+
+## Support
+* [Migration from EconomyAPI](https://github.com/cooldogedev/EconAPIToBE)
