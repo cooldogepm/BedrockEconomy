@@ -71,12 +71,12 @@ final class BedrockEconomyAPI
         return BedrockEconomyAPI::_getInstance();
     }
 
-    public function getPlayerBalance(string $player, int $mode = SearchConstants::SEARCH_MODE_USERNAME): int
+    public function getPlayerBalance(string $player, int $mode = SearchConstants::SEARCH_MODE_USERNAME): ?int
     {
-        return $this->getPlayerSession($player, $mode)->getBalance();
+        return $this->getPlayerAccount($player, $mode)?->getBalance();
     }
 
-    public function getPlayerSession(string $player, int $mode = SearchConstants::SEARCH_MODE_USERNAME): Account
+    public function getPlayerAccount(string $player, int $mode = SearchConstants::SEARCH_MODE_USERNAME): ?Account
     {
         return BedrockEconomyAPI::getBedrockEconomy()->getAccountManager()->getAccount($player, $mode);
     }
@@ -93,17 +93,17 @@ final class BedrockEconomyAPI
 
     public function setPlayerBalance(string $player, int $newBalance, int $mode = SearchConstants::SEARCH_MODE_USERNAME): void
     {
-        $this->getPlayerSession($player, $mode)->setBalance($newBalance);
+        $this->getPlayerAccount($player, $mode)?->setBalance($newBalance);
     }
 
     public function addToPlayerBalance(string $player, int $amount, int $mode = SearchConstants::SEARCH_MODE_USERNAME): void
     {
-        $this->getPlayerSession($player, $mode)->incrementBalance($amount);
+        $this->getPlayerAccount($player, $mode)?->incrementBalance($amount);
     }
 
     public function subtractFromPlayerBalance(string $player, int $amount, int $mode = SearchConstants::SEARCH_MODE_USERNAME): void
     {
-        $this->getPlayerSession($player, $mode)->decrementBalance($amount);
+        $this->getPlayerAccount($player, $mode)?->decrementBalance($amount);
     }
 
     public function deletePlayerAccount(string $player, int $mode = SearchConstants::SEARCH_MODE_USERNAME): void

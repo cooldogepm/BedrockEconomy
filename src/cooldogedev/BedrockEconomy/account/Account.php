@@ -97,9 +97,9 @@ final class Account extends BedrockEconomyOwned
         return $this->balance;
     }
 
-    public function setBalance(int $balance): bool
+    public function setBalance(int $balance, bool $ignoreCheck = false): bool
     {
-        if ($balance === $this->getBalance()) {
+        if (!$ignoreCheck && $balance === $this->getBalance()) {
             return false;
         }
 
