@@ -1,5 +1,5 @@
 # BedrockEconomy
-BedrockEconomy is an amazing economy plugin made for PocketMine-MP focused on stability and simplicity
+BedrockEconomy is an economy plugin made for PocketMine-MP focused on stability and simplicity
 
 ## Commands
 | Name | Description | Usage | Permission |
