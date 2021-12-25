@@ -31,17 +31,33 @@ use mysqli;
 
 final class MySQLBulkPlayersRetrievalQuery extends MySQLQuery
 {
+    public function __construct(protected ?int $limit = null, protected ?int $offset = null)
+    {
+        parent::__construct();
+    }
+
     public function handleIncomingConnection(mysqli $connection): ?array
     {
         $statement = $connection->prepare($this->getQuery());
         $statement->execute();
         $result = $statement->get_result()?->fetch_all(MYSQLI_ASSOC);
         $statement->close();
+
         return $result;
     }
 
     public function getQuery(): string
     {
-        return "SELECT * FROM " . $this->getTable();
+        return $this->getLimit() ? "SELECT * FROM " . $this->getTable() . " ORDER BY balance DESC LIMIT " . $this->getLimit() . " OFFSET " . ($this->getOffset() ?? 0) : "SELECT * FROM " . $this->getTable();
+    }
+
+    public function getLimit(): ?int
+    {
+        return $this->limit;
+    }
+
+    public function getOffset(): ?int
+    {
+        return $this->offset;
     }
 }

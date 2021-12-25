@@ -26,12 +26,14 @@ declare(strict_types=1);
 
 namespace cooldogedev\BedrockEconomy\account;
 
+use Closure;
 use cooldogedev\BedrockEconomY\api\BedrockEconomyOwned;
 use cooldogedev\BedrockEconomy\BedrockEconomy;
 use cooldogedev\BedrockEconomy\constant\SearchConstants;
 use cooldogedev\BedrockEconomy\constant\TableConstants;
 use cooldogedev\BedrockEconomy\event\account\AccountCacheEvent;
 use cooldogedev\BedrockEconomy\event\account\AccountDeletionEvent;
+use cooldogedev\libPromise\thread\ThreadedPromise;
 
 final class AccountManager extends BedrockEconomyOwned
 {
@@ -50,7 +52,7 @@ final class AccountManager extends BedrockEconomyOwned
             $this->getPlugin()
                 ->getDatabaseManager()
                 ->getQueryManager()
-                ->getBulkPlayersRetrievalQuery(),
+                ->getBulkPlayersRetrievalQuery(null, null),
             TableConstants::DATA_TABLE_PLAYERS,
             onSuccess: function (?array $players): void {
                 if (!$players) {
@@ -98,6 +100,16 @@ final class AccountManager extends BedrockEconomyOwned
     public function getAccounts(): array
     {
         return $this->accounts;
+    }
+
+    public function getHighestBalances(int $limit, ?int $offset = null, ?Closure $onSuccess = null, ?Closure $onError = null): ?ThreadedPromise
+    {
+        return $this->getPlugin()->getDatabaseManager()->getConnector()->submitQuery(
+            $this->getPlugin()->getDatabaseManager()->getQueryManager()->getBulkPlayersRetrievalQuery($limit, $offset),
+            table: TableConstants::DATA_TABLE_PLAYERS,
+            onSuccess: $onSuccess,
+            onError: $onError,
+        );
     }
 
     public function removeFromCache(string $xuid): bool

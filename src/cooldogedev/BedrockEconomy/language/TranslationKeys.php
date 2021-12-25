@@ -35,4 +35,5 @@ final class TranslationKeys
     public const PLAYER = "{PLAYER}";
     public const CURRENCY_SYMBOL = "{CURRENCY_SYMBOL}";
     public const CURRENCY_NAME = "{CURRENCY_NAME}";
+    public const POSITION = "{POSITION}";
 }

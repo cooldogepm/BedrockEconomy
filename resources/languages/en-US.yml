@@ -31,6 +31,10 @@ balance-set: "&aYou've set &f{PLAYER}&a's balance to {CURRENCY_SYMBOL}{AMOUNT}!"
 account-delete: "&aYou've deleted &f{PLAYER}&a's account!"
 # Called when a user executes a command while they don't have an account in the database
 no-account: "&cYou don't have an account!"
+# Called when users attempts to view the top balances
+top-balance-header: "&6TOP BALANCES"
+top-balance-row-template: "&b{POSITION}. &a{PLAYER} &7: &b{AMOUNT}"
+top-balance-error: "&cFailed to retrieve top balances!"
 
 commands:
   balance:
@@ -42,6 +46,11 @@ commands:
     name: pay
     description: Pay others
     usage: "&cUsage /pay <player: string> <amount: number>"
+    aliases: [ ]
+  top-balance:
+    name: topbalance
+    description: View top balances
+    usage: "&cUsage /tppbalance [page: number]"
     aliases: [ ]
   add-balance:
     name: addbalance

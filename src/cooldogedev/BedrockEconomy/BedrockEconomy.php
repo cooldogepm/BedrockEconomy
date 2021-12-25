@@ -34,6 +34,7 @@ use cooldogedev\BedrockEconomy\command\admin\RemoveBalanceCommand;
 use cooldogedev\BedrockEconomy\command\admin\SetBalanceCommand;
 use cooldogedev\BedrockEconomy\command\BalanceCommand;
 use cooldogedev\BedrockEconomy\command\PayCommand;
+use cooldogedev\BedrockEconomy\command\TopBalanceCommand;
 use cooldogedev\BedrockEconomy\config\ConfigManager;
 use cooldogedev\BedrockEconomy\currency\CurrencyManager;
 use cooldogedev\BedrockEconomy\database\DatabaseManager;
@@ -117,6 +118,7 @@ final class BedrockEconomy extends PluginBase
                 $className = match ($data["name"]) {
                     "balance" => BalanceCommand::class,
                     "pay" => PayCommand::class,
+                    "topbalance" => TopBalanceCommand::class,
                     "addbalance" => AddBalanceCommand::class,
                     "deleteaccount" => DeleteAccountCommand::class,
                     "removebalance" => RemoveBalanceCommand::class,

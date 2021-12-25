@@ -39,9 +39,9 @@ use cooldogedev\libSQL\query\SQLQuery;
 
 final class MySQLQueryManager extends QueryManager
 {
-    public function getBulkPlayersRetrievalQuery(): SQLQuery
+    public function getBulkPlayersRetrievalQuery(?int $limit = null, ?int $offset = null): SQLQuery
     {
-        return new MySQLBulkPlayersRetrievalQuery();
+        return new MySQLBulkPlayersRetrievalQuery($limit, $offset);
     }
 
     public function getPlayerCreationQuery(string $xuid, string $username, int $balance): SQLQuery

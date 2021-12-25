@@ -31,6 +31,11 @@ use SQLite3;
 
 final class SQLiteBulkPlayersRetrievalQuery extends SQLiteQuery
 {
+    public function __construct(protected ?int $limit = null, protected ?int $offset = null)
+    {
+        parent::__construct();
+    }
+
     public function handleIncomingConnection(SQLite3 $connection): array
     {
         $players = [];
@@ -40,11 +45,22 @@ final class SQLiteBulkPlayersRetrievalQuery extends SQLiteQuery
                 $players[] = $player;
             }
         }
+
         return $players;
     }
 
     public function getQuery(): string
     {
-        return "SELECT * FROM " . $this->getTable();
+        return $this->getLimit() ? "SELECT * FROM " . $this->getTable() . " ORDER BY balance DESC LIMIT " . $this->getLimit() . " OFFSET " . ($this->getOffset() ?? 0) : "SELECT * FROM " . $this->getTable();
+    }
+
+    public function getLimit(): ?int
+    {
+        return $this->limit;
+    }
+
+    public function getOffset(): ?int
+    {
+        return $this->offset;
     }
 }

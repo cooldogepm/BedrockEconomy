@@ -32,7 +32,7 @@ use cooldogedev\libSQL\query\SQLQuery;
 
 abstract class QueryManager
 {
-    abstract public function getBulkPlayersRetrievalQuery(): SQLQuery;
+    abstract public function getBulkPlayersRetrievalQuery(?int $limit = null, ?int $offset = null): SQLQuery;
 
     abstract public function getPlayerCreationQuery(string $xuid, string $username, int $balance): SQLQuery;
 

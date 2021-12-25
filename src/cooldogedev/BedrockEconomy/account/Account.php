@@ -51,7 +51,7 @@ final class Account extends BedrockEconomyOwned
         protected string $username,
         protected string $xuid,
         ?int             $balance = null,
-        bool $submitForCreation = false
+        bool             $submitForCreation = false
     )
     {
         parent::__construct($plugin);

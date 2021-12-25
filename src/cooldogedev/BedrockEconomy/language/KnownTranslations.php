@@ -44,4 +44,7 @@ final class KnownTranslations
     public const BALANCE_SET = "balance-set";
     public const ACCOUNT_DELETE = "account-delete";
     public const NO_ACCOUNT = "no-account";
+    public const TOP_BALANCE_HEADER = "top-balance-header";
+    public const TOP_BALANCE_ROW_TEMPLATE = "top-balance-row-template";
+    public const TOP_BALANCE_ERROR = "top-balance-error";
 }
