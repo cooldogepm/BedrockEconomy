@@ -6,6 +6,7 @@ BedrockEconomy is an economy plugin made for PocketMine-MP focused on stability 
 | ------- | ----------- | ----- | ---------- |
 | balance | Show your and others balance | `balance [player: string]` | `bedrockeconomy.command.balance` |
 | pay | Pay others with your balance | `pay <player: string> <amount: number>`  | `bedrockeconomy.command.pay` |
+| topbalance | View the top balances | `topbalance [page: number]` | `bedrockeconomy.command.topbalance` |
 | addbalance | Add points to others balance | `addbalance <player: string> <amount: number>`  | `bedrockeconomy.command.addbalance` |
 | removebalance | Remove points from others balance | `removebalance <player: string> <amount: number>`  | `bedrockeconomy.command.removebalance` |
 | setbalance | Set others balance | `setbalance <player: string> <balance: number>`  | `bedrockeconomy.command.setbalance` |
