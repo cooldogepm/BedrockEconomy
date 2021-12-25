@@ -4,13 +4,17 @@ api: [ 4.0.0 ]
 php: [ 8.0 ]
 author: cooldogedev
 main: cooldogedev\BedrockEconomy\BedrockEconomy
-description: Economy made easy for Minecraft Bedrock
+description: An economy plugin focused on stability and simplicity
+website: "https://github.com/cooldogedev/BedrockEconomy"
 permissions:
   bedrockeconomy.command.balance:
     description: Allows users to view their balance
     default: true
   bedrockeconomy.command.pay:
     description: Allows users to pay others with their balance
+    default: true
+  bedrockeconomy.command.topbalance:
+    description: Allows users to view the top balances
     default: true
   bedrockeconomy.command.addbalance:
     description: Allows users to add balance points to others

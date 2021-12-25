@@ -94,7 +94,7 @@ final class TopBalanceCommand extends BaseCommand
 
     protected function prepare(): void
     {
-        $this->setPermission(BedrockEconomyPermissions::COMMAND_BALANCE_PERMISSION);
+        $this->setPermission(BedrockEconomyPermissions::COMMAND_TOP_BALANCE_PERMISSION);
         try {
             $this->registerArgument(0, new IntegerArgument(TopBalanceCommand::ARGUMENT_PAGE, true));
         } catch (Exception) {

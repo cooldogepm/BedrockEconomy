@@ -30,6 +30,7 @@ final class BedrockEconomyPermissions
 {
     public const COMMAND_BALANCE_PERMISSION = "bedrockeconomy.command.balance";
     public const COMMAND_PAY_PERMISSION = "bedrockeconomy.command.pay";
+    public const COMMAND_TOP_BALANCE_PERMISSION = "bedrockeconomy.command.topbalance";
     public const COMMAND_ADD_BALANCE_PERMISSION = "bedrockeconomy.command.addbalance";
     public const COMMAND_REMOVE_BALANCE_PERMISSION = "bedrockeconomy.command.removebalance";
     public const COMMAND_SET_BALANCE_PERMISSION = "bedrockeconomy.command.setbalance";
