@@ -26,139 +26,151 @@ declare(strict_types=1);
 
 namespace cooldogedev\BedrockEconomy\account;
 
-use Closure;
 use cooldogedev\BedrockEconomY\api\BedrockEconomyOwned;
 use cooldogedev\BedrockEconomy\BedrockEconomy;
-use cooldogedev\BedrockEconomy\constant\SearchConstants;
-use cooldogedev\BedrockEconomy\constant\TableConstants;
-use cooldogedev\BedrockEconomy\event\account\AccountCacheEvent;
+use cooldogedev\BedrockEconomy\event\account\AccountCreationEvent;
 use cooldogedev\BedrockEconomy\event\account\AccountDeletionEvent;
-use cooldogedev\libPromise\thread\ThreadedPromise;
+use cooldogedev\BedrockEconomy\query\QueryManager;
+use cooldogedev\BedrockEconomy\transaction\Transaction;
+use cooldogedev\libSQL\context\ClosureContext;
+use cooldogedev\libSQL\query\SQLQuery;
 
 final class AccountManager extends BedrockEconomyOwned
 {
-    protected int $lastSnapshotDate;
     /**
-     * @var Account[]
+     * @var Transaction[]
      */
-    protected array $accounts;
+    protected array $transactions;
+    /**
+     * @var string[]
+     */
+    protected array $cache;
 
     public function __construct(BedrockEconomy $plugin)
     {
         parent::__construct($plugin);
-        $this->accounts = [];
-
-        $this->getPlugin()->getDatabaseManager()->getConnector()->submitQuery(
-            $this->getPlugin()
-                ->getDatabaseManager()
-                ->getQueryManager()
-                ->getBulkPlayersRetrievalQuery(null, null),
-            TableConstants::DATA_TABLE_PLAYERS,
-            onSuccess: function (?array $players): void {
-                if (!$players) {
-                    return;
-                }
-                foreach ($players as $player) {
-                    $this->addAccount($player["xuid"], $player["username"], $player["balance"]);
-                    $this->getPlugin()->getLogger()->debug("Cached " . $player["username"] . "'s session.");
-                }
-            }
-        );
+        $this->transactions = [];
     }
 
-    public function addAccount(string $xuid, string $username, ?int $balance = null, bool $submitForCreation = false): bool
+    public function createAccount(string $username, ?int $balance = null): ?SQLQuery
     {
-        if ($this->hasAccount($xuid)) {
-            return false;
+        if ($balance === null) {
+            $balance = $this->getPlugin()->getCurrencyManager()->getDefaultBalance();
         }
-        $session = new Account($this->getPlugin(), $username, $xuid, $balance, $submitForCreation);
 
-        $event = new AccountCacheEvent($session);
+        $event = new AccountCreationEvent($username, $balance);
         $event->call();
 
         if ($event->isCancelled()) {
-            return false;
+            return null;
         }
 
-        $this->accounts[$xuid] = $session;
+        return $this->getPlugin()->getConnector()->submit(
+            QueryManager::getPlayerCreationQuery($username, $balance),
+            table: QueryManager::DATA_TABLE_PLAYERS,
+        );
+    }
 
+    public function hasAccount(string $username, ClosureContext $context): ?SQLQuery
+    {
+        return $this->getBalance(
+            $username,
+            context: $context->first(fn(?int $balance) => $balance !== null)
+        );
+    }
+
+    public function getBalance(string $username, ClosureContext $context): ?SQLQuery
+    {
+        return $this->getPlugin()->getConnector()->submit(
+            QueryManager::getPlayerQuery($username),
+            QueryManager::DATA_TABLE_PLAYERS,
+            context: $context->first(fn(?array $data): ?int => $data["balance"] ?? null)
+        );
+    }
+
+    public function updateBalance(string $username, Transaction $transaction, ClosureContext $context): ?SQLQuery
+    {
+        $this->addTransaction($transaction);
+
+        return $this->getPlugin()->getConnector()->submit(
+            QueryManager::getPlayerUpdateQuery(strtolower($username), $transaction),
+            QueryManager::DATA_TABLE_PLAYERS,
+            context: $context->first(
+                function () use ($transaction): void {
+                    $this->removeTransaction($transaction);
+                }
+            )
+        );
+    }
+
+    protected function addTransaction(Transaction $transaction): bool
+    {
+        $objectHash = spl_object_hash($transaction);
+        if ($this->hasTransaction($objectHash)) {
+            return false;
+        }
+        $this->transactions[$objectHash] = $transaction;
         return true;
     }
 
-    public function hasAccount(string $searchValue, int $searchMode = SearchConstants::SEARCH_MODE_XUID): bool
+    protected function hasTransaction(string $objectHash): bool
     {
-        return match ($searchMode) {
-            SearchConstants::SEARCH_MODE_XUID => isset($this->accounts[$searchValue]),
-            SearchConstants::SEARCH_MODE_USERNAME => count(array_filter($this->getAccounts(), fn(Account $session): bool => strtolower($session->getUsername()) === strtolower($searchValue))) > 0,
-            default => false
-        };
+        return isset($this->transactions[$objectHash]);
+    }
+
+    protected function removeTransaction(Transaction $transaction): bool
+    {
+        $objectHash = spl_object_hash($transaction);
+        if (!$this->hasTransaction($objectHash)) {
+            return false;
+        }
+        unset($this->transactions[$objectHash]);
+        return true;
+    }
+
+    public function getHighestBalances(int $limit, ClosureContext $context, ?int $offset = null): ?SQLQuery
+    {
+        return $this->getPlugin()->getConnector()->submit(
+            QueryManager::getBulkPlayersQuery($limit, $offset),
+            table: QueryManager::DATA_TABLE_PLAYERS,
+            context: $context
+        );
+    }
+
+    public function deleteAccount(string $username, ClosureContext $context): ?SQLQuery
+    {
+        return $this->getBalance(
+            $username,
+            ClosureContext::create(
+                function (?int $balance) use ($username, $context): void {
+                    if ($balance === null) {
+                        $context->invoke(false);
+                        return;
+                    }
+
+                    $event = new AccountDeletionEvent($username, $balance);
+                    $event->call();
+
+                    if ($event->isCancelled()) {
+                        $context->invoke(false);
+                        return;
+                    }
+
+                    $this->getPlugin()->getConnector()->submit(
+                        QueryManager::getPlayerDeletionQuery($username),
+                        QueryManager::DATA_TABLE_PLAYERS,
+                        context: $context
+                    );
+                }
+            )
+        );
     }
 
     /**
-     * @return Account[]
+     * @return Transaction[]
      */
-    public function getAccounts(): array
+    protected function getTransactions(): array
     {
-        return $this->accounts;
-    }
-
-    public function getHighestBalances(int $limit, ?int $offset = null, ?Closure $onSuccess = null, ?Closure $onError = null): ?ThreadedPromise
-    {
-        return $this->getPlugin()->getDatabaseManager()->getConnector()->submitQuery(
-            $this->getPlugin()->getDatabaseManager()->getQueryManager()->getBulkPlayersRetrievalQuery($limit, $offset),
-            table: TableConstants::DATA_TABLE_PLAYERS,
-            onSuccess: $onSuccess,
-            onError: $onError,
-        );
-    }
-
-    public function removeFromCache(string $xuid): bool
-    {
-        if (!$this->hasAccount($xuid)) {
-            return false;
-        }
-        unset($this->accounts[$xuid]);
-        return true;
-    }
-
-    public function deleteAccount(string $xuid, int $mode = SearchConstants::SEARCH_MODE_XUID): bool
-    {
-        if (!$this->hasAccount($xuid, $mode)) {
-            return false;
-        }
-
-        $session = $this->getAccount($xuid, $mode);
-
-        $event = new AccountDeletionEvent($session);
-        $event->call();
-
-        if ($event->isCancelled()) {
-            return false;
-        }
-
-        $this->getPlugin()->getDatabaseManager()->getConnector()->submitQuery(
-            $this->getPlugin()
-                ->getDatabaseManager()
-                ->getQueryManager()
-                ->getPlayerDeletionQuery($xuid),
-            TableConstants::DATA_TABLE_PLAYERS,
-            onSuccess: function () use ($xuid) {
-                unset($this->accounts[$xuid]);
-            }
-        );
-
-        return true;
-    }
-
-    public function getAccount(string $searchValue, int $searchMode = SearchConstants::SEARCH_MODE_XUID): ?Account
-    {
-        if ($searchMode === SearchConstants::SEARCH_MODE_USERNAME) {
-            if (!$this->hasAccount($searchValue, SearchConstants::SEARCH_MODE_USERNAME)) {
-                return null;
-            }
-            $sessions = array_filter($this->getAccounts(), fn(Account $session): bool => strtolower($session->getUsername()) === strtolower($searchValue));
-            return $sessions[array_key_first($sessions)];
-        }
-        return $this->accounts[$searchValue] ?? null;
+        return $this->transactions;
     }
 }

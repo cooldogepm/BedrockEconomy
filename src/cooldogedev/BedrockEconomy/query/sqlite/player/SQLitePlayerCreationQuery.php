@@ -24,42 +24,41 @@
 
 declare(strict_types=1);
 
-namespace cooldogedev\BedrockEconomy\database\query\player\mysql;
+namespace cooldogedev\BedrockEconomy\query\sqlite\player;
 
-use cooldogedev\BedrockEconomy\constant\SearchConstants;
-use cooldogedev\libSQL\query\MySQLQuery;
-use mysqli;
+use cooldogedev\libSQL\query\SQLiteQuery;
+use SQLite3;
 
-final class MySQLPlayerRetrievalQuery extends MySQLQuery
+final class SQLitePlayerCreationQuery extends SQLiteQuery
 {
-    public function __construct(protected string $searchValue, protected int $searchMode = SearchConstants::SEARCH_MODE_XUID)
+    public function __construct(protected string $playerName, protected int $balance)
     {
-        parent::__construct();
     }
 
-    public function handleIncomingConnection(mysqli $connection): ?array
+    public function onRun(SQLite3 $connection): void
     {
-        $searchValue = $this->getSearchValue();
         $statement = $connection->prepare($this->getQuery());
-        $statement->bind_param("s", $searchValue);
+        $statement->bindValue(":username", $this->getPlayerName());
+        $statement->bindValue(":balance", $this->getBalance());
         $statement->execute();
-        $result = $statement->get_result()?->fetch_assoc();
         $statement->close();
-        return $result;
-    }
 
-    public function getSearchValue(): string
-    {
-        return $this->searchValue;
+        // TODO: Fix this
+        $this->setResult(true);
     }
 
     public function getQuery(): string
     {
-        return "SELECT * FROM " . $this->getTable() . " WHERE " . ($this->getSearchMode() === SearchConstants::SEARCH_MODE_XUID ? "xuid" : "username") . " = ?";
+        return "INSERT OR IGNORE INTO " . $this->getTable() . " (username, balance) VALUES (:username, :balance)";
     }
 
-    public function getSearchMode(): int
+    public function getPlayerName(): string
     {
-        return $this->searchMode;
+        return $this->playerName;
+    }
+
+    public function getBalance(): int
+    {
+        return $this->balance;
     }
 }

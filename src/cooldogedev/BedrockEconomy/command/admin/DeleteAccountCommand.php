@@ -26,12 +26,13 @@ declare(strict_types=1);
 
 namespace cooldogedev\BedrockEconomy\command\admin;
 
+use cooldogedev\BedrockEconomy\api\BedrockEconomyAPI;
 use cooldogedev\BedrockEconomy\BedrockEconomy;
-use cooldogedev\BedrockEconomy\constant\SearchConstants;
 use cooldogedev\BedrockEconomy\language\KnownTranslations;
 use cooldogedev\BedrockEconomy\language\LanguageManager;
 use cooldogedev\BedrockEconomy\language\TranslationKeys;
 use cooldogedev\BedrockEconomy\permission\BedrockEconomyPermissions;
+use cooldogedev\libSQL\context\ClosureContext;
 use CortexPE\Commando\args\RawStringArgument;
 use CortexPE\Commando\BaseCommand;
 use Exception;
@@ -45,22 +46,25 @@ final class DeleteAccountCommand extends BaseCommand
     public function onRun(CommandSender $sender, string $aliasUsed, array $args): void
     {
         $player = $args[DeleteAccountCommand::ARGUMENT_PLAYER];
-        $session = $this->getOwningPlugin()->getAccountManager()->getAccount($player, SearchConstants::SEARCH_MODE_USERNAME);
 
-        if (!$session) {
-            $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::PLAYER_NOT_FOUND, [
-                    TranslationKeys::PLAYER => $player
-                ]
-            ));
-            return;
-        }
-
-        $this->getOwningPlugin()->getAccountManager()->deleteAccount($session->getXuid());
-
-        $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::ACCOUNT_DELETE, [
-                TranslationKeys::PLAYER => $session->getUsername(),
-            ]
-        ));
+        BedrockEconomyAPI::getInstance()->deletePlayerAccount(
+            $player,
+            ClosureContext::create(
+                function (bool $successful) use ($sender, $player): void {
+                    if (!$successful) {
+                        $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::PLAYER_NOT_FOUND, [
+                                TranslationKeys::PLAYER => $player
+                            ]
+                        ));
+                        return;
+                    }
+                    $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::ACCOUNT_DELETE, [
+                            TranslationKeys::PLAYER => $player,
+                        ]
+                    ));
+                }
+            )
+        );
     }
 
     /**
@@ -75,7 +79,7 @@ final class DeleteAccountCommand extends BaseCommand
     {
         $this->setPermission(BedrockEconomyPermissions::COMMAND_DELETE_ACCOUNT_PERMISSION);
         try {
-            $this->registerArgument(0, new RawStringArgument(DeleteAccountCommand::ARGUMENT_PLAYER, true));
+            $this->registerArgument(0, new RawStringArgument(DeleteAccountCommand::ARGUMENT_PLAYER));
         } catch (Exception) {
         }
     }

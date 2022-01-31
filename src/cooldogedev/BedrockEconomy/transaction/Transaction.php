@@ -4,32 +4,28 @@ declare(strict_types=1);
 
 namespace cooldogedev\BedrockEconomy\transaction;
 
-use cooldogedev\BedrockEconomy\constant\TransactionConstants;
 use Threaded;
 
 final class Transaction extends Threaded
 {
+    public const TRANSACTION_TYPE_INCREMENT = 0;
+    public const TRANSACTION_TYPE_DECREMENT = 1;
+    public const TRANSACTION_TYPE_SET = 2;
+
+    protected int $issueDate;
+
     public function __construct(
         protected int $type,
         protected int $value,
-        protected int $issueDate,
+        ?int          $issueDate = null,
     )
     {
+        $this->issueDate = $issueDate ?? time();
     }
 
     public function getIssueDate(): int
     {
         return $this->issueDate;
-    }
-
-    public function call(int $balance): int
-    {
-        return match ($this->getType()) {
-            TransactionConstants::TRANSACTION_TYPE_INCREMENT => $balance + $this->getValue(),
-            TransactionConstants::TRANSACTION_TYPE_DECREMENT => $balance - $this->getValue(),
-            TransactionConstants::TRANSACTION_TYPE_SET => $this->getValue(),
-            default => $balance,
-        };
     }
 
     public function getType(): int

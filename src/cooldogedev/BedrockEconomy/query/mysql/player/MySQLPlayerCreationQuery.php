@@ -24,10 +24,45 @@
 
 declare(strict_types=1);
 
-namespace cooldogedev\BedrockEconomy\constant;
+namespace cooldogedev\BedrockEconomy\query\mysql\player;
 
-final class SearchConstants
+use cooldogedev\libSQL\query\MySQLQuery;
+use mysqli;
+
+final class MySQLPlayerCreationQuery extends MySQLQuery
 {
-    public const SEARCH_MODE_USERNAME = 0;
-    public const SEARCH_MODE_XUID = 1;
+    public function __construct(
+        protected string $playerName,
+        protected int    $balance
+    )
+    {
+    }
+
+    public function onRun(mysqli $connection): void
+    {
+        $playerName = $this->getPlayerName();
+        $balance = $this->getBalance();
+        $statement = $connection->prepare($this->getQuery());
+        $statement->bind_param("ss", $playerName, $balance);
+        $statement->execute();
+        $successful = $statement->affected_rows > 0;
+        $statement->close();
+
+        $this->setResult($successful);
+    }
+
+    public function getPlayerName(): string
+    {
+        return $this->playerName;
+    }
+
+    public function getBalance(): int
+    {
+        return $this->balance;
+    }
+
+    public function getQuery(): string
+    {
+        return "INSERT IGNORE INTO " . $this->getTable() . " (username, balance) VALUES (?, ?)";
+    }
 }

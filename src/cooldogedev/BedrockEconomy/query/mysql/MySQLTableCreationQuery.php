@@ -24,46 +24,37 @@
 
 declare(strict_types=1);
 
-namespace cooldogedev\BedrockEconomy\database\query\player\sqlite;
+namespace cooldogedev\BedrockEconomy\query\mysql;
 
-use cooldogedev\libSQL\query\SQLiteQuery;
-use SQLite3;
+use cooldogedev\BedrockEconomy\query\QueryManager;
+use cooldogedev\libSQL\query\MySQLQuery;
+use mysqli;
 
-final class SQLitePlayerCreationQuery extends SQLiteQuery
+final class MySQLTableCreationQuery extends MySQLQuery
 {
-    public function __construct(protected string $searchValue, protected string $playerName, protected int $balance)
+    public function __construct(protected int $defaultBalance)
     {
-        parent::__construct();
     }
 
-    public function handleIncomingConnection(SQLite3 $connection): bool
+    public function onRun(mysqli $connection): void
     {
         $statement = $connection->prepare($this->getQuery());
-        $statement->bindValue(":xuid", $this->getXuid());
-        $statement->bindValue(":username", $this->getUsername());
-        $statement->bindValue(":balance", $this->getBalance());
         $statement->execute();
         $statement->close();
-        return true;
     }
 
     public function getQuery(): string
     {
-        return "INSERT OR IGNORE INTO " . $this->getTable() . " (xuid, username, balance) VALUES (:xuid, :username, :balance)";
+        return "CREATE TABLE IF NOT EXISTS " . QueryManager::DATA_TABLE_PLAYERS . "
+            (
+             username VARCHAR (16) PRIMARY KEY UNIQUE NOT NULL,
+             balance INT (64) DEFAULT " . $this->getDefaultBalance() . "
+             )
+             ";
     }
 
-    public function getXuid(): string
+    public function getDefaultBalance(): int
     {
-        return $this->searchValue;
-    }
-
-    public function getUsername(): string
-    {
-        return $this->playerName;
-    }
-
-    public function getBalance(): int
-    {
-        return $this->balance;
+        return $this->defaultBalance;
     }
 }

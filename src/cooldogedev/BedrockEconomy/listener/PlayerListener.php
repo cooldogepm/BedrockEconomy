@@ -26,8 +26,9 @@ declare(strict_types=1);
 
 namespace cooldogedev\BedrockEconomy\listener;
 
+use cooldogedev\BedrockEconomy\api\BedrockEconomyAPI;
 use cooldogedev\BedrockEconomY\api\BedrockEconomyOwned;
-use cooldogedev\BedrockEconomy\constant\SearchConstants;
+use cooldogedev\libSQL\context\ClosureContext;
 use pocketmine\event\Listener;
 use pocketmine\event\player\PlayerLoginEvent;
 
@@ -40,23 +41,16 @@ final class PlayerListener extends BedrockEconomyOwned implements Listener
     public function onPlayerLogin(PlayerLoginEvent $event): void
     {
         $player = $event->getPlayer();
-        if (!$this->getPlugin()->getAccountManager()->hasAccount($player->getXuid()) && !$this->getPlugin()->getAccountManager()->hasAccount($player->getName(), SearchConstants::SEARCH_MODE_USERNAME)) {
-            $this->getPlugin()->getAccountManager()->addAccount($player->getXuid(), $player->getName());
-            $this->getPlugin()->getLogger()->debug("Creating a new record for " . $player->getName() . ".");
-        } else {
-            $session = $this->getPlugin()->getAccountManager()->getAccount($player->getName(), SearchConstants::SEARCH_MODE_USERNAME);
-            if ($session->isXuidIsInvalid()) {
-                $session->attemptXuidFix($player->getXuid());
-                $this->getPlugin()->getLogger()->debug("Fixing " . $player->getName() . "'s account data (xuid).");
-            }
-        }
-    }
 
-//    public function onPlayerQuit(PlayerQuitEvent $event): void
-//    {
-//        $player = $event->getPlayer();
-//        if ($this->getPlugin()->getDatabaseManager()->getSaveMode() === SaveConstants::SAVE_MODE_UPON_DISCONNECTION) {
-//            $this->getPlugin()->getLogger()->debug("Saving " . $player->getName() . "'s account data.");
-//        }
-//    }
+        BedrockEconomyAPI::getInstance()->getPlayerBalance(
+            $player->getName(),
+            ClosureContext::create(
+                function (?int $balance) use ($player): void {
+                    if ($balance === null) {
+                        $this->getPlugin()->getAccountManager()->createAccount($player->getName());
+                    }
+                }
+            )
+        );
+    }
 }

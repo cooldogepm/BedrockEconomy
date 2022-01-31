@@ -26,7 +26,6 @@ declare(strict_types=1);
 
 namespace cooldogedev\BedrockEconomy\event;
 
-use cooldogedev\BedrockEconomy\account\Account;
 use cooldogedev\BedrockEconomy\transaction\Transaction;
 use pocketmine\event\Cancellable;
 use pocketmine\event\CancellableTrait;
@@ -36,13 +35,13 @@ final class TransactionSubmitEvent extends Event implements Cancellable
 {
     use CancellableTrait;
 
-    public function __construct(protected Account $session, protected Transaction $transaction)
+    public function __construct(protected string $account, protected Transaction $transaction)
     {
     }
 
-    public function getSession(): Account
+    public function getAccount(): string
     {
-        return $this->session;
+        return $this->account;
     }
 
     public function getTransaction(): Transaction

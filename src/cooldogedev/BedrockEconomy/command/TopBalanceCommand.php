@@ -31,6 +31,7 @@ use cooldogedev\BedrockEconomy\language\KnownTranslations;
 use cooldogedev\BedrockEconomy\language\LanguageManager;
 use cooldogedev\BedrockEconomy\language\TranslationKeys;
 use cooldogedev\BedrockEconomy\permission\BedrockEconomyPermissions;
+use cooldogedev\libSQL\context\ClosureContext;
 use CortexPE\Commando\args\IntegerArgument;
 use CortexPE\Commando\BaseCommand;
 use Exception;
@@ -49,19 +50,21 @@ final class TopBalanceCommand extends BaseCommand
 
         $this->getOwningPlugin()->getAccountManager()->getHighestBalances(
             limit: TopBalanceCommand::DEFAULT_LIMIT,
+            context: ClosureContext::create(
+                function (?array $data) use ($sender, $offset): void {
+                    if (!$data) {
+                        $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::TOP_BALANCE_ERROR));
+                        return;
+                    }
+
+                    $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::TOP_BALANCE_HEADER));
+
+                    foreach ($this->handleData($data, $offset) as $datum) {
+                        $sender->sendMessage($datum);
+                    }
+                }
+            ),
             offset: $offset,
-            onSuccess: function (?array $data) use ($sender, $offset): void {
-                if (!$data) {
-                    $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::TOP_BALANCE_ERROR));
-                    return;
-                }
-
-                $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::TOP_BALANCE_HEADER));
-
-                foreach ($this->handleData($data, $offset) as $datum) {
-                    $sender->sendMessage($datum);
-                }
-            }
         );
     }
 

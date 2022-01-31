@@ -26,7 +26,6 @@ declare(strict_types=1);
 
 namespace cooldogedev\BedrockEconomy\event\account;
 
-use cooldogedev\BedrockEconomy\account\Account;
 use pocketmine\event\Cancellable;
 use pocketmine\event\CancellableTrait;
 use pocketmine\event\Event;
@@ -35,12 +34,17 @@ abstract class AccountEvent extends Event implements Cancellable
 {
     use CancellableTrait;
 
-    public function __construct(protected Account $session)
+    public function __construct(protected string $account, protected int $balance)
     {
     }
 
-    public function getSession(): Account
+    public function getBalance(): int
     {
-        return $this->session;
+        return $this->balance;
+    }
+
+    public function getAccount(): string
+    {
+        return $this->account;
     }
 }

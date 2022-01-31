@@ -24,43 +24,36 @@
 
 declare(strict_types=1);
 
-namespace cooldogedev\BedrockEconomy\database\query\player\sqlite;
+namespace cooldogedev\BedrockEconomy\query\sqlite;
 
+use cooldogedev\BedrockEconomy\query\QueryManager;
 use cooldogedev\libSQL\query\SQLiteQuery;
 use SQLite3;
 
-final class SQLiteBulkPlayersRetrievalQuery extends SQLiteQuery
+final class SQLiteTableCreationQuery extends SQLiteQuery
 {
-    public function __construct(protected ?int $limit = null, protected ?int $offset = null)
+    public function __construct(protected int $defaultBalance)
     {
-        parent::__construct();
     }
 
-    public function handleIncomingConnection(SQLite3 $connection): array
+    public function onRun(SQLite3 $connection): void
     {
-        $players = [];
-        $result = $connection->query($this->getQuery());
-        if ($result) {
-            while ($player = $result->fetchArray(SQLITE3_ASSOC)) {
-                $players[] = $player;
-            }
-        }
-
-        return $players;
+        $connection->query($this->getQuery())?->fetchArray();
+        $this->setResult(true);
     }
 
     public function getQuery(): string
     {
-        return $this->getLimit() ? "SELECT * FROM " . $this->getTable() . " ORDER BY balance DESC LIMIT " . $this->getLimit() . " OFFSET " . ($this->getOffset() ?? 0) : "SELECT * FROM " . $this->getTable();
+        return "CREATE TABLE IF NOT EXISTS " . QueryManager::DATA_TABLE_PLAYERS . "
+            (
+             username VARCHAR (16) PRIMARY KEY UNIQUE NOT NULL,
+             balance INT (64) DEFAULT " . $this->getDefaultBalance() . "
+             )
+             ";
     }
 
-    public function getLimit(): ?int
+    public function getDefaultBalance(): int
     {
-        return $this->limit;
-    }
-
-    public function getOffset(): ?int
-    {
-        return $this->offset;
+        return $this->defaultBalance;
     }
 }

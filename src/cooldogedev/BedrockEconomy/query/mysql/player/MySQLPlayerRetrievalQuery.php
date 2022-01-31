@@ -24,40 +24,36 @@
 
 declare(strict_types=1);
 
-namespace cooldogedev\BedrockEconomy\database\query\player\sqlite;
+namespace cooldogedev\BedrockEconomy\query\mysql\player;
 
-use cooldogedev\libSQL\query\SQLiteQuery;
-use SQLite3;
+use cooldogedev\libSQL\query\MySQLQuery;
+use mysqli;
 
-class SQLitePlayerFixQuery extends SQLiteQuery
+final class MySQLPlayerRetrievalQuery extends MySQLQuery
 {
-    public function __construct(protected string $xuid, protected string $playerName)
+    public function __construct(protected string $playerName)
     {
-        parent::__construct();
     }
 
-    public function handleIncomingConnection(SQLite3 $connection): bool
+    public function onRun(mysqli $connection): void
     {
+        $playerName = $this->getPlayerName();
         $statement = $connection->prepare($this->getQuery());
-        $statement->bindValue(":xuid", $this->getXuid());
-        $statement->bindValue(":username", $this->getUsername());
+        $statement->bind_param("s", $playerName);
         $statement->execute();
+        $result = $statement->get_result()?->fetch_assoc();
         $statement->close();
-        return true;
+
+        $this->setResult($result);
+    }
+
+    public function getPlayerName(): string
+    {
+        return $this->playerName;
     }
 
     public function getQuery(): string
     {
-        return "UPDATE " . $this->getTable() . " SET xuid = :xuid WHERE username = :username";
-    }
-
-    public function getXuid(): string
-    {
-        return $this->xuid;
-    }
-
-    public function getUsername(): string
-    {
-        return $this->playerName;
+        return "SELECT * FROM " . $this->getTable() . " WHERE username = ?";
     }
 }

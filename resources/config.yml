@@ -1,6 +1,6 @@
 ---
 # Configuration version, don't edit this.
-config-version: 1.0.0
+config-version: 2.0.0
 
 language: en-US
 
@@ -19,6 +19,7 @@ currency:
 
 database:
   provider: sqlite
+  threads: 2 # Number of threads to use for the database
 
   mysql:
     host: 127.0.0.1
@@ -28,5 +29,5 @@ database:
     port: 3306
 
   sqlite:
-    data-file: players.db
+    file: players.db
 ...

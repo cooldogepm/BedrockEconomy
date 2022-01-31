@@ -24,62 +24,54 @@
 
 declare(strict_types=1);
 
-namespace cooldogedev\BedrockEconomy\database\query\player\sqlite;
+namespace cooldogedev\BedrockEconomy\query\sqlite\player;
 
-use cooldogedev\BedrockEconomy\constant\SearchConstants;
-use cooldogedev\BedrockEconomy\constant\TransactionConstants;
 use cooldogedev\BedrockEconomy\transaction\Transaction;
 use cooldogedev\libSQL\query\SQLiteQuery;
 use SQLite3;
 
 final class SQLitePlayerUpdateQuery extends SQLiteQuery
 {
-    public function __construct(protected string $searchValue, protected Transaction $transaction, protected int $searchMode = SearchConstants::SEARCH_MODE_XUID)
+    public function __construct(protected string $playerName, protected Transaction $transaction)
     {
-        parent::__construct();
     }
 
-    public function handleIncomingConnection(SQLite3 $connection): bool
+    public function onRun(SQLite3 $connection): void
     {
         // There's a bug with SQLite3::prepare()
         $statement = $connection->prepare($this->getSecondaryQuery());
-        $statement->bindValue(":searchValue", $this->getSearchValue());
+        $statement->bindValue(":username", $this->getPlayerName());
         $result = $statement->execute()?->fetchArray(SQLITE3_ASSOC) ?: null;
         $statement->close();
         $hasAccount = $result !== null;
 
         $statement = $connection->prepare($this->getQuery());
-        $statement->bindValue(":searchValue", $this->getSearchValue());
+        $statement->bindValue(":username", $this->getPlayerName());
         // There's a bug with SQLite3::prepare() that causes the statement to be executed multiple times
         $statement->execute()?->finalize();
         $statement->close();
 
-        return $hasAccount;
+        $this->setResult($hasAccount);
     }
 
     public function getSecondaryQuery(): string
     {
-        return "SELECT * FROM " . $this->getTable() . " WHERE " . ($this->getSearchMode() === SearchConstants::SEARCH_MODE_XUID ? "xuid" : "username") . " = :searchValue";
+        return "SELECT * FROM " . $this->getTable() . " WHERE username = :username";
     }
 
-    public function getSearchMode(): int
+    public function getPlayerName(): string
     {
-        return $this->searchMode;
-    }
-
-    public function getSearchValue(): string
-    {
-        return $this->searchValue;
+        return $this->playerName;
     }
 
     public function getQuery(): string
     {
         $statement = match ($this->getTransaction()->getType()) {
-            TransactionConstants::TRANSACTION_TYPE_INCREMENT => "balance + " . $this->getTransaction()->getValue(),
-            TransactionConstants::TRANSACTION_TYPE_DECREMENT => "balance - " . $this->getTransaction()->getValue(),
-            TransactionConstants::TRANSACTION_TYPE_SET => $this->getTransaction()->getValue()
+            Transaction::TRANSACTION_TYPE_INCREMENT => "balance + " . $this->getTransaction()->getValue(),
+            Transaction::TRANSACTION_TYPE_DECREMENT => "balance - " . $this->getTransaction()->getValue(),
+            Transaction::TRANSACTION_TYPE_SET => $this->getTransaction()->getValue()
         };
-        return "UPDATE " . $this->getTable() . " SET balance = " . $statement . " WHERE " . ($this->getSearchMode() === SearchConstants::SEARCH_MODE_XUID ? "xuid" : "username") . " = :searchValue";
+        return "UPDATE " . $this->getTable() . " SET balance = " . $statement . " WHERE username = :username";
     }
 
     public function getTransaction(): Transaction

@@ -26,9 +26,11 @@ declare(strict_types=1);
 
 namespace cooldogedev\BedrockEconomy\api;
 
-use cooldogedev\BedrockEconomy\account\Account;
 use cooldogedev\BedrockEconomy\BedrockEconomy;
-use cooldogedev\BedrockEconomy\constant\SearchConstants;
+use cooldogedev\BedrockEconomy\event\TransactionSubmitEvent;
+use cooldogedev\BedrockEconomy\transaction\Transaction;
+use cooldogedev\libSQL\context\ClosureContext;
+use cooldogedev\libSQL\query\SQLQuery;
 use pocketmine\utils\SingletonTrait;
 
 final class BedrockEconomyAPI
@@ -39,7 +41,7 @@ final class BedrockEconomyAPI
     }
 
     protected static bool $registered = false;
-    protected static ?BedrockEconomy $bedrockEconomy = null;
+    protected static ?BedrockEconomy $plugin = null;
 
     public function __construct()
     {
@@ -52,7 +54,7 @@ final class BedrockEconomyAPI
             return false;
         }
         BedrockEconomyAPI::setRegistered(true);
-        BedrockEconomyAPI::setBedrockEconomy($bedrockEconomy);
+        BedrockEconomyAPI::setPlugin($bedrockEconomy);
         return true;
     }
 
@@ -71,43 +73,65 @@ final class BedrockEconomyAPI
         return BedrockEconomyAPI::_getInstance();
     }
 
-    public function getPlayerBalance(string $player, int $mode = SearchConstants::SEARCH_MODE_USERNAME): ?int
+    public function setPlayerBalance(string $username, int $balance, ?ClosureContext $context = null): ?SQLQuery
     {
-        return $this->getPlayerAccount($player, $mode)?->getBalance();
+        $transaction = new Transaction(Transaction::TRANSACTION_TYPE_SET, $balance, time());
+
+        $event = new TransactionSubmitEvent($username, $transaction);
+        $event->call();
+
+        if ($event->isCancelled()) {
+            return null;
+        }
+
+        return $this->getPlugin()->getAccountManager()->updateBalance($username, $transaction, $context ?? ClosureContext::create());
     }
 
-    public function getPlayerAccount(string $player, int $mode = SearchConstants::SEARCH_MODE_USERNAME): ?Account
+    public static function getPlugin(): ?BedrockEconomy
     {
-        return BedrockEconomyAPI::getBedrockEconomy()->getAccountManager()->getAccount($player, $mode);
+        return BedrockEconomyAPI::$plugin;
     }
 
-    protected static function getBedrockEconomy(): ?BedrockEconomy
+    protected static function setPlugin(?BedrockEconomy $plugin): void
     {
-        return BedrockEconomyAPI::$bedrockEconomy;
+        BedrockEconomyAPI::$plugin = $plugin;
     }
 
-    protected static function setBedrockEconomy(?BedrockEconomy $bedrockEconomy): void
+    public function subtractFromPlayerBalance(string $username, int $subtraction, ?ClosureContext $context = null): ?SQLQuery
     {
-        BedrockEconomyAPI::$bedrockEconomy = $bedrockEconomy;
+        $transaction = new Transaction(Transaction::TRANSACTION_TYPE_DECREMENT, $subtraction, time());
+
+        $event = new TransactionSubmitEvent($username, $transaction);
+        $event->call();
+
+        if ($event->isCancelled()) {
+            return null;
+        }
+
+        return $this->getPlugin()->getAccountManager()->updateBalance($username, $transaction, $context ?? ClosureContext::create());
     }
 
-    public function setPlayerBalance(string $player, int $newBalance, int $mode = SearchConstants::SEARCH_MODE_USERNAME): void
+    public function deletePlayerAccount(string $username, ?ClosureContext $context = null): void
     {
-        $this->getPlayerAccount($player, $mode)?->setBalance($newBalance);
+        $this->getPlugin()->getAccountManager()->deleteAccount($username, $context ?? ClosureContext::create());
     }
 
-    public function addToPlayerBalance(string $player, int $amount, int $mode = SearchConstants::SEARCH_MODE_USERNAME): void
+    public function addToPlayerBalance(string $username, int $addition, ?ClosureContext $context = null): ?SQLQuery
     {
-        $this->getPlayerAccount($player, $mode)?->incrementBalance($amount);
+        $transaction = new Transaction(Transaction::TRANSACTION_TYPE_INCREMENT, $addition, time());
+
+        $event = new TransactionSubmitEvent($username, $transaction);
+        $event->call();
+
+        if ($event->isCancelled()) {
+            return null;
+        }
+
+        return $this->getPlugin()->getAccountManager()->updateBalance($username, $transaction, $context ?? ClosureContext::create());
     }
 
-    public function subtractFromPlayerBalance(string $player, int $amount, int $mode = SearchConstants::SEARCH_MODE_USERNAME): void
+    public function getPlayerBalance(string $username, ?ClosureContext $context = null): SQLQuery
     {
-        $this->getPlayerAccount($player, $mode)?->decrementBalance($amount);
-    }
-
-    public function deletePlayerAccount(string $player, int $mode = SearchConstants::SEARCH_MODE_USERNAME): void
-    {
-        BedrockEconomyAPI::getBedrockEconomy()->getAccountManager()->deleteAccount($player, $mode);
+        return $this->getPlugin()->getAccountManager()->getBalance($username, $context ?? ClosureContext::create());
     }
 }

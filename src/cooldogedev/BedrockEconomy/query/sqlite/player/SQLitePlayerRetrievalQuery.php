@@ -24,9 +24,34 @@
 
 declare(strict_types=1);
 
-namespace cooldogedev\BedrockEconomy\constant;
+namespace cooldogedev\BedrockEconomy\query\sqlite\player;
 
-final class TableConstants
+use cooldogedev\libSQL\query\SQLiteQuery;
+use SQLite3;
+
+final class SQLitePlayerRetrievalQuery extends SQLiteQuery
 {
-    public const DATA_TABLE_PLAYERS = "bedrock_economy";
+    public function __construct(protected string $playerName)
+    {
+    }
+
+    public function onRun(SQLite3 $connection): void
+    {
+        $statement = $connection->prepare($this->getQuery());
+        $statement->bindValue(":username", $this->getPlayerName());
+        $result = $statement->execute()?->fetchArray(SQLITE3_ASSOC) ?: null;
+        $statement->close();
+
+        $this->setResult($result);
+    }
+
+    public function getQuery(): string
+    {
+        return "SELECT * FROM " . $this->getTable() . " WHERE username = :username";
+    }
+
+    public function getPlayerName(): string
+    {
+        return $this->playerName;
+    }
 }

@@ -24,29 +24,36 @@
 
 declare(strict_types=1);
 
-namespace cooldogedev\BedrockEconomy\task;
+namespace cooldogedev\BedrockEconomy\query\mysql\player;
 
-use cooldogedev\BedrockEconomy\account\AccountManager;
-use pocketmine\scheduler\Task;
+use cooldogedev\libSQL\query\MySQLQuery;
+use mysqli;
 
-// WIP
-final class FixedAccountSaveTask extends Task
+final class MySQLPlayerDeletionQuery extends MySQLQuery
 {
-    public function __construct(protected AccountManager $sessionManager)
+    public function __construct(protected string $playerName)
     {
     }
 
-    public function onRun(): void
+    public function onRun(mysqli $connection): void
     {
-//        foreach ($this->getSessionManager()->getAccounts() as $session) {
-//            if ($session->onSave()) {
-//                $session->getPlugin()->getLogger()->debug("Saving " . $session->getUsername() . "'s session.");
-//            }
-//        }
+        $playerName = $this->getPlayerName();
+        $statement = $connection->prepare($this->getQuery());
+        $statement->bind_param("s", $playerName);
+        $statement->execute();
+        $successful = $statement->affected_rows > 0;
+        $statement->close();
+
+        $this->setResult($successful);
     }
 
-    public function getSessionManager(): AccountManager
+    public function getPlayerName(): string
     {
-        return $this->sessionManager;
+        return $this->playerName;
+    }
+
+    public function getQuery(): string
+    {
+        return "DELETE FROM " . $this->getTable() . " WHERE username = ?";
     }
 }

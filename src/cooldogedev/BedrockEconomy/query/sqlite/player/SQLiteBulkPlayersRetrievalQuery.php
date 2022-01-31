@@ -24,11 +24,42 @@
 
 declare(strict_types=1);
 
-namespace cooldogedev\BedrockEconomy\constant;
+namespace cooldogedev\BedrockEconomy\query\sqlite\player;
 
-final class TransactionConstants
+use cooldogedev\libSQL\query\SQLiteQuery;
+use SQLite3;
+
+final class SQLiteBulkPlayersRetrievalQuery extends SQLiteQuery
 {
-    public const TRANSACTION_TYPE_INCREMENT = 0;
-    public const TRANSACTION_TYPE_DECREMENT = 1;
-    public const TRANSACTION_TYPE_SET = 2;
+    public function __construct(protected ?int $limit = null, protected ?int $offset = null)
+    {
+    }
+
+    public function onRun(SQLite3 $connection): void
+    {
+        $players = [];
+        $result = $connection->query($this->getQuery());
+        if ($result) {
+            while ($player = $result->fetchArray(SQLITE3_ASSOC)) {
+                $players[] = $player;
+            }
+        }
+
+        $this->setResult($players);
+    }
+
+    public function getQuery(): string
+    {
+        return $this->getLimit() ? "SELECT * FROM " . $this->getTable() . " ORDER BY balance DESC LIMIT " . $this->getLimit() . " OFFSET " . ($this->getOffset() ?? 0) : "SELECT * FROM " . $this->getTable();
+    }
+
+    public function getLimit(): ?int
+    {
+        return $this->limit;
+    }
+
+    public function getOffset(): ?int
+    {
+        return $this->offset;
+    }
 }

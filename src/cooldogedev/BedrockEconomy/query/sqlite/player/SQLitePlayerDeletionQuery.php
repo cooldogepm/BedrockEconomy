@@ -24,45 +24,34 @@
 
 declare(strict_types=1);
 
-namespace cooldogedev\BedrockEconomy\database\query\player\mysql;
+namespace cooldogedev\BedrockEconomy\query\sqlite\player;
 
-use cooldogedev\libSQL\query\MySQLQuery;
-use mysqli;
+use cooldogedev\libSQL\query\SQLiteQuery;
+use SQLite3;
 
-/**
- * Used to insert the player's xuid if they don't have one set already due to
- * the stupidity of EconomyAPI.
- */
-class MySQLPlayerFixQuery extends MySQLQuery
+final class SQLitePlayerDeletionQuery extends SQLiteQuery
 {
-    public function __construct(protected string $xuid, protected string $playerName)
+    public function __construct(protected string $playerName)
     {
-        parent::__construct();
     }
 
-    public function handleIncomingConnection(mysqli $connection): bool
+    public function onRun(SQLite3 $connection): void
     {
-        $xuid = $this->getXuid();
-        $username = $this->getPlayerName();
         $statement = $connection->prepare($this->getQuery());
-        $statement->bind_param("ss", $xuid, $username);
+        $statement->bindValue(":username", $this->getPlayerName());
         $statement->execute();
         $statement->close();
-        return true;
+        // TODO: Fix this
+        $this->setResult(true);
     }
 
-    public function getXuid(): string
+    public function getQuery(): string
     {
-        return $this->xuid;
+        return "DELETE FROM " . $this->getTable() . " WHERE username = :username";
     }
 
     public function getPlayerName(): string
     {
         return $this->playerName;
-    }
-
-    public function getQuery(): string
-    {
-        return "UPDATE " . $this->getTable() . " SET xuid = ? WHERE username = ?";
     }
 }

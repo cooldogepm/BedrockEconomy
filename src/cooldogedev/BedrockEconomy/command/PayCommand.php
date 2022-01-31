@@ -26,12 +26,14 @@ declare(strict_types=1);
 
 namespace cooldogedev\BedrockEconomy\command;
 
+use Closure;
+use cooldogedev\BedrockEconomy\api\BedrockEconomyAPI;
 use cooldogedev\BedrockEconomy\BedrockEconomy;
-use cooldogedev\BedrockEconomy\constant\SearchConstants;
 use cooldogedev\BedrockEconomy\language\KnownTranslations;
 use cooldogedev\BedrockEconomy\language\LanguageManager;
 use cooldogedev\BedrockEconomy\language\TranslationKeys;
 use cooldogedev\BedrockEconomy\permission\BedrockEconomyPermissions;
+use cooldogedev\libSQL\context\ClosureContext;
 use CortexPE\Commando\args\IntegerArgument;
 use CortexPE\Commando\args\RawStringArgument;
 use CortexPE\Commando\BaseCommand;
@@ -68,37 +70,19 @@ final class PayCommand extends BaseCommand
 
         $amount = (int)floor($amount);
 
-        $session = $this->getOwningPlugin()->getAccountManager()->getAccount($sender->getXuid());
-
-        if (!$session) {
-            $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::NO_ACCOUNT));
-            return;
-        }
-
-        $this->getOwningPlugin()->getDatabaseManager()->getConnector()->appendQueryToPool(
-            $session->getBalanceFromDatabase(
-                function (?array $data) use ($sender, $amount, $receiver, $session): void {
-                    if (!$data) {
+        BedrockEconomyAPI::getInstance()->getPlayerBalance(
+            $sender->getName(),
+            ClosureContext::create(
+                function (?int $balance, Closure $stop) use ($sender, $amount, $receiver): ?int {
+                    if ($balance === null) {
                         $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::NO_ACCOUNT));
-                        return;
+                        return $stop();
                     }
-
-                    $balance = $data["balance"];
 
                     if ($amount > $balance) {
                         $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::BALANCE_INSUFFICIENT));
-                        return;
+                        return $stop();
                     }
-
-                    if (!$this->getOwningPlugin()->getAccountManager()->hasAccount($receiver, SearchConstants::SEARCH_MODE_USERNAME)) {
-                        $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::PLAYER_NOT_FOUND, [
-                                TranslationKeys::PLAYER => $receiver
-                            ]
-                        ));
-                        return;
-                    }
-
-                    $receiver = $this->getOwningPlugin()->getAccountManager()->getAccount($receiver, SearchConstants::SEARCH_MODE_USERNAME);
 
                     if ($amount > $this->getOwningPlugin()->getCurrencyManager()->getMaximumPayment()) {
                         $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::PAYMENT_SEND_EXCEED_LIMIT, [
@@ -108,7 +92,7 @@ final class PayCommand extends BaseCommand
                                 TranslationKeys::CURRENCY_SYMBOL => $this->getOwningPlugin()->getCurrencyManager()->getSymbol()
                             ]
                         ));
-                        return;
+                        return $stop();
                     }
 
                     if ($amount < $this->getOwningPlugin()->getCurrencyManager()->getMinimumPayment()) {
@@ -119,44 +103,63 @@ final class PayCommand extends BaseCommand
                                 TranslationKeys::CURRENCY_SYMBOL => $this->getOwningPlugin()->getCurrencyManager()->getSymbol()
                             ]
                         ));
-                        return;
+                        return $stop();
                     }
 
-                    if (
-                        $this->getOwningPlugin()->getCurrencyManager()->hasBalanceCap() &&
-                        $balance >= $this->getOwningPlugin()->getCurrencyManager()->getBalanceCap()
-                    ) {
-                        $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::BALANCE_CAP, [
-                                TranslationKeys::AMOUNT => $amount,
-                                TranslationKeys::LIMIT => $this->getOwningPlugin()->getCurrencyManager()->getBalanceCap(),
-                                TranslationKeys::PLAYER => $receiver->getUsername(),
-                                TranslationKeys::CURRENCY_NAME => $this->getOwningPlugin()->getCurrencyManager()->getName(),
-                                TranslationKeys::CURRENCY_SYMBOL => $this->getOwningPlugin()->getCurrencyManager()->getSymbol()
-                            ]
-                        ));
-                        return;
-                    }
-
-                    $session->decrementBalance($amount);
-                    $receiver->incrementBalance($amount);
-
-                    if ($receiver->getPlayer()) {
-                        $receiver->getPlayer()->sendMessage(LanguageManager::getTranslation(KnownTranslations::PAYMENT_RECEIVE, [
-                                TranslationKeys::AMOUNT => $amount,
-                                TranslationKeys::PAYER => $sender->getName(),
-                                TranslationKeys::CURRENCY_NAME => $this->getOwningPlugin()->getCurrencyManager()->getName(),
-                                TranslationKeys::CURRENCY_SYMBOL => $this->getOwningPlugin()->getCurrencyManager()->getSymbol()
-                            ]
-                        ));
-                    }
-                    $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::PAYMENT_SEND, [
-                            TranslationKeys::AMOUNT => $amount,
-                            TranslationKeys::RECEIVER => $receiver->getUsername(),
-                            TranslationKeys::CURRENCY_NAME => $this->getOwningPlugin()->getCurrencyManager()->getName(),
-                            TranslationKeys::CURRENCY_SYMBOL => $this->getOwningPlugin()->getCurrencyManager()->getSymbol()
-                        ]
-                    ));
+                    return $balance;
                 }
+            )->push(
+                fn(int $balance) => BedrockEconomyAPI::getInstance()->getPlayerBalance(
+                    $receiver,
+                    ClosureContext::create(
+                        function (?int $receiverBalance) use ($balance, $sender, $amount, $receiver): void {
+
+                            if (!$receiverBalance) {
+                                $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::PLAYER_NOT_FOUND, [
+                                        TranslationKeys::PLAYER => $receiver
+                                    ]
+                                ));
+                                return;
+                            }
+
+                            if (
+                                $this->getOwningPlugin()->getCurrencyManager()->hasBalanceCap() &&
+                                $receiverBalance >= $this->getOwningPlugin()->getCurrencyManager()->getBalanceCap()
+                            ) {
+                                $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::BALANCE_CAP, [
+                                        TranslationKeys::AMOUNT => $amount,
+                                        TranslationKeys::LIMIT => $this->getOwningPlugin()->getCurrencyManager()->getBalanceCap(),
+                                        TranslationKeys::PLAYER => $receiver,
+                                        TranslationKeys::CURRENCY_NAME => $this->getOwningPlugin()->getCurrencyManager()->getName(),
+                                        TranslationKeys::CURRENCY_SYMBOL => $this->getOwningPlugin()->getCurrencyManager()->getSymbol()
+                                    ]
+                                ));
+                                return;
+                            }
+
+                            BedrockEconomyAPI::getInstance()->subtractFromPlayerBalance($sender->getName(), $amount);
+                            BedrockEconomyAPI::getInstance()->addToPlayerBalance($receiver, $amount);
+
+                            $receiverPlayer = $this->getOwningPlugin()->getServer()->getPlayerByPrefix($receiver);
+
+                            $receiverPlayer?->sendMessage(LanguageManager::getTranslation(KnownTranslations::PAYMENT_RECEIVE, [
+                                    TranslationKeys::AMOUNT => $amount,
+                                    TranslationKeys::PAYER => $sender->getName(),
+                                    TranslationKeys::CURRENCY_NAME => $this->getOwningPlugin()->getCurrencyManager()->getName(),
+                                    TranslationKeys::CURRENCY_SYMBOL => $this->getOwningPlugin()->getCurrencyManager()->getSymbol()
+                                ]
+                            ));
+
+                            $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::PAYMENT_SEND, [
+                                    TranslationKeys::AMOUNT => $amount,
+                                    TranslationKeys::RECEIVER => $receiver,
+                                    TranslationKeys::CURRENCY_NAME => $this->getOwningPlugin()->getCurrencyManager()->getName(),
+                                    TranslationKeys::CURRENCY_SYMBOL => $this->getOwningPlugin()->getCurrencyManager()->getSymbol()
+                                ]
+                            ));
+                        }
+                    )
+                )
             )
         );
     }

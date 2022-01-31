@@ -24,34 +24,47 @@
 
 declare(strict_types=1);
 
-namespace cooldogedev\BedrockEconomy\database\query\player\sqlite;
+namespace cooldogedev\BedrockEconomy\query\mysql\player;
 
-use cooldogedev\libSQL\query\SQLiteQuery;
-use SQLite3;
+use cooldogedev\BedrockEconomy\transaction\Transaction;
+use cooldogedev\libSQL\query\MySQLQuery;
+use mysqli;
 
-final class SQLitePlayerDeletionQuery extends SQLiteQuery
+final class MySQLPlayerUpdateQuery extends MySQLQuery
 {
-    public function __construct(protected string $searchValue)
+    public function __construct(protected string $playerName, protected Transaction $transaction)
     {
-        parent::__construct();
     }
 
-    public function handleIncomingConnection(SQLite3 $connection): bool
+    public function onRun(mysqli $connection): void
     {
+        $playerName = $this->getPlayerName();
         $statement = $connection->prepare($this->getQuery());
-        $statement->bindValue(":xuid", $this->getXuid());
+        $statement->bind_param("s", $playerName);
         $statement->execute();
+        $successful = $statement->affected_rows > 0;
         $statement->close();
-        return true;
+
+        $this->setResult($successful);
+    }
+
+    public function getPlayerName(): string
+    {
+        return $this->playerName;
     }
 
     public function getQuery(): string
     {
-        return "DELETE FROM " . $this->getTable() . " WHERE xuid = :xuid";
+        $statement = match ($this->getTransaction()->getType()) {
+            Transaction::TRANSACTION_TYPE_INCREMENT => "balance + " . $this->getTransaction()->getValue(),
+            Transaction::TRANSACTION_TYPE_DECREMENT => "balance - " . $this->getTransaction()->getValue(),
+            Transaction::TRANSACTION_TYPE_SET => $this->getTransaction()->getValue()
+        };
+        return "UPDATE " . $this->getTable() . " SET balance = " . $statement . " WHERE username = ?";
     }
 
-    public function getXuid(): string
+    public function getTransaction(): Transaction
     {
-        return $this->searchValue;
+        return $this->transaction;
     }
 }

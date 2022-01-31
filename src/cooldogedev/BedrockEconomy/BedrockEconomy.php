@@ -37,9 +37,10 @@ use cooldogedev\BedrockEconomy\command\PayCommand;
 use cooldogedev\BedrockEconomy\command\TopBalanceCommand;
 use cooldogedev\BedrockEconomy\config\ConfigManager;
 use cooldogedev\BedrockEconomy\currency\CurrencyManager;
-use cooldogedev\BedrockEconomy\database\DatabaseManager;
 use cooldogedev\BedrockEconomy\language\LanguageManager;
 use cooldogedev\BedrockEconomy\listener\PlayerListener;
+use cooldogedev\BedrockEconomy\query\QueryManager;
+use cooldogedev\libSQL\ConnectionPool;
 use CortexPE\Commando\BaseCommand;
 use pocketmine\plugin\PluginBase;
 use pocketmine\utils\SingletonTrait;
@@ -54,7 +55,7 @@ final class BedrockEconomy extends PluginBase
 
     protected ConfigManager $configManager;
     protected CurrencyManager $currencyManager;
-    protected DatabaseManager $databaseManager;
+    protected ConnectionPool $connector;
     protected AccountManager $accountManager;
 
     public static function getInstance(): BedrockEconomy
@@ -62,24 +63,9 @@ final class BedrockEconomy extends PluginBase
         return BedrockEconomy::_getInstance();
     }
 
-    public function getDatabaseManager(): DatabaseManager
-    {
-        return $this->databaseManager;
-    }
-
     public function getAccountManager(): AccountManager
     {
         return $this->accountManager;
-    }
-
-    public function getConfigManager(): ConfigManager
-    {
-        return $this->configManager;
-    }
-
-    public function getCurrencyManager(): CurrencyManager
-    {
-        return $this->currencyManager;
     }
 
     public function getAPI(): BedrockEconomyAPI
@@ -101,12 +87,31 @@ final class BedrockEconomy extends PluginBase
     {
         $this->configManager = new ConfigManager($this);
         $this->currencyManager = new CurrencyManager($this);
-        $this->databaseManager = new DatabaseManager($this);
+        $this->connector = new ConnectionPool($this, $this->getConfigManager()->getDatabaseConfig());
         $this->accountManager = new AccountManager($this);
+
+        QueryManager::setIsMySQL($this->getConfigManager()->getDatabaseConfig()["provider"] === ConnectionPool::DATA_PROVIDER_MYSQL);
+
+        $this->getConnector()->submit(QueryManager::getTableCreationQuery($this->getCurrencyManager()->getDefaultBalance()));
 
         $this->getServer()->getPluginManager()->registerEvents(new PlayerListener($this), $this);
 
         $this->initializeCommands();
+    }
+
+    public function getConfigManager(): ConfigManager
+    {
+        return $this->configManager;
+    }
+
+    public function getConnector(): ConnectionPool
+    {
+        return $this->connector;
+    }
+
+    public function getCurrencyManager(): CurrencyManager
+    {
+        return $this->currencyManager;
     }
 
     protected function initializeCommands(): void

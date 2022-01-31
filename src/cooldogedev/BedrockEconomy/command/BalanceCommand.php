@@ -27,12 +27,11 @@ declare(strict_types=1);
 namespace cooldogedev\BedrockEconomy\command;
 
 use cooldogedev\BedrockEconomy\BedrockEconomy;
-use cooldogedev\BedrockEconomy\constant\SearchConstants;
-use cooldogedev\BedrockEconomy\constant\TableConstants;
 use cooldogedev\BedrockEconomy\language\KnownTranslations;
 use cooldogedev\BedrockEconomy\language\LanguageManager;
 use cooldogedev\BedrockEconomy\language\TranslationKeys;
 use cooldogedev\BedrockEconomy\permission\BedrockEconomyPermissions;
+use cooldogedev\libSQL\context\ClosureContext;
 use CortexPE\Commando\args\RawStringArgument;
 use CortexPE\Commando\BaseCommand;
 use Exception;
@@ -53,38 +52,29 @@ final class BalanceCommand extends BaseCommand
             return;
         }
 
-        $session = $this->getOwningPlugin()->getAccountManager()->getAccount($player ?? $sender->getName(), SearchConstants::SEARCH_MODE_USERNAME);
         $isSelf = $player === null;
 
-        if ($isSelf && !$session) {
-            $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::NO_ACCOUNT));
-            return;
-        }
+        $this->getOwningPlugin()->getAccountManager()->getBalance(
+            $player ?? $sender->getName(),
+            ClosureContext::create(
+                function (?int $balance) use ($sender, $player, $isSelf): void {
+                    if ($balance === null) {
+                        $sender->sendMessage(LanguageManager::getTranslation($isSelf ? KnownTranslations::NO_ACCOUNT : KnownTranslations::PLAYER_NOT_FOUND, [
+                                TranslationKeys::PLAYER => $player
+                            ]
+                        ));
+                        return;
+                    }
 
-        $this->getOwningPlugin()->getDatabaseManager()->getConnector()->submitQuery(
-            $this->getOwningPlugin()->getDatabaseManager()->getQueryManager()->getPlayerRetrievalQuery(
-                $player ?? $sender->getName(),
-                SearchConstants::SEARCH_MODE_USERNAME
-            ),
-            TableConstants::DATA_TABLE_PLAYERS,
-            onSuccess: function (?array $data) use ($sender, $player, $isSelf): void {
-
-                if (!$data) {
-                    $sender->sendMessage(LanguageManager::getTranslation($isSelf ? KnownTranslations::NO_ACCOUNT : KnownTranslations::PLAYER_NOT_FOUND, [
-                            TranslationKeys::PLAYER => $player
+                    $sender->sendMessage(LanguageManager::getTranslation($player ? KnownTranslations::BALANCE_INFO_OTHER : KnownTranslations::BALANCE_INFO, [
+                            TranslationKeys::PLAYER => $player,
+                            TranslationKeys::AMOUNT => $balance,
+                            TranslationKeys::CURRENCY_NAME => $this->getOwningPlugin()->getCurrencyManager()->getName(),
+                            TranslationKeys::CURRENCY_SYMBOL => $this->getOwningPlugin()->getCurrencyManager()->getSymbol()
                         ]
                     ));
-                    return;
-                }
-
-                $sender->sendMessage(LanguageManager::getTranslation($player ? KnownTranslations::BALANCE_INFO_OTHER : KnownTranslations::BALANCE_INFO, [
-                        TranslationKeys::PLAYER => $player,
-                        TranslationKeys::AMOUNT => $data["balance"],
-                        TranslationKeys::CURRENCY_NAME => $this->getOwningPlugin()->getCurrencyManager()->getName(),
-                        TranslationKeys::CURRENCY_SYMBOL => $this->getOwningPlugin()->getCurrencyManager()->getSymbol()
-                    ]
-                ));
-            }
+                },
+            )
         );
     }
 
