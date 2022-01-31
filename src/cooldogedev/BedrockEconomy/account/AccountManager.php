@@ -41,10 +41,6 @@ final class AccountManager extends BedrockEconomyOwned
      * @var Transaction[]
      */
     protected array $transactions;
-    /**
-     * @var string[]
-     */
-    protected array $cache;
 
     public function __construct(BedrockEconomy $plugin)
     {
