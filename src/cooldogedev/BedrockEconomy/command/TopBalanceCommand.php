@@ -46,7 +46,7 @@ final class TopBalanceCommand extends BaseCommand
     public function onRun(CommandSender $sender, string $aliasUsed, array $args): void
     {
         $offset = $args[TopBalanceCommand::ARGUMENT_PAGE] ?? 0;
-        $offset = $offset > 0 ? ($offset - 1) * 2 : $offset;
+        $offset = $offset > 0 ? ($offset - 1) * TopBalanceCommand::DEFAULT_LIMIT : $offset;
 
         $this->getOwningPlugin()->getAccountManager()->getHighestBalances(
             limit: TopBalanceCommand::DEFAULT_LIMIT,
