@@ -130,6 +130,29 @@ final class BedrockEconomyAPI
         return $this->getPlugin()->getAccountManager()->updateBalance($username, $transaction, $context ?? ClosureContext::create());
     }
 
+    public function isAccountExists(string $username, ?ClosureContext $context = null): ?SQLQuery
+    {
+        return $this->getPlugin()->getAccountManager()->hasAccount($username, $context ?? ClosureContext::create());
+    }
+
+
+    /**
+     * @param string $username
+     * @param int|null $balance
+     * @return SQLQuery|null
+     *
+     * @internal This method is not meant to be used outside of the BedrockEconomy scope.
+     */
+    public function createAccount(string $username, ?int $balance = null): ?SQLQuery
+    {
+        return $this->getPlugin()->getAccountManager()->createAccount($username, $balance);
+    }
+
+    public function getHighestBalances(int $limit, ?ClosureContext $context = null, ?int $offset = null): ?SQLQuery
+    {
+        return $this->getPlugin()->getAccountManager()->getHighestBalances($limit, $context ?? ClosureContext::create(), $offset);
+    }
+
     public function getPlayerBalance(string $username, ?ClosureContext $context = null): SQLQuery
     {
         return $this->getPlugin()->getAccountManager()->getBalance($username, $context ?? ClosureContext::create());

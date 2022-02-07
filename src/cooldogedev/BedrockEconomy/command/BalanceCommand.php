@@ -26,6 +26,7 @@ declare(strict_types=1);
 
 namespace cooldogedev\BedrockEconomy\command;
 
+use cooldogedev\BedrockEconomy\api\BedrockEconomyAPI;
 use cooldogedev\BedrockEconomy\BedrockEconomy;
 use cooldogedev\BedrockEconomy\language\KnownTranslations;
 use cooldogedev\BedrockEconomy\language\LanguageManager;
@@ -54,7 +55,7 @@ final class BalanceCommand extends BaseCommand
 
         $isSelf = $player === null;
 
-        $this->getOwningPlugin()->getAccountManager()->getBalance(
+        BedrockEconomyAPI::getInstance()->getPlayerBalance(
             $player ?? $sender->getName(),
             ClosureContext::create(
                 function (?int $balance) use ($sender, $player, $isSelf): void {

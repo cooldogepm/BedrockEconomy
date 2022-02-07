@@ -48,6 +48,13 @@ final class AccountManager extends BedrockEconomyOwned
         $this->transactions = [];
     }
 
+    /**
+     * @param string $username
+     * @param int|null $balance
+     * @return SQLQuery|null
+     *
+     * @internal This method is not meant to be used outside of the BedrockEconomy scope.
+     */
     public function createAccount(string $username, ?int $balance = null): ?SQLQuery
     {
         if ($balance === null) {

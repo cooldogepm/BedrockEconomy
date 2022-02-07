@@ -26,6 +26,7 @@ declare(strict_types=1);
 
 namespace cooldogedev\BedrockEconomy\command;
 
+use cooldogedev\BedrockEconomy\api\BedrockEconomyAPI;
 use cooldogedev\BedrockEconomy\BedrockEconomy;
 use cooldogedev\BedrockEconomy\language\KnownTranslations;
 use cooldogedev\BedrockEconomy\language\LanguageManager;
@@ -48,7 +49,7 @@ final class TopBalanceCommand extends BaseCommand
         $offset = $args[TopBalanceCommand::ARGUMENT_PAGE] ?? 0;
         $offset = $offset > 0 ? ($offset - 1) * TopBalanceCommand::DEFAULT_LIMIT : $offset;
 
-        $this->getOwningPlugin()->getAccountManager()->getHighestBalances(
+        BedrockEconomyAPI::getInstance()->getHighestBalances(
             limit: TopBalanceCommand::DEFAULT_LIMIT,
             context: ClosureContext::create(
                 function (?array $data) use ($sender, $offset): void {
@@ -68,14 +69,6 @@ final class TopBalanceCommand extends BaseCommand
         );
     }
 
-    /**
-     * @return BedrockEconomy
-     */
-    public function getOwningPlugin(): Plugin
-    {
-        return parent::getOwningPlugin();
-    }
-
     public function handleData(array $result, int $offset): array
     {
         $newResult = [];
@@ -93,6 +86,14 @@ final class TopBalanceCommand extends BaseCommand
         }
 
         return $newResult;
+    }
+
+    /**
+     * @return BedrockEconomy
+     */
+    public function getOwningPlugin(): Plugin
+    {
+        return parent::getOwningPlugin();
     }
 
     protected function prepare(): void

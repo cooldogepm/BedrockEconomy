@@ -47,7 +47,7 @@ final class PlayerListener extends BedrockEconomyOwned implements Listener
             ClosureContext::create(
                 function (?int $balance) use ($player): void {
                     if ($balance === null) {
-                        $this->getPlugin()->getAccountManager()->createAccount($player->getName());
+                        BedrockEconomyAPI::getInstance()->createAccount($player->getName());
                     }
                 }
             )
