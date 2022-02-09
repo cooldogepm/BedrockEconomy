@@ -1,6 +1,6 @@
 ---
 # Configuration version, don't edit this.
-config-version: 2.0.0
+config-version: 2.0.1
 
 language: en-US
 
@@ -19,13 +19,13 @@ currency:
 
 database:
   provider: sqlite
-  threads: 2 # Number of threads to use for the database
+  threads: 2 # Number of threads to use for the database query processing, 2 is recommended
 
   mysql:
     host: 127.0.0.1
-    username: root
-    password: ""
-    schema: ""
+    username: your_username
+    password: password
+    schema: db_name
     port: 3306
 
   sqlite:
