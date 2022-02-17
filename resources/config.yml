@@ -2,7 +2,7 @@
 # Configuration version, don't edit this.
 config-version: 2.0.1
 
-language: de-DE
+language: en-US
 
 currency:
   name: USD
