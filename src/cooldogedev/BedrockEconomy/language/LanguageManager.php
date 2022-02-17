@@ -34,7 +34,8 @@ final class LanguageManager
     protected const DEFAULT_LANGUAGE = "en-US";
     protected const SUPPORTED_LANGUAGES = [
         "en-US",
-        "de-DE"
+        "de-DE",
+		"vi-VN"
     ];
 
     protected static string $language;
