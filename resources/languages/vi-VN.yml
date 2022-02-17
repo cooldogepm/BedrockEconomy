@@ -50,7 +50,7 @@ commands:
   top-balance:
     name: topbalance
     description: Xem xếp hạng tiền
-    usage: "&cSử dụng /tppbalance [page: number]"
+    usage: "&cSử dụng /topbalance [page: number]"
     aliases: [ ]
   add-balance:
     name: addbalance
