@@ -46,14 +46,17 @@ final class TopBalanceCommand extends BaseCommand
 
     public function onRun(CommandSender $sender, string $aliasUsed, array $args): void
     {
+        $limit = $this->getOwningPlugin()->getConfigManager()->getUtilityConfig()["top-balance-accounts-limit"] ?? TopBalanceCommand::DEFAULT_LIMIT;
+
         $offset = $args[TopBalanceCommand::ARGUMENT_PAGE] ?? 0;
-        $offset = $offset > 0 ? ($offset - 1) * TopBalanceCommand::DEFAULT_LIMIT : $offset;
+        $offset = $offset > 1 ? $offset : 1;
+        $offset = $offset > 0 ? ($offset - 1) * $limit : $offset;
 
         BedrockEconomyAPI::getInstance()->getHighestBalances(
-            limit: TopBalanceCommand::DEFAULT_LIMIT,
+            limit: $limit,
             context: ClosureContext::create(
                 function (?array $data) use ($sender, $offset): void {
-                    if (!$data) {
+                    if ($data === null) {
                         $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::TOP_BALANCE_ERROR));
                         return;
                     }
@@ -67,6 +70,14 @@ final class TopBalanceCommand extends BaseCommand
             ),
             offset: $offset,
         );
+    }
+
+    /**
+     * @return BedrockEconomy
+     */
+    public function getOwningPlugin(): Plugin
+    {
+        return parent::getOwningPlugin();
     }
 
     public function handleData(array $result, int $offset): array
@@ -86,14 +97,6 @@ final class TopBalanceCommand extends BaseCommand
         }
 
         return $newResult;
-    }
-
-    /**
-     * @return BedrockEconomy
-     */
-    public function getOwningPlugin(): Plugin
-    {
-        return parent::getOwningPlugin();
     }
 
     protected function prepare(): void

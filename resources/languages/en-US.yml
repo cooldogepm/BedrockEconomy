@@ -39,37 +39,37 @@ top-balance-error: "&cFailed to retrieve top balances!"
 commands:
   balance:
     name: balance
-    description: Show your balance
+    description: Displays your current balance
     usage: "&cUsage /balance [player: string]"
     aliases: [ ]
   pay:
     name: pay
-    description: Pay others
+    description: Pays others from your balance
     usage: "&cUsage /pay <player: string> <amount: number>"
     aliases: [ ]
   top-balance:
     name: topbalance
-    description: View top balances
-    usage: "&cUsage /tppbalance [page: number]"
+    description: Displays the top balances
+    usage: "&cUsage /topbalance [page: number]"
     aliases: [ ]
   add-balance:
     name: addbalance
-    description: Add points to others balance
+    description: Adds balance points to a user
     usage: "&cUsage /addbalance [player: string] <amount: number>"
     aliases: [ ]
   remove-balance:
     name: removebalance
-    description: Remove points from others balance
+    description: Removes balance points from a user
     usage: "&cUsage /removebalance [player: string] <amount: number>"
     aliases: [ ]
   set-balance:
     name: setbalance
-    description: Set others balance
+    description: Sets the balance of a user
     usage: "&cUsage /setbalance [player: string] <amount: number>"
     aliases: [ ]
   delete-account:
     name: deleteaccount
-    description: Delete an account
+    description: Deletes an account of a user
     usage: "&cUsage /deleteaccount [player: string]"
     aliases: [ ]
 ...

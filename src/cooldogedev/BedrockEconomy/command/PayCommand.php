@@ -114,7 +114,7 @@ final class PayCommand extends BaseCommand
                     ClosureContext::create(
                         function (?int $receiverBalance) use ($balance, $sender, $amount, $receiver): void {
 
-                            if (!$receiverBalance) {
+                            if ($receiverBalance === null) {
                                 $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::PLAYER_NOT_FOUND, [
                                         TranslationKeys::PLAYER => $receiver
                                     ]
