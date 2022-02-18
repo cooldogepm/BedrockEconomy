@@ -56,7 +56,7 @@ final class TopBalanceCommand extends BaseCommand
             limit: $limit,
             context: ClosureContext::create(
                 function (?array $data) use ($sender, $offset): void {
-                    if ($data === null) {
+                    if ($data === null || count($data) === 0) {
                         $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::TOP_BALANCE_ERROR));
                         return;
                     }
