@@ -40,7 +40,7 @@ final class MySQLPlayerCreationQuery extends MySQLQuery
 
     public function onRun(mysqli $connection): void
     {
-        $playerName = $this->getPlayerName();
+        $playerName = strtolower($this->getPlayerName());
         $balance = $this->getBalance();
         $statement = $connection->prepare($this->getQuery());
         $statement->bind_param("ss", $playerName, $balance);

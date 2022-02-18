@@ -15,9 +15,10 @@ final class Transaction extends Threaded
     protected int $issueDate;
 
     public function __construct(
-        protected int $type,
-        protected int $value,
-        ?int          $issueDate = null,
+        protected int  $type,
+        protected int  $value,
+        protected ?int $balanceCap = null,
+        ?int           $issueDate = null,
     )
     {
         $this->issueDate = $issueDate ?? time();
@@ -36,5 +37,10 @@ final class Transaction extends Threaded
     public function getValue(): int
     {
         return $this->value;
+    }
+
+    public function getBalanceCap(): ?int
+    {
+        return $this->balanceCap;
     }
 }

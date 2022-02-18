@@ -37,7 +37,7 @@ final class MySQLPlayerDeletionQuery extends MySQLQuery
 
     public function onRun(mysqli $connection): void
     {
-        $playerName = $this->getPlayerName();
+        $playerName = strtolower($this->getPlayerName());
         $statement = $connection->prepare($this->getQuery());
         $statement->bind_param("s", $playerName);
         $statement->execute();

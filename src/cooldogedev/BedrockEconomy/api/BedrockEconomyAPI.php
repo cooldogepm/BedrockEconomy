@@ -75,7 +75,12 @@ final class BedrockEconomyAPI
 
     public function setPlayerBalance(string $username, int $balance, ?ClosureContext $context = null): ?SQLQuery
     {
-        $transaction = new Transaction(Transaction::TRANSACTION_TYPE_SET, $balance, time());
+        $transaction = new Transaction(
+            Transaction::TRANSACTION_TYPE_SET,
+            $balance,
+            $this->getPlugin()->getCurrencyManager()->hasBalanceCap() ? $this->getPlugin()->getCurrencyManager()->getBalanceCap() : null,
+            time()
+        );
 
         $event = new TransactionSubmitEvent($username, $transaction);
         $event->call();
@@ -99,7 +104,12 @@ final class BedrockEconomyAPI
 
     public function subtractFromPlayerBalance(string $username, int $subtraction, ?ClosureContext $context = null): ?SQLQuery
     {
-        $transaction = new Transaction(Transaction::TRANSACTION_TYPE_DECREMENT, $subtraction, time());
+        $transaction = new Transaction(
+            Transaction::TRANSACTION_TYPE_DECREMENT,
+            $subtraction,
+            $this->getPlugin()->getCurrencyManager()->hasBalanceCap() ? $this->getPlugin()->getCurrencyManager()->getBalanceCap() : null,
+            time()
+        );
 
         $event = new TransactionSubmitEvent($username, $transaction);
         $event->call();
@@ -118,7 +128,12 @@ final class BedrockEconomyAPI
 
     public function addToPlayerBalance(string $username, int $addition, ?ClosureContext $context = null): ?SQLQuery
     {
-        $transaction = new Transaction(Transaction::TRANSACTION_TYPE_INCREMENT, $addition, time());
+        $transaction = new Transaction(
+            Transaction::TRANSACTION_TYPE_INCREMENT,
+            $addition,
+            $this->getPlugin()->getCurrencyManager()->hasBalanceCap() ? $this->getPlugin()->getCurrencyManager()->getBalanceCap() : null,
+            time()
+        );
 
         $event = new TransactionSubmitEvent($username, $transaction);
         $event->call();
@@ -139,13 +154,14 @@ final class BedrockEconomyAPI
     /**
      * @param string $username
      * @param int|null $balance
+     * @param ClosureContext|null $context
      * @return SQLQuery|null
      *
      * @internal This method is not meant to be used outside of the BedrockEconomy scope.
      */
-    public function createAccount(string $username, ?int $balance = null): ?SQLQuery
+    public function createAccount(string $username, ?int $balance = null, ?ClosureContext $context = null): ?SQLQuery
     {
-        return $this->getPlugin()->getAccountManager()->createAccount($username, $balance);
+        return $this->getPlugin()->getAccountManager()->createAccount($username, $context ?? ClosureContext::create(), $balance);
     }
 
     public function getHighestBalances(int $limit, ?ClosureContext $context = null, ?int $offset = null): ?SQLQuery

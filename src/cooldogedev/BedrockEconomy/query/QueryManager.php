@@ -56,19 +56,19 @@ final class QueryManager
 
     public static function isMySQL(): bool
     {
-        return self::$isMySQL;
+        return QueryManager::$isMySQL;
     }
 
     public static function setIsMySQL(bool $isMySQL): void
     {
-        self::$isMySQL = $isMySQL;
+        QueryManager::$isMySQL = $isMySQL;
     }
 
     public static function getPlayerCreationQuery(string $username, int $balance): SQLQuery
     {
         $class = QueryManager::isMySQL() ? MySQLPlayerCreationQuery::class : SQLitePlayerCreationQuery::class;
 
-        return new $class(strtolower($username), $balance);
+        return new $class($username, $balance);
     }
 
     public static function getPlayerDeletionQuery(string $username): SQLQuery
@@ -82,14 +82,14 @@ final class QueryManager
     {
         $class = QueryManager::isMySQL() ? MySQLPlayerRetrievalQuery::class : SQLitePlayerRetrievalQuery::class;
 
-        return new $class(strtolower($username));
+        return new $class($username);
     }
 
     public static function getPlayerUpdateQuery(string $username, Transaction $transaction): SQLQuery
     {
         $class = QueryManager::isMySQL() ? MySQLPlayerUpdateQuery::class : SQLitePlayerUpdateQuery::class;
 
-        return new $class(strtolower($username), $transaction);
+        return new $class($username, $transaction);
     }
 
     public static function getTableCreationQuery(int $defaultBalance): SQLQuery

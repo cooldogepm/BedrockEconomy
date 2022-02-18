@@ -38,25 +38,13 @@ final class SQLitePlayerUpdateQuery extends SQLiteQuery
 
     public function onRun(SQLite3 $connection): void
     {
-        // There's a bug with SQLite3::prepare()
-        $statement = $connection->prepare($this->getSecondaryQuery());
-        $statement->bindValue(":username", $this->getPlayerName());
-        $result = $statement->execute()?->fetchArray(SQLITE3_ASSOC) ?: null;
-        $statement->close();
-        $hasAccount = $result !== null;
-
         $statement = $connection->prepare($this->getQuery());
-        $statement->bindValue(":username", $this->getPlayerName());
+        $statement->bindValue(":username", strtolower($this->getPlayerName()));
         // There's a bug with SQLite3::prepare() that causes the statement to be executed multiple times
         $statement->execute()?->finalize();
         $statement->close();
 
-        $this->setResult($hasAccount);
-    }
-
-    public function getSecondaryQuery(): string
-    {
-        return "SELECT * FROM " . $this->getTable() . " WHERE username = :username";
+        $this->setResult($connection->changes() > 0);
     }
 
     public function getPlayerName(): string
@@ -67,10 +55,11 @@ final class SQLitePlayerUpdateQuery extends SQLiteQuery
     public function getQuery(): string
     {
         $statement = match ($this->getTransaction()->getType()) {
-            Transaction::TRANSACTION_TYPE_INCREMENT => "balance + " . $this->getTransaction()->getValue(),
-            Transaction::TRANSACTION_TYPE_DECREMENT => "balance - " . $this->getTransaction()->getValue(),
+            Transaction::TRANSACTION_TYPE_INCREMENT => $this->getTransaction()->getBalanceCap() !== null ? "MIN (balance + " . $this->getTransaction()->getValue() . ", " . $this->getTransaction()->getBalanceCap() . ")" : "balance + " . $this->getTransaction()->getValue(),
+            Transaction::TRANSACTION_TYPE_DECREMENT => "MAX (balance - " . $this->getTransaction()->getValue() . ", 0)",
             Transaction::TRANSACTION_TYPE_SET => $this->getTransaction()->getValue()
         };
+
         return "UPDATE " . $this->getTable() . " SET balance = " . $statement . " WHERE username = :username";
     }
 
