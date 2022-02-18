@@ -50,7 +50,7 @@ commands:
   top-balance:
     name: topbalance
     description: 查看頂部餘額
-    usage: "&cUsage /tppbalance [page: number]"
+    usage: "&cUsage /topbalance [page: number]"
     aliases: [ ]
   add-balance:
     name: addbalance
