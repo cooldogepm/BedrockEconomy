@@ -1,5 +1,5 @@
 name: BedrockEconomy
-version: 2.0.3
+version: 2.0.4
 api: [ 4.0.0 ]
 php: [ 8.0 ]
 author: cooldogedev
@@ -23,7 +23,7 @@ permissions:
     description: Allows users to remove balance points from others
     default: op
   bedrockeconomy.command.setbalance:
-    description: Allows users to set others balance
+    description: Allows users to change others balance
     default: op
   bedrockeconomy.command.deleteaccount:
     description: Allows users to delete others account data
