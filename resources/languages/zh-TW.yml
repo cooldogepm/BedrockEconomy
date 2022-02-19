@@ -30,7 +30,7 @@
  # 刪除某人帳號時
  account-delete: "&a你已經刪除了 &f{PLAYER}&a 的帳號！"
  # 當用戶執行命令卻在資料庫中沒有帳戶
- no-account: "&c你沒有賬戶！"
+ no-account: "&c你沒有帳戶！"
  # 當用戶試圖查看擁有餘額最高的前數個帳戶（排行榜）
  top-balance-header: "&6最高餘額帳戶"
  top-balance-row-template: "&b{POSITION}. &a{PLAYER} &7: &b{AMOUNT}"
@@ -69,7 +69,7 @@ commands:
     aliases: [ ]
   delete-account:
     name: deleteaccount
-    description: 刪除賬戶
+    description: 刪除帳戶
     usage: "&c用法為 /deleteaccount [玩家：文字]"
     aliases: [ ]
 ...
