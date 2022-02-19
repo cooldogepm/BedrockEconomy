@@ -16,7 +16,7 @@ payment-send-exceed-limit: "&cBạn đã vượt quá giới hạn chuyển củ
 # Called when attempting to send a payment below the minimum
 payment-send-insufficient: "&cSố tiền chuyển của bạn thấp hơn yêu cầu tối thiểu là &f{LIMIT}&c!"
 # Called when attempting to pay yourself
-payment-send-self: "&cBạn không thể pay cho chính bản thân mình!"
+payment-send-self: "&cBạn không thể chuyển cho chính bản thân mình!"
 # Called when users attempts to view their own balance
 balance-info: "&aSố tiền của bạn là: &f{CURRENCY_SYMBOL}{AMOUNT}"
 # Called when users attempts to view someone's balance
