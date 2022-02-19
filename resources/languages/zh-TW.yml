@@ -1,75 +1,75 @@
 ---
- # 當控制台運行玩家專用命令時調用
+ # 控制台使用玩家專用指令
  command-player-only: "&c此命令只能在遊戲中運行！"
- # 嘗試與不存在的帳戶交互時調用
- player-not-found: "&f{PLAYER} &cwas not found!"
- # 在餘額不足的情況下嘗試發送付款時調用
+ # 嘗試與不存在的帳戶互動
+ player-not-found: "&f{PLAYER} &c不存在！"
+ # 在餘額不足的情況下嘗試付款
  balance-insufficient: "&c你沒有足夠的餘額！"
- # 嘗試向已達到餘額限制的用戶付款時調用
- balance-cap: "&f{PLAYER} &chas 已經達到餘額上限 {LIMIT}!"
- # 發送成功交易時調用
+ # 嘗試向已達到餘額上限的用戶付款
+ balance-cap: "&f{PLAYER} &c已經達到餘額上限 {LIMIT}！"
+ # 成功支付
  payment-send: "&a你已經向 &f{RECEIVER}&a 支付了 {CURRENCY_SYMBOL}{AMOUNT}！"
- # 收到交易成功時調用
+ # 成功收款
  payment-receive: "&a你從 &f{PAYER}&a 收到了 {CURRENCY_SYMBOL}{AMOUNT}！"
- # 嘗試發送超過最大限制的付款時調用
- payment-send-exceed-limit: "&c你已經超過了 &f{LIMIT} 的支付限額！"
- # 嘗試發送低於最低金額的付款時調用
- payment-send-insufficient: "&c您的付款低於 &f{LIMIT}&c 的最低要求！"
- # 嘗試向自己付款時調用
- payment-send-self: "&c你不能給自己付款！"
- # 當用戶試圖查看自己的餘額時調用
+ # 付款金額超過上限
+ payment-send-exceed-limit: "&c你的付款金額超過上限 &f{LIMIT} ！"
+ # 付款金額超過下限
+ payment-send-insufficient: "&c你的付款金額超過下限 &f{LIMIT} ！"
+ # 嘗試向自己付款
+ payment-send-self: "&c你不能向自己付款！"
+ # 當用戶試圖查看自己的餘額
  balance-info: "&a你的餘額是 &f{CURRENCY_SYMBOL}{AMOUNT}"
- # 當用戶試圖查看某人的餘額時調用
+ # 當用戶試圖查看某人的餘額
  balance-info-other: "&a{PLAYER} 的餘額為 &f{CURRENCY_SYMBOL}{AMOUNT}"
- # 當增加某人的餘額時調用
+ # 增加某人的餘額
  balance-add: "&a您已將 {CURRENCY_SYMBOL}{AMOUNT} 添加到 &f{PLAYER}&a！"
- # 減少某人的餘額時調用
- balance-remove: "&a你已經從 &f{PLAYER}&a 中刪除了 {CURRENCY_SYMBOL}{AMOUNT}！"
- # 將某人的餘額更新為新值時調用
+ # 減少某人的餘額
+ balance-remove: "&a你已經從 &f{PLAYER}&a 中移除了 {CURRENCY_SYMBOL}{AMOUNT}！"
+ # 設置某人的餘額
  balance-set: "&a您已將 &f{PLAYER}&a 的餘額設置為 {CURRENCY_SYMBOL}{AMOUNT}！"
- # 刪除某人帳號時調用
+ # 刪除某人帳號時
  account-delete: "&a你已經刪除了 &f{PLAYER}&a 的帳號！"
- # 當用戶在數據庫中沒有帳戶時執行命令時調用
+ # 當用戶執行命令卻在資料庫中沒有帳戶
  no-account: "&c你沒有賬戶！"
- # 當用戶試圖查看最高餘額時調用
- top-balance-header: "&6TOP BALANCES"
+ # 當用戶試圖查看擁有餘額最高的前數個帳戶（排行榜）
+ top-balance-header: "&6最高餘額帳戶"
  top-balance-row-template: "&b{POSITION}. &a{PLAYER} &7: &b{AMOUNT}"
- top-balance-error: "&c未能檢索到最高餘額！"
+ top-balance-error: "&c未能檢索到最高餘額帳戶！"
 
 commands:
   balance:
     name: balance
     description: 顯示您的餘額
-    usage: "&c用法/平衡[玩家：字符串]"
+    usage: "&c用法為 /blance [玩家：文字]"
     aliases: [ ]
   pay:
     name: pay
     description: 付錢給別人
-    usage: "&cUsage /pay <玩家：字符串> <金額：數字>"
+    usage: "&c用法為 /pay <玩家：文字> <金額：數字>"
     aliases: [ ]
   top-balance:
     name: topbalance
-    description: 查看頂部餘額
-    usage: "&cUsage /topbalance [page: number]"
+    description: 查看擁有餘額最高的前數個帳戶
+    usage: "&c用法為 /topbalance [第幾頁：數字]"
     aliases: [ ]
   add-balance:
     name: addbalance
-    description: 給別人加點餘額
-    usage: "&cUsage /addbalance [player: string] <amount: number>"
+    description: 增加某人的餘額
+    usage: "&c用法為 /addbalance [玩家：文字] <金額：數字>"
     aliases: [ ]
   remove-balance:
     name: removebalance
-    description: 從其他餘額中刪除積分
-    usage: "&cUsage /removebalance [player: string] <amount: number>"
+    description: 減少某人的餘額
+    usage: "&c用法為 /removebalance [玩家：文字] <金額：數字>"
     aliases: [ ]
   set-balance:
     name: setbalance
-    description: 設置他人餘額
-    usage: "&cUsage /setbalance [player: string] <amount: number>"
+    description: 設置某人的餘額
+    usage: "&c用法為 /setbalance [玩家：文字] <金額：數字>"
     aliases: [ ]
   delete-account:
     name: deleteaccount
     description: 刪除賬戶
-    usage: "&cUsage /deleteaccount [player: string]"
+    usage: "&c用法為 /deleteaccount [玩家：文字]"
     aliases: [ ]
 ...
