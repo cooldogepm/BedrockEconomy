@@ -37,6 +37,8 @@ use cooldogedev\libSQL\query\SQLQuery;
 
 final class AccountManager extends BedrockEconomyOwned
 {
+    public const ERROR_EVENT_CANCELLED = "The event was cancelled";
+
     /**
      * @var Transaction[]
      */
@@ -50,12 +52,13 @@ final class AccountManager extends BedrockEconomyOwned
 
     /**
      * @param string $username
+     * @param ClosureContext $context
      * @param int|null $balance
      * @return SQLQuery|null
      *
      * @internal This method is not meant to be used outside of the BedrockEconomy scope.
      */
-    public function createAccount(string $username, ?int $balance = null): ?SQLQuery
+    public function createAccount(string $username, ClosureContext $context, ?int $balance = null): ?SQLQuery
     {
         if ($balance === null) {
             $balance = $this->getPlugin()->getCurrencyManager()->getDefaultBalance();
@@ -65,12 +68,14 @@ final class AccountManager extends BedrockEconomyOwned
         $event->call();
 
         if ($event->isCancelled()) {
+            $context->invoke(false, AccountManager::ERROR_EVENT_CANCELLED);
             return null;
         }
 
         return $this->getPlugin()->getConnector()->submit(
-            QueryManager::getPlayerCreationQuery($username, $balance),
+            QueryManager::getPlayerCreationQuery($username, $event->getBalance()),
             table: QueryManager::DATA_TABLE_PLAYERS,
+            context: $context
         );
     }
 
@@ -142,30 +147,18 @@ final class AccountManager extends BedrockEconomyOwned
 
     public function deleteAccount(string $username, ClosureContext $context): ?SQLQuery
     {
-        return $this->getBalance(
-            $username,
-            ClosureContext::create(
-                function (?int $balance) use ($username, $context): void {
-                    if ($balance === null) {
-                        $context->invoke(false);
-                        return;
-                    }
+        $event = new AccountDeletionEvent($username);
+        $event->call();
 
-                    $event = new AccountDeletionEvent($username, $balance);
-                    $event->call();
+        if ($event->isCancelled()) {
+            $context->invoke(false, AccountManager::ERROR_EVENT_CANCELLED);
+            return null;
+        }
 
-                    if ($event->isCancelled()) {
-                        $context->invoke(false);
-                        return;
-                    }
-
-                    $this->getPlugin()->getConnector()->submit(
-                        QueryManager::getPlayerDeletionQuery($username),
-                        QueryManager::DATA_TABLE_PLAYERS,
-                        context: $context
-                    );
-                }
-            )
+        return $this->getPlugin()->getConnector()->submit(
+            QueryManager::getPlayerDeletionQuery($username),
+            QueryManager::DATA_TABLE_PLAYERS,
+            context: $context
         );
     }
 

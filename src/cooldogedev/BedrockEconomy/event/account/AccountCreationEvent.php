@@ -28,5 +28,18 @@ namespace cooldogedev\BedrockEconomy\event\account;
 
 final class AccountCreationEvent extends AccountEvent
 {
+    public function __construct(string $account, protected int $balance)
+    {
+        parent::__construct($account);
+    }
 
+    public function getBalance(): int
+    {
+        return $this->balance;
+    }
+
+    public function setBalance(int $balance): void
+    {
+        $this->balance = $balance;
+    }
 }

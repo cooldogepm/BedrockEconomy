@@ -38,7 +38,7 @@ final class SQLitePlayerRetrievalQuery extends SQLiteQuery
     public function onRun(SQLite3 $connection): void
     {
         $statement = $connection->prepare($this->getQuery());
-        $statement->bindValue(":username", $this->getPlayerName());
+        $statement->bindValue(":username", strtolower($this->getPlayerName()));
         $result = $statement->execute()?->fetchArray(SQLITE3_ASSOC) ?: null;
         $statement->close();
 

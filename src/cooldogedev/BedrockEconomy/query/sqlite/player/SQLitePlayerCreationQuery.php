@@ -38,13 +38,12 @@ final class SQLitePlayerCreationQuery extends SQLiteQuery
     public function onRun(SQLite3 $connection): void
     {
         $statement = $connection->prepare($this->getQuery());
-        $statement->bindValue(":username", $this->getPlayerName());
+        $statement->bindValue(":username", strtolower($this->getPlayerName()));
         $statement->bindValue(":balance", $this->getBalance());
         $statement->execute();
         $statement->close();
 
-        // TODO: Fix this
-        $this->setResult(true);
+        $this->setResult($connection->changes() > 0);
     }
 
     public function getQuery(): string

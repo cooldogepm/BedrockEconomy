@@ -34,13 +34,8 @@ abstract class AccountEvent extends Event implements Cancellable
 {
     use CancellableTrait;
 
-    public function __construct(protected string $account, protected int $balance)
+    public function __construct(protected string $account)
     {
-    }
-
-    public function getBalance(): int
-    {
-        return $this->balance;
     }
 
     public function getAccount(): string

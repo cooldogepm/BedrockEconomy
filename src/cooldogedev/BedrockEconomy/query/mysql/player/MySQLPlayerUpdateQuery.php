@@ -38,7 +38,7 @@ final class MySQLPlayerUpdateQuery extends MySQLQuery
 
     public function onRun(mysqli $connection): void
     {
-        $playerName = $this->getPlayerName();
+        $playerName = strtolower($this->getPlayerName());
         $statement = $connection->prepare($this->getQuery());
         $statement->bind_param("s", $playerName);
         $statement->execute();
@@ -56,10 +56,11 @@ final class MySQLPlayerUpdateQuery extends MySQLQuery
     public function getQuery(): string
     {
         $statement = match ($this->getTransaction()->getType()) {
-            Transaction::TRANSACTION_TYPE_INCREMENT => "balance + " . $this->getTransaction()->getValue(),
-            Transaction::TRANSACTION_TYPE_DECREMENT => "balance - " . $this->getTransaction()->getValue(),
-            Transaction::TRANSACTION_TYPE_SET => $this->getTransaction()->getValue()
+            Transaction::TRANSACTION_TYPE_INCREMENT => $this->getTransaction()->getBalanceCap() !== null ? "MIN (balance + " . $this->getTransaction()->getValue() . ", " . $this->getTransaction()->getBalanceCap() . ")" : "balance + " . $this->getTransaction()->getValue(),
+            Transaction::TRANSACTION_TYPE_DECREMENT => "MAX (balance - " . $this->getTransaction()->getValue() . ", 0)",
+            Transaction::TRANSACTION_TYPE_SET => $this->getTransaction()->getBalanceCap() !== null ? "MIN (" . $this->getTransaction()->getValue() . ", " . $this->getTransaction()->getBalanceCap() . ")" : $this->getTransaction()->getValue(),
         };
+
         return "UPDATE " . $this->getTable() . " SET balance = " . $statement . " WHERE username = ?";
     }
 

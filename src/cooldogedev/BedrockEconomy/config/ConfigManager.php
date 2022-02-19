@@ -28,6 +28,7 @@ namespace cooldogedev\BedrockEconomy\config;
 
 use cooldogedev\BedrockEconomy\api\BedrockEconomyOwned;
 use cooldogedev\BedrockEconomy\BedrockEconomy;
+use JsonException;
 
 final class ConfigManager extends BedrockEconomyOwned
 {
@@ -35,10 +36,12 @@ final class ConfigManager extends BedrockEconomyOwned
     protected array $currencyConfig;
     protected array $mysqlConfig;
     protected array $sqliteConfig;
+    protected array $utilityConfig;
 
     public function __construct(BedrockEconomy $plugin)
     {
         parent::__construct($plugin);
+
         if ($this->getPlugin()->getDescription()->getVersion() !== $this->getPlugin()->getConfig()->get("config-version")) {
             $this->getPlugin()->getLogger()->warning("An outdated config was provided attempting to generate a new one...");
             if (!rename($this->getPlugin()->getDataFolder() . "config.yml", $this->getPlugin()->getDataFolder() . "config.old.yml")) {
@@ -46,7 +49,17 @@ final class ConfigManager extends BedrockEconomyOwned
                 $this->getPlugin()->getServer()->getPluginManager()->disablePlugin($this->getPlugin());
             }
             $this->getPlugin()->reloadConfig();
+
+            // This could happen if the plugin's version was updated from poggit's page and not github which might cause an issue (reloads on every start up)
+            try {
+                $this->getPlugin()->getConfig()->set("config-version", $this->getPlugin()->getDescription()->getVersion());
+                $this->getPlugin()->getConfig()->save();
+            } catch (JsonException $e) {
+                $this->getPlugin()->getLogger()->critical("An error occurred while attempting to generate the new config, " . $e->getMessage());
+            }
         }
+
+        $this->utilityConfig = $this->getPlugin()->getConfig()->get("utility");
         $this->databaseConfig = $this->getPlugin()->getConfig()->get("database");
         $this->currencyConfig = $this->getPlugin()->getConfig()->get("currency");
         $this->mysqlConfig = $this->getDatabaseConfig()["mysql"];
@@ -56,6 +69,11 @@ final class ConfigManager extends BedrockEconomyOwned
     public function getDatabaseConfig(): array
     {
         return $this->databaseConfig;
+    }
+
+    public function getUtilityConfig(): array
+    {
+        return $this->utilityConfig;
     }
 
     public function getCurrencyConfig(): array

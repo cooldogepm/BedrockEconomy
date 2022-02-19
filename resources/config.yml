@@ -1,26 +1,40 @@
 ---
 # Configuration version, don't edit this.
-config-version: 2.0.2
+config-version: 2.0.4
 
 language: en-US
 
+utility:
+  # The numbers of accounts to display when using the command.
+  top-balance-accounts-limit: 10
+
 currency:
+  # The name of the currency.
   name: USD
+  # The symbol of the currency.
   symbol: $
 
   balance:
-    default-balance: 0
-    balance-cap: 1000 # Has no effect if enable-balance-cap is left false
+    # The balance for new users.
+    default-balance: 100
+    # This has no effect if `enable-balance-cap` is false.
+    balance-cap: 100000
+    # Enabling this will disallow users from exceeding the balance cap.
     enable-balance-cap: false
 
   payment:
-    minimum-payment: 10
-    maximum-payment: 100
+    # The minimum amount of money a user can send.
+    minimum-payment: 100
+    # The maximum amount of money a user can send.
+    maximum-payment: 1000
 
 database:
+  # The database provider, mysql or sqlite.
   provider: sqlite
-  threads: 2 # Number of threads to use for the database query processing, 2 is recommended
+  # Number of threads to use for the database query processing, 2 is recommended.
+  threads: 2
 
+  # The database connection information.
   mysql:
     host: 127.0.0.1
     username: your_username
@@ -28,6 +42,7 @@ database:
     schema: db_name
     port: 3306
 
+  # The database file name.
   sqlite:
     file: players.db
 ...
