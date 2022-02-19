@@ -12,7 +12,7 @@ payment-send: "&aBạn đã chuyển {CURRENCY_SYMBOL}{AMOUNT} đến &f{RECEIVE
 # Called when receiving a successful transaction
 payment-receive: "&aBạn đã nhận được {CURRENCY_SYMBOL}{AMOUNT} từ &f{PAYER}&a!"
 # Called when attempting to send a payment that exceeds the maximum limit
-payment-send-exceed-limit: "&cBạn đã vượt quá giới hạn chuyển của &f{LIMIT}!"
+payment-send-exceed-limit: "&cBạn đã vượt quá giới hạn chuyển là &f{LIMIT}!"
 # Called when attempting to send a payment below the minimum
 payment-send-insufficient: "&cSố tiền chuyển của bạn thấp hơn yêu cầu tối thiểu là &f{LIMIT}&c!"
 # Called when attempting to pay yourself
