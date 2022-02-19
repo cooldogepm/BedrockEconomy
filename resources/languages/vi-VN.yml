@@ -39,7 +39,7 @@ top-balance-error: "&cKhông tìm được số tiền hàng đầu!"
 commands:
   balance:
     name: balance
-    description: Xem số số tiền của bạn
+    description: Xem số tiền của bạn
     usage: "&cSử dụng /balance [player: string]"
     aliases: [ ]
   pay:
