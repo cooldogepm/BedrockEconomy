@@ -4,21 +4,21 @@ command-player-only: "&cVui lòng sử dụng lệnh này trong game!"
 # Called when trying to interact with non-existing account
 player-not-found: "&f{PLAYER} &ckhông được tìm thấy!"
 # Called when attempting to send a payment without having sufficient balance
-balance-insufficient: "&cSố dư của bạn không đủ!"
+balance-insufficient: "&cSố tiền của bạn không đủ!"
 # Called when attempting to pay a user who already has reached the balance limit
-balance-cap: "&f{PLAYER} &cđã đạt đến giới hạn số dư là {LIMIT}!"
+balance-cap: "&f{PLAYER} &cđã đạt đến giới hạn số tiền là {LIMIT}!"
 # Called when sending a successful transaction
 payment-send: "&aBạn đã chuyển {CURRENCY_SYMBOL}{AMOUNT} đến &f{RECEIVER}&a!"
 # Called when receiving a successful transaction
 payment-receive: "&aBạn đã nhận được {CURRENCY_SYMBOL}{AMOUNT} từ &f{PAYER}&a!"
 # Called when attempting to send a payment that exceeds the maximum limit
-payment-send-exceed-limit: "&cBạn đã vượt quá giới hạn thanh toán của &f{LIMIT}!"
+payment-send-exceed-limit: "&cBạn đã vượt quá giới hạn chuyển là &f{LIMIT}!"
 # Called when attempting to send a payment below the minimum
-payment-send-insufficient: "&cKhoản thanh toán của bạn thấp hơn yêu cầu tối thiểu là &f{LIMIT}&c!"
+payment-send-insufficient: "&cSố tiền chuyển của bạn thấp hơn yêu cầu tối thiểu là &f{LIMIT}&c!"
 # Called when attempting to pay yourself
-payment-send-self: "&cBạn không thể pay cho chính bản thân mình!"
+payment-send-self: "&cBạn không thể chuyển cho chính bản thân mình!"
 # Called when users attempts to view their own balance
-balance-info: "&aTiền của bạn là: &f{CURRENCY_SYMBOL}{AMOUNT}"
+balance-info: "&aSố tiền của bạn là: &f{CURRENCY_SYMBOL}{AMOUNT}"
 # Called when users attempts to view someone's balance
 balance-info-other: "&a{PLAYER} có số tiền là &f{CURRENCY_SYMBOL}{AMOUNT}"
 # Called when incrementing someone's balance
@@ -26,7 +26,7 @@ balance-add: "&aBạn đã thêm {CURRENCY_SYMBOL}{AMOUNT} cho &f{PLAYER}&a!"
 # Called when decrementing someone's balance
 balance-remove: "&aBạn đã xóa {CURRENCY_SYMBOL}{AMOUNT} từ &f{PLAYER}&a!"
 # Called when updating someone's balance to a new value
-balance-set: "&aBạn đã chỉnh tiền của &f{PLAYER}&a thành {CURRENCY_SYMBOL}{AMOUNT}!"
+balance-set: "&aBạn đã chỉnh số tiền của &f{PLAYER}&a thành {CURRENCY_SYMBOL}{AMOUNT}!"
 # Called when deleting someone's account
 account-delete: "&aBạn đã xóa tài khoản &f{PLAYER}"
 # Called when a user executes a command while they don't have an account in the database
@@ -34,7 +34,7 @@ no-account: "&cBạn không có tài khoản!"
 # Called when users attempts to view the top balances
 top-balance-header: "&6XẾP HẠNG TIỀN"
 top-balance-row-template: "&b{POSITION}. &a{PLAYER} &7: &b{AMOUNT}"
-top-balance-error: "&cKhông tìm được số dư hàng đầu!"
+top-balance-error: "&cKhông tìm được số tiền hàng đầu!"
 
 commands:
   balance:
@@ -54,12 +54,12 @@ commands:
     aliases: [ ]
   add-balance:
     name: addbalance
-    description: Thêm tiền vào số dư của người khác
+    description: Thêm tiền cho người khác
     usage: "&cSử dụng /addbalance [player: string] <amount: number>"
     aliases: [ ]
   remove-balance:
     name: removebalance
-    description: Xóa điểm từ số dư của người khác
+    description: xóa tiền của người khác
     usage: "&cSử dụng/removebalance [player: string] <amount: number>"
     aliases: [ ]
   set-balance:
