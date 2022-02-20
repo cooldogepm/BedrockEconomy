@@ -55,21 +55,21 @@ commands:
   add-balance:
     name: addbalance
     description: 給別人加點餘額
-    usage: "&cUsage /addbalance [player: string] <amount: number>"
+    usage: "&cUsage /addbalance <player: string> <amount: number>"
     aliases: [ ]
   remove-balance:
     name: removebalance
     description: 從其他餘額中刪除積分
-    usage: "&cUsage /removebalance [player: string] <amount: number>"
+    usage: "&cUsage /removebalance <player: string> <amount: number>"
     aliases: [ ]
   set-balance:
     name: setbalance
     description: 設置他人餘額
-    usage: "&cUsage /setbalance [player: string] <amount: number>"
+    usage: "&cUsage /setbalance <player: string> <amount: number>"
     aliases: [ ]
   delete-account:
     name: deleteaccount
     description: 刪除賬戶
-    usage: "&cUsage /deleteaccount [player: string]"
+    usage: "&cUsage /deleteaccount <player: string>"
     aliases: [ ]
 ...

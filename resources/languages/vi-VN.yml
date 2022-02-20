@@ -55,21 +55,21 @@ commands:
   add-balance:
     name: addbalance
     description: Thêm tiền cho người khác
-    usage: "&cSử dụng /addbalance [player: string] <amount: number>"
+    usage: "&cSử dụng /addbalance <player: string> <amount: number>"
     aliases: [ ]
   remove-balance:
     name: removebalance
     description: xóa tiền của người khác
-    usage: "&cSử dụng/removebalance [player: string] <amount: number>"
+    usage: "&cSử dụng/removebalance <player: string> <amount: number>"
     aliases: [ ]
   set-balance:
     name: setbalance
     description: Chỉnh số tiền của người khác!
-    usage: "&cSử dụng /setbalance [player: string] <amount: number>"
+    usage: "&cSử dụng /setbalance <player: string> <amount: number>"
     aliases: [ ]
   delete-account:
     name: deleteaccount
     description: Xóa tài khoản người chơi
-    usage: "&cSử dụng /deleteaccount [player: string]"
+    usage: "&cSử dụng /deleteaccount <player: string>"
     aliases: [ ]
 ...

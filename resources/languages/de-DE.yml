@@ -45,7 +45,7 @@ commands:
   pay:
     name: pay
     description: Bezahle andere
-    usage: "&cUsage /pay <player: string <amount: number>"
+    usage: "&cUsage /pay <player: string> <amount: number>"
     aliases: [ ]
   top-balance:
     name: topbalance
@@ -55,21 +55,21 @@ commands:
   add-balance:
     name: addbalance
     description: Füge anderen Konten Geld hinzu
-    usage: "&cUsage /addbalance [player: string] <amount: number>"
+    usage: "&cUsage /addbalance <player: string> <amount: number>"
     aliases: [ ]
   remove-balance:
     name: removebalance
     description: Entferne anderen Konten Geld
-    usage: "&cUsage /removebalance [player: string] <amount: number>"
+    usage: "&cUsage /removebalance <player: string> <amount: number>"
     aliases: [ ]
   set-balance:
     name: setbalance
-    description: Setze den Kontostand anderer 
-    usage: "&cUsage /setbalance [player: string] <amount: number>"
+    description: Setze den Kontostand anderer
+    usage: "&cUsage /setbalance <player: string> <amount: number>"
     aliases: [ ]
   delete-account:
     name: deleteaccount
     description: Lösche ein Konto
-    usage: "&cUsage /deleteaccount [player: string]"
+    usage: "&cUsage /deleteaccount <player: string>"
     aliases: [ ]
 ...

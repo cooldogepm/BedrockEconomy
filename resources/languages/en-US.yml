@@ -55,21 +55,21 @@ commands:
   add-balance:
     name: addbalance
     description: Adds balance points to a user
-    usage: "&cUsage /addbalance [player: string] <amount: number>"
+    usage: "&cUsage /addbalance <player: string> <amount: number>"
     aliases: [ ]
   remove-balance:
     name: removebalance
     description: Removes balance points from a user
-    usage: "&cUsage /removebalance [player: string] <amount: number>"
+    usage: "&cUsage /removebalance <player: string> <amount: number>"
     aliases: [ ]
   set-balance:
     name: setbalance
     description: Sets the balance of a user
-    usage: "&cUsage /setbalance [player: string] <amount: number>"
+    usage: "&cUsage /setbalance <player: string> <amount: number>"
     aliases: [ ]
   delete-account:
     name: deleteaccount
     description: Deletes an account of a user
-    usage: "&cUsage /deleteaccount [player: string]"
+    usage: "&cUsage /deleteaccount <player: string>"
     aliases: [ ]
 ...
