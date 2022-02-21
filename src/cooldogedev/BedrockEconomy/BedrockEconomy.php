@@ -41,7 +41,6 @@ use cooldogedev\BedrockEconomy\language\LanguageManager;
 use cooldogedev\BedrockEconomy\listener\PlayerListener;
 use cooldogedev\BedrockEconomy\query\QueryManager;
 use cooldogedev\libSQL\ConnectionPool;
-use CortexPE\Commando\BaseCommand;
 use pocketmine\plugin\PluginBase;
 use pocketmine\utils\SingletonTrait;
 use pocketmine\utils\TextFormat;
@@ -116,33 +115,32 @@ final class BedrockEconomy extends PluginBase
 
     protected function initializeCommands(): void
     {
-        $commandsConfig = LanguageManager::getArray("commands");
+        $commands = [];
 
-        $commands = array_map(
-            function (array $data): array {
-                $className = match ($data["name"]) {
-                    "balance" => BalanceCommand::class,
-                    "pay" => PayCommand::class,
-                    "topbalance" => TopBalanceCommand::class,
-                    "addbalance" => AddBalanceCommand::class,
-                    "deleteaccount" => DeleteAccountCommand::class,
-                    "removebalance" => RemoveBalanceCommand::class,
-                    "setbalance" => SetBalanceCommand::class,
-                };
-                return [$data, $className];
-            },
-            $commandsConfig
-        );
+        $commandsData = LanguageManager::getArray("commands");
 
-        $commands = array_map(function (array $commandData): BaseCommand {
-            [$data, $className] = $commandData;
-            /**
-             * @var BaseCommand $command
-             */
-            $command = new $className($this, $data["name"], $data["description"], $data["aliases"]);
-            $command->setUsage(TextFormat::colorize($data["usage"]));
-            return $command;
-        }, $commands);
+        $classMap = [
+            "balance" => BalanceCommand::class,
+            "pay" => PayCommand::class,
+            "top-balance" => TopBalanceCommand::class,
+            "add-balance" => AddBalanceCommand::class,
+            "remove-balance" => RemoveBalanceCommand::class,
+            "set-balance" => SetBalanceCommand::class,
+            "delete-account" => DeleteAccountCommand::class
+        ];
+
+        foreach ($commandsData as $key => $commandData) {
+            $className = $classMap[$key] ?? null;
+
+            if ($className === null) {
+                continue;
+            }
+
+            $command = new $className($this, $commandData["name"], $commandData["description"], $commandData["aliases"]);
+            $command->setUsage(TextFormat::colorize($commandData["usage"]));
+
+            $commands[] = $command;
+        }
 
         $this->getServer()->getCommandMap()->registerAll("bedrockeconomy", $commands);
     }
