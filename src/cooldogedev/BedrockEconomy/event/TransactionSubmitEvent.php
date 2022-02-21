@@ -31,6 +31,9 @@ use pocketmine\event\Cancellable;
 use pocketmine\event\CancellableTrait;
 use pocketmine\event\Event;
 
+/**
+ * This event is ALWAYS called before a transaction is submitted to the database.
+ */
 final class TransactionSubmitEvent extends Event implements Cancellable
 {
     use CancellableTrait;

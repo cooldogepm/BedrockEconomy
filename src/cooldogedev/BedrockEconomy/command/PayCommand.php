@@ -29,6 +29,7 @@ namespace cooldogedev\BedrockEconomy\command;
 use Closure;
 use cooldogedev\BedrockEconomy\api\BedrockEconomyAPI;
 use cooldogedev\BedrockEconomy\BedrockEconomy;
+use cooldogedev\BedrockEconomy\event\balance\BalanceTransferEvent;
 use cooldogedev\BedrockEconomy\language\KnownTranslations;
 use cooldogedev\BedrockEconomy\language\LanguageManager;
 use cooldogedev\BedrockEconomy\language\TranslationKeys;
@@ -69,6 +70,13 @@ final class PayCommand extends BaseCommand
         }
 
         $amount = (int)floor($amount);
+
+        $event = new BalanceTransferEvent($receiver, $sender->getName(), $amount);
+        $event->call();
+
+        if ($event->isCancelled()) {
+            return;
+        }
 
         BedrockEconomyAPI::getInstance()->getPlayerBalance(
             $sender->getName(),

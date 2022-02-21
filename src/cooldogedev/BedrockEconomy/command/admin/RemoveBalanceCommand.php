@@ -28,6 +28,7 @@ namespace cooldogedev\BedrockEconomy\command\admin;
 
 use cooldogedev\BedrockEconomy\api\BedrockEconomyAPI;
 use cooldogedev\BedrockEconomy\BedrockEconomy;
+use cooldogedev\BedrockEconomy\event\balance\BalanceRemoveEvent;
 use cooldogedev\BedrockEconomy\language\KnownTranslations;
 use cooldogedev\BedrockEconomy\language\LanguageManager;
 use cooldogedev\BedrockEconomy\language\TranslationKeys;
@@ -56,6 +57,13 @@ final class RemoveBalanceCommand extends BaseCommand
         }
 
         $amount = (int)floor($amount);
+
+        $event = new BalanceRemoveEvent($player, $sender->getName(), $amount);
+        $event->call();
+
+        if ($event->isCancelled()) {
+            return;
+        }
 
         BedrockEconomyAPI::getInstance()->subtractFromPlayerBalance(
             $player,
