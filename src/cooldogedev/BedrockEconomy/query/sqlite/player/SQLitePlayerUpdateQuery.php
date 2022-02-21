@@ -47,11 +47,6 @@ final class SQLitePlayerUpdateQuery extends SQLiteQuery
         $this->setResult($connection->changes() > 0);
     }
 
-    public function getPlayerName(): string
-    {
-        return $this->playerName;
-    }
-
     public function getQuery(): string
     {
         $statement = match ($this->getTransaction()->getType()) {
@@ -66,5 +61,10 @@ final class SQLitePlayerUpdateQuery extends SQLiteQuery
     public function getTransaction(): Transaction
     {
         return $this->transaction;
+    }
+
+    public function getPlayerName(): string
+    {
+        return $this->playerName;
     }
 }
