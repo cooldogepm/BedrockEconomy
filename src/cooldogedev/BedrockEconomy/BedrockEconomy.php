@@ -27,6 +27,7 @@ declare(strict_types=1);
 namespace cooldogedev\BedrockEconomy;
 
 use cooldogedev\BedrockEconomy\account\AccountManager;
+use cooldogedev\BedrockEconomy\addon\AddonManager;
 use cooldogedev\BedrockEconomy\api\BedrockEconomyAPI;
 use cooldogedev\BedrockEconomy\command\admin\AddBalanceCommand;
 use cooldogedev\BedrockEconomy\command\admin\DeleteAccountCommand;
@@ -40,6 +41,7 @@ use cooldogedev\BedrockEconomy\currency\CurrencyManager;
 use cooldogedev\BedrockEconomy\language\LanguageManager;
 use cooldogedev\BedrockEconomy\listener\PlayerListener;
 use cooldogedev\BedrockEconomy\query\QueryManager;
+use cooldogedev\BedrockEconomy\transaction\TransactionManager;
 use cooldogedev\libSQL\ConnectionPool;
 use pocketmine\plugin\PluginBase;
 use pocketmine\utils\SingletonTrait;
@@ -56,10 +58,17 @@ final class BedrockEconomy extends PluginBase
     protected CurrencyManager $currencyManager;
     protected ConnectionPool $connector;
     protected AccountManager $accountManager;
+    protected TransactionManager $transactionManager;
+    protected AddonManager $addonManager;
 
     public static function getInstance(): BedrockEconomy
     {
         return BedrockEconomy::_getInstance();
+    }
+
+    public function getAddonManager(): AddonManager
+    {
+        return $this->addonManager;
     }
 
     public function getAccountManager(): AccountManager
@@ -70,6 +79,11 @@ final class BedrockEconomy extends PluginBase
     public function getAPI(): BedrockEconomyAPI
     {
         return BedrockEconomyAPI::getInstance();
+    }
+
+    public function getTransactionManager(): TransactionManager
+    {
+        return $this->transactionManager;
     }
 
     protected function onLoad(): void
@@ -87,7 +101,9 @@ final class BedrockEconomy extends PluginBase
         $this->configManager = new ConfigManager($this);
         $this->currencyManager = new CurrencyManager($this);
         $this->connector = new ConnectionPool($this, $this->getConfigManager()->getDatabaseConfig());
+        $this->transactionManager = new TransactionManager($this);
         $this->accountManager = new AccountManager($this);
+        $this->addonManager = new AddonManager($this);
 
         QueryManager::setIsMySQL($this->getConfigManager()->getDatabaseConfig()["provider"] === ConnectionPool::DATA_PROVIDER_MYSQL);
 
@@ -96,6 +112,13 @@ final class BedrockEconomy extends PluginBase
         $this->getServer()->getPluginManager()->registerEvents(new PlayerListener($this), $this);
 
         $this->initializeCommands();
+    }
+
+    protected function onDisable(): void
+    {
+        foreach ($this->getAddonManager()->getAddons() as $addon) {
+            $addon->setEnabled(false);
+        }
     }
 
     public function getConfigManager(): ConfigManager

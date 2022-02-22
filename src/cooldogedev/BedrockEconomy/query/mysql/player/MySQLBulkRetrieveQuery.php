@@ -24,22 +24,22 @@
 
 declare(strict_types=1);
 
-namespace cooldogedev\BedrockEconomy\query\sqlite\player;
+namespace cooldogedev\BedrockEconomy\query\mysql\player;
 
-use cooldogedev\libSQL\query\SQLiteQuery;
-use SQLite3;
+use cooldogedev\libSQL\query\MySQLQuery;
+use mysqli;
 
-final class SQLitePlayerRetrievalQuery extends SQLiteQuery
+final class MySQLBulkRetrieveQuery extends MySQLQuery
 {
-    public function __construct(protected string $playerName)
+    public function __construct(protected ?int $limit = null, protected ?int $offset = null)
     {
     }
 
-    public function onRun(SQLite3 $connection): void
+    public function onRun(mysqli $connection): void
     {
         $statement = $connection->prepare($this->getQuery());
-        $statement->bindValue(":username", strtolower($this->getPlayerName()));
-        $result = $statement->execute()?->fetchArray(SQLITE3_ASSOC) ?: null;
+        $statement->execute();
+        $result = $statement->get_result()?->fetch_all(MYSQLI_ASSOC);
         $statement->close();
 
         $this->setResult($result);
@@ -47,11 +47,16 @@ final class SQLitePlayerRetrievalQuery extends SQLiteQuery
 
     public function getQuery(): string
     {
-        return "SELECT * FROM " . $this->getTable() . " WHERE username = :username";
+        return $this->getLimit() ? "SELECT * FROM " . $this->getTable() . " ORDER BY balance DESC LIMIT " . $this->getLimit() . " OFFSET " . ($this->getOffset() ?? 0) : "SELECT * FROM " . $this->getTable();
     }
 
-    public function getPlayerName(): string
+    public function getLimit(): ?int
     {
-        return $this->playerName;
+        return $this->limit;
+    }
+
+    public function getOffset(): ?int
+    {
+        return $this->offset;
     }
 }

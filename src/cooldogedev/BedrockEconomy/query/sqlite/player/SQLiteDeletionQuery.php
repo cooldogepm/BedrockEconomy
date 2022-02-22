@@ -29,7 +29,7 @@ namespace cooldogedev\BedrockEconomy\query\sqlite\player;
 use cooldogedev\libSQL\query\SQLiteQuery;
 use SQLite3;
 
-final class SQLitePlayerDeletionQuery extends SQLiteQuery
+final class SQLiteDeletionQuery extends SQLiteQuery
 {
     public function __construct(protected string $playerName)
     {

@@ -26,24 +26,36 @@ declare(strict_types=1);
 
 namespace cooldogedev\BedrockEconomy\transaction;
 
+use cooldogedev\BedrockEconomy\BedrockEconomy;
+use JsonSerializable;
 use Threaded;
 
-final class Transaction extends Threaded
+abstract class Transaction extends Threaded implements JsonSerializable
 {
-    public const TRANSACTION_TYPE_INCREMENT = 0;
-    public const TRANSACTION_TYPE_DECREMENT = 1;
-    public const TRANSACTION_TYPE_SET = 2;
+    public const TRANSACTION_TYPE_TRANSFER = 0;
+    public const TRANSACTION_TYPE_INCREMENT = 1;
+    public const TRANSACTION_TYPE_DECREMENT = 2;
+    public const TRANSACTION_TYPE_SET = 3;
 
+    protected int $id;
     protected int $issueDate;
+    protected int $balanceCap;
 
     public function __construct(
-        protected int  $type,
-        protected int  $value,
-        protected ?int $balanceCap = null,
-        ?int           $issueDate = null,
+        protected int $type,
+        ?int          $id = null,
+        ?int          $balanceCap = null,
+        ?int          $issueDate = null,
     )
     {
+        $this->id = $id ?? TransactionManager::getNextId();
+        $this->balanceCap = $balanceCap ?? BedrockEconomy::getInstance()->getCurrencyManager()->getBalanceCap();
         $this->issueDate = $issueDate ?? time();
+    }
+
+    public function getId(): int
+    {
+        return $this->id;
     }
 
     public function getIssueDate(): int
@@ -54,11 +66,6 @@ final class Transaction extends Threaded
     public function getType(): int
     {
         return $this->type;
-    }
-
-    public function getValue(): int
-    {
-        return $this->value;
     }
 
     public function getBalanceCap(): ?int

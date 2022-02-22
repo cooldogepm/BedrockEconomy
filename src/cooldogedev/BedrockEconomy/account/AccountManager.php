@@ -31,7 +31,8 @@ use cooldogedev\BedrockEconomy\BedrockEconomy;
 use cooldogedev\BedrockEconomy\event\account\AccountCreationEvent;
 use cooldogedev\BedrockEconomy\event\account\AccountDeletionEvent;
 use cooldogedev\BedrockEconomy\query\QueryManager;
-use cooldogedev\BedrockEconomy\transaction\Transaction;
+use cooldogedev\BedrockEconomy\transaction\types\TransferTransaction;
+use cooldogedev\BedrockEconomy\transaction\types\UpdateTransaction;
 use cooldogedev\libSQL\context\ClosureContext;
 use cooldogedev\libSQL\query\SQLQuery;
 
@@ -39,15 +40,9 @@ final class AccountManager extends BedrockEconomyOwned
 {
     public const ERROR_EVENT_CANCELLED = "The event was cancelled";
 
-    /**
-     * @var Transaction[]
-     */
-    protected array $transactions;
-
     public function __construct(BedrockEconomy $plugin)
     {
         parent::__construct($plugin);
-        $this->transactions = [];
     }
 
     /**
@@ -96,44 +91,38 @@ final class AccountManager extends BedrockEconomyOwned
         );
     }
 
-    public function updateBalance(string $username, Transaction $transaction, ClosureContext $context): ?SQLQuery
+    public function updateBalance(string $username, UpdateTransaction $transaction, ClosureContext $context): ?SQLQuery
     {
-        $this->addTransaction($transaction);
+        if (!$this->getPlugin()->getTransactionManager()->submitTransaction($transaction)) {
+            return null;
+        }
 
         return $this->getPlugin()->getConnector()->submit(
-            QueryManager::getPlayerUpdateQuery(strtolower($username), $transaction),
+            QueryManager::getPlayerUpdateQuery($transaction),
             QueryManager::DATA_TABLE_PLAYERS,
             context: $context->first(
-                function () use ($transaction): void {
-                    $this->removeTransaction($transaction);
+                function (bool $successful) use ($transaction): void {
+                    $this->getPlugin()->getTransactionManager()->processTransaction($transaction, $successful);
                 }
             )
         );
     }
 
-    protected function addTransaction(Transaction $transaction): bool
+    public function transferFromBalance(TransferTransaction $transaction, ClosureContext $context): ?SQLQuery
     {
-        $objectHash = spl_object_hash($transaction);
-        if ($this->hasTransaction($objectHash)) {
-            return false;
+        if (!$this->getPlugin()->getTransactionManager()->submitTransaction($transaction)) {
+            return null;
         }
-        $this->transactions[$objectHash] = $transaction;
-        return true;
-    }
 
-    protected function hasTransaction(string $objectHash): bool
-    {
-        return isset($this->transactions[$objectHash]);
-    }
-
-    protected function removeTransaction(Transaction $transaction): bool
-    {
-        $objectHash = spl_object_hash($transaction);
-        if (!$this->hasTransaction($objectHash)) {
-            return false;
-        }
-        unset($this->transactions[$objectHash]);
-        return true;
+        return $this->getPlugin()->getConnector()->submit(
+            QueryManager::getPlayerTransferQuery($transaction),
+            QueryManager::DATA_TABLE_PLAYERS,
+            context: $context->first(
+                function (bool $successful) use ($transaction): void {
+                    $this->getPlugin()->getTransactionManager()->processTransaction($transaction, $successful);
+                }
+            )
+        );
     }
 
     public function getHighestBalances(int $limit, ClosureContext $context, ?int $offset = null): ?SQLQuery
@@ -160,13 +149,5 @@ final class AccountManager extends BedrockEconomyOwned
             QueryManager::DATA_TABLE_PLAYERS,
             context: $context
         );
-    }
-
-    /**
-     * @return Transaction[]
-     */
-    protected function getTransactions(): array
-    {
-        return $this->transactions;
     }
 }

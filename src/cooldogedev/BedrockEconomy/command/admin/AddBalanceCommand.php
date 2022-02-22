@@ -28,7 +28,6 @@ namespace cooldogedev\BedrockEconomy\command\admin;
 
 use cooldogedev\BedrockEconomy\api\BedrockEconomyAPI;
 use cooldogedev\BedrockEconomy\BedrockEconomy;
-use cooldogedev\BedrockEconomy\event\balance\BalanceAddEvent;
 use cooldogedev\BedrockEconomy\language\KnownTranslations;
 use cooldogedev\BedrockEconomy\language\LanguageManager;
 use cooldogedev\BedrockEconomy\language\TranslationKeys;
@@ -57,13 +56,6 @@ final class AddBalanceCommand extends BaseCommand
         }
 
         $amount = (int)floor($amount);
-
-        $event = new BalanceAddEvent($player, $sender->getName(), $amount);
-        $event->call();
-
-        if ($event->isCancelled()) {
-            return;
-        }
 
         BedrockEconomyAPI::getInstance()->addToPlayerBalance(
             $player,

@@ -24,17 +24,42 @@
 
 declare(strict_types=1);
 
-namespace cooldogedev\BedrockEconomy\event\balance;
+namespace cooldogedev\BedrockEconomy\query\sqlite\player;
 
-use cooldogedev\BedrockEconomy\event\account\AccountEvent;
-use cooldogedev\BedrockEconomy\event\TransactionSubmitEvent;
+use cooldogedev\libSQL\query\SQLiteQuery;
+use SQLite3;
 
-/**
- * These events are called before TransactionSubmitEvent is called.
- * They also don't get fired if the balance was updated from the API because there's no need for that.
- * Keep in mind that the balance is not updated until the @link TransactionSubmitEvent is called,
- * and it also might NOT update at all due to invalid data and such things.
- */
-abstract class BalanceEvent extends AccountEvent
+final class SQLiteBulkRetrieveQuery extends SQLiteQuery
 {
+    public function __construct(protected ?int $limit = null, protected ?int $offset = null)
+    {
+    }
+
+    public function onRun(SQLite3 $connection): void
+    {
+        $players = [];
+        $result = $connection->query($this->getQuery());
+        if ($result) {
+            while ($player = $result->fetchArray(SQLITE3_ASSOC)) {
+                $players[] = $player;
+            }
+        }
+
+        $this->setResult($players);
+    }
+
+    public function getQuery(): string
+    {
+        return $this->getLimit() ? "SELECT * FROM " . $this->getTable() . " ORDER BY balance DESC LIMIT " . $this->getLimit() . " OFFSET " . ($this->getOffset() ?? 0) : "SELECT * FROM " . $this->getTable();
+    }
+
+    public function getLimit(): ?int
+    {
+        return $this->limit;
+    }
+
+    public function getOffset(): ?int
+    {
+        return $this->offset;
+    }
 }

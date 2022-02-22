@@ -24,27 +24,11 @@
 
 declare(strict_types=1);
 
-namespace cooldogedev\BedrockEconomy\event\balance;
+namespace cooldogedev\BedrockEconomy\event\transaction;
 
-final class BalanceAddEvent extends BalanceEvent
+/**
+ * This event is ALWAYS called before a transaction is submitted to the database.
+ */
+final class TransactionSubmitEvent extends TransactionEvent
 {
-    public function __construct(string $account, protected string $issuer, protected int $amount)
-    {
-        parent::__construct($account);
-    }
-
-    public function getAmount(): int
-    {
-        return $this->amount;
-    }
-
-    public function setAmount(int $amount): void
-    {
-        $this->amount = $amount;
-    }
-
-    public function getIssuer(): string
-    {
-        return $this->issuer;
-    }
 }

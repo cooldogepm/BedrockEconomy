@@ -26,21 +26,23 @@ declare(strict_types=1);
 
 namespace cooldogedev\BedrockEconomy\query\sqlite\player;
 
+use cooldogedev\BedrockEconomy\transaction\Transaction;
+use cooldogedev\BedrockEconomy\transaction\types\UpdateTransaction;
 use cooldogedev\libSQL\query\SQLiteQuery;
 use SQLite3;
 
-final class SQLitePlayerCreationQuery extends SQLiteQuery
+final class SQLiteUpdateQuery extends SQLiteQuery
 {
-    public function __construct(protected string $playerName, protected int $balance)
+    public function __construct(protected UpdateTransaction $transaction)
     {
     }
 
     public function onRun(SQLite3 $connection): void
     {
         $statement = $connection->prepare($this->getQuery());
-        $statement->bindValue(":username", strtolower($this->getPlayerName()));
-        $statement->bindValue(":balance", $this->getBalance());
-        $statement->execute();
+        $statement->bindValue(":username", strtolower($this->getTransaction()->getTarget()));
+        // There's a bug with SQLite3::prepare() that causes the statement to be executed multiple times
+        $statement->execute()?->finalize();
         $statement->close();
 
         $this->setResult($connection->changes() > 0);
@@ -48,16 +50,17 @@ final class SQLitePlayerCreationQuery extends SQLiteQuery
 
     public function getQuery(): string
     {
-        return "INSERT OR IGNORE INTO " . $this->getTable() . " (username, balance) VALUES (:username, :balance)";
+        $statement = match ($this->getTransaction()->getType()) {
+            Transaction::TRANSACTION_TYPE_INCREMENT => $this->getTransaction()->getBalanceCap() !== null ? "MIN (balance + " . $this->getTransaction()->getValue() . ", " . $this->getTransaction()->getBalanceCap() . ")" : "balance + " . $this->getTransaction()->getValue(),
+            Transaction::TRANSACTION_TYPE_DECREMENT => "MAX (balance - " . $this->getTransaction()->getValue() . ", 0)",
+            Transaction::TRANSACTION_TYPE_SET => $this->getTransaction()->getBalanceCap() !== null ? "MIN (" . $this->getTransaction()->getValue() . ", " . $this->getTransaction()->getBalanceCap() . ")" : $this->getTransaction()->getValue(),
+        };
+
+        return "UPDATE " . $this->getTable() . " SET balance = " . $statement . " WHERE username = :username";
     }
 
-    public function getPlayerName(): string
+    public function getTransaction(): UpdateTransaction
     {
-        return $this->playerName;
-    }
-
-    public function getBalance(): int
-    {
-        return $this->balance;
+        return $this->transaction;
     }
 }

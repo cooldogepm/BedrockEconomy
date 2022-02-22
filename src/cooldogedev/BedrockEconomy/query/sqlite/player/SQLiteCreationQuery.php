@@ -24,27 +24,40 @@
 
 declare(strict_types=1);
 
-namespace cooldogedev\BedrockEconomy\event\balance;
+namespace cooldogedev\BedrockEconomy\query\sqlite\player;
 
-final class BalanceSetEvent extends BalanceEvent
+use cooldogedev\libSQL\query\SQLiteQuery;
+use SQLite3;
+
+final class SQLiteCreationQuery extends SQLiteQuery
 {
-    public function __construct(string $account, protected string $issuer, protected int $amount)
+    public function __construct(protected string $playerName, protected int $balance)
     {
-        parent::__construct($account);
     }
 
-    public function getAmount(): int
+    public function onRun(SQLite3 $connection): void
     {
-        return $this->amount;
+        $statement = $connection->prepare($this->getQuery());
+        $statement->bindValue(":username", strtolower($this->getPlayerName()));
+        $statement->bindValue(":balance", $this->getBalance());
+        $statement->execute();
+        $statement->close();
+
+        $this->setResult($connection->changes() > 0);
     }
 
-    public function setAmount(int $amount): void
+    public function getQuery(): string
     {
-        $this->amount = $amount;
+        return "INSERT OR IGNORE INTO " . $this->getTable() . " (username, balance) VALUES (:username, :balance)";
     }
 
-    public function getIssuer(): string
+    public function getPlayerName(): string
     {
-        return $this->issuer;
+        return $this->playerName;
+    }
+
+    public function getBalance(): int
+    {
+        return $this->balance;
     }
 }

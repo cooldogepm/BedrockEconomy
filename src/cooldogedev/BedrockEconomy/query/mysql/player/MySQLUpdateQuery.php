@@ -24,27 +24,34 @@
 
 declare(strict_types=1);
 
-namespace cooldogedev\BedrockEconomy\query\sqlite\player;
+namespace cooldogedev\BedrockEconomy\query\mysql\player;
 
 use cooldogedev\BedrockEconomy\transaction\Transaction;
-use cooldogedev\libSQL\query\SQLiteQuery;
-use SQLite3;
+use cooldogedev\BedrockEconomy\transaction\types\UpdateTransaction;
+use cooldogedev\libSQL\query\MySQLQuery;
+use mysqli;
 
-final class SQLitePlayerUpdateQuery extends SQLiteQuery
+final class MySQLUpdateQuery extends MySQLQuery
 {
-    public function __construct(protected string $playerName, protected Transaction $transaction)
+    public function __construct(protected UpdateTransaction $transaction)
     {
     }
 
-    public function onRun(SQLite3 $connection): void
+    public function onRun(mysqli $connection): void
     {
+        $playerName = strtolower($this->getTransaction()->getTarget());
         $statement = $connection->prepare($this->getQuery());
-        $statement->bindValue(":username", strtolower($this->getPlayerName()));
-        // There's a bug with SQLite3::prepare() that causes the statement to be executed multiple times
-        $statement->execute()?->finalize();
+        $statement->bind_param("s", $playerName);
+        $statement->execute();
+        $successful = $statement->affected_rows > 0;
         $statement->close();
 
-        $this->setResult($connection->changes() > 0);
+        $this->setResult($successful);
+    }
+
+    public function getTransaction(): UpdateTransaction
+    {
+        return $this->transaction;
     }
 
     public function getQuery(): string
@@ -55,16 +62,6 @@ final class SQLitePlayerUpdateQuery extends SQLiteQuery
             Transaction::TRANSACTION_TYPE_SET => $this->getTransaction()->getBalanceCap() !== null ? "MIN (" . $this->getTransaction()->getValue() . ", " . $this->getTransaction()->getBalanceCap() . ")" : $this->getTransaction()->getValue(),
         };
 
-        return "UPDATE " . $this->getTable() . " SET balance = " . $statement . " WHERE username = :username";
-    }
-
-    public function getTransaction(): Transaction
-    {
-        return $this->transaction;
-    }
-
-    public function getPlayerName(): string
-    {
-        return $this->playerName;
+        return "UPDATE " . $this->getTable() . " SET balance = " . $statement . " WHERE username = ?";
     }
 }

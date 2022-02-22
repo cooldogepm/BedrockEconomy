@@ -29,7 +29,7 @@ namespace cooldogedev\BedrockEconomy\query\mysql\player;
 use cooldogedev\libSQL\query\MySQLQuery;
 use mysqli;
 
-final class MySQLPlayerCreationQuery extends MySQLQuery
+final class MySQLCreationQuery extends MySQLQuery
 {
     public function __construct(
         protected string $playerName,

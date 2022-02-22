@@ -24,31 +24,36 @@
 
 declare(strict_types=1);
 
-namespace cooldogedev\BedrockEconomy\event;
+namespace cooldogedev\BedrockEconomy\query\mysql\player;
 
-use cooldogedev\BedrockEconomy\transaction\Transaction;
-use pocketmine\event\Cancellable;
-use pocketmine\event\CancellableTrait;
-use pocketmine\event\Event;
+use cooldogedev\libSQL\query\MySQLQuery;
+use mysqli;
 
-/**
- * This event is ALWAYS called before a transaction is submitted to the database.
- */
-final class TransactionSubmitEvent extends Event implements Cancellable
+final class MySQLDeletionQuery extends MySQLQuery
 {
-    use CancellableTrait;
-
-    public function __construct(protected string $account, protected Transaction $transaction)
+    public function __construct(protected string $playerName)
     {
     }
 
-    public function getAccount(): string
+    public function onRun(mysqli $connection): void
     {
-        return $this->account;
+        $playerName = strtolower($this->getPlayerName());
+        $statement = $connection->prepare($this->getQuery());
+        $statement->bind_param("s", $playerName);
+        $statement->execute();
+        $successful = $statement->affected_rows > 0;
+        $statement->close();
+
+        $this->setResult($successful);
     }
 
-    public function getTransaction(): Transaction
+    public function getPlayerName(): string
     {
-        return $this->transaction;
+        return $this->playerName;
+    }
+
+    public function getQuery(): string
+    {
+        return "DELETE FROM " . $this->getTable() . " WHERE username = ?";
     }
 }

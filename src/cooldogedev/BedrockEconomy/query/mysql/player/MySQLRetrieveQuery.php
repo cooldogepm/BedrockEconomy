@@ -26,13 +26,12 @@ declare(strict_types=1);
 
 namespace cooldogedev\BedrockEconomy\query\mysql\player;
 
-use cooldogedev\BedrockEconomy\transaction\Transaction;
 use cooldogedev\libSQL\query\MySQLQuery;
 use mysqli;
 
-final class MySQLPlayerUpdateQuery extends MySQLQuery
+final class MySQLRetrieveQuery extends MySQLQuery
 {
-    public function __construct(protected string $playerName, protected Transaction $transaction)
+    public function __construct(protected string $playerName)
     {
     }
 
@@ -42,10 +41,10 @@ final class MySQLPlayerUpdateQuery extends MySQLQuery
         $statement = $connection->prepare($this->getQuery());
         $statement->bind_param("s", $playerName);
         $statement->execute();
-        $successful = $statement->affected_rows > 0;
+        $result = $statement->get_result()?->fetch_assoc();
         $statement->close();
 
-        $this->setResult($successful);
+        $this->setResult($result);
     }
 
     public function getPlayerName(): string
@@ -55,17 +54,6 @@ final class MySQLPlayerUpdateQuery extends MySQLQuery
 
     public function getQuery(): string
     {
-        $statement = match ($this->getTransaction()->getType()) {
-            Transaction::TRANSACTION_TYPE_INCREMENT => $this->getTransaction()->getBalanceCap() !== null ? "MIN (balance + " . $this->getTransaction()->getValue() . ", " . $this->getTransaction()->getBalanceCap() . ")" : "balance + " . $this->getTransaction()->getValue(),
-            Transaction::TRANSACTION_TYPE_DECREMENT => "MAX (balance - " . $this->getTransaction()->getValue() . ", 0)",
-            Transaction::TRANSACTION_TYPE_SET => $this->getTransaction()->getBalanceCap() !== null ? "MIN (" . $this->getTransaction()->getValue() . ", " . $this->getTransaction()->getBalanceCap() . ")" : $this->getTransaction()->getValue(),
-        };
-
-        return "UPDATE " . $this->getTable() . " SET balance = " . $statement . " WHERE username = ?";
-    }
-
-    public function getTransaction(): Transaction
-    {
-        return $this->transaction;
+        return "SELECT * FROM " . $this->getTable() . " WHERE username = ?";
     }
 }
