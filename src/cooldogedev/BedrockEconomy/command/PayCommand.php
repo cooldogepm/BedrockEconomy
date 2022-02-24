@@ -57,8 +57,14 @@ final class PayCommand extends BaseCommand
         $receiver = $args[PayCommand::ARGUMENT_RECEIVER];
         $amount = $args[PayCommand::ARGUMENT_AMOUNT];
 
-        if (strtolower($receiver) === strtolower($sender->getName())) {
+        $onlinePlayer = $this->getOwningPlugin()->getServer()->getPlayerByPrefix($receiver);
 
+        if ($onlinePlayer !== null) {
+            $receiver = $onlinePlayer->getName();
+            $onlinePlayer = null;
+        }
+
+        if (strtolower($receiver) === strtolower($sender->getName())) {
             $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::PAYMENT_SEND_SELF));
             return;
         }

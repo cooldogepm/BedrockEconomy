@@ -47,6 +47,13 @@ final class DeleteAccountCommand extends BaseCommand
     {
         $player = $args[DeleteAccountCommand::ARGUMENT_PLAYER];
 
+        $onlinePlayer = $this->getOwningPlugin()->getServer()->getPlayerByPrefix($player);
+
+        if ($onlinePlayer !== null) {
+            $player = $onlinePlayer->getName();
+            $onlinePlayer = null;
+        }
+
         BedrockEconomyAPI::getInstance()->deletePlayerAccount(
             $player,
             ClosureContext::create(

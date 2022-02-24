@@ -55,6 +55,13 @@ final class RemoveBalanceCommand extends BaseCommand
             return;
         }
 
+        $onlinePlayer = $this->getOwningPlugin()->getServer()->getPlayerByPrefix($player);
+
+        if ($onlinePlayer !== null) {
+            $player = $onlinePlayer->getName();
+            $onlinePlayer = null;
+        }
+
         $amount = (int)floor($amount);
 
         BedrockEconomyAPI::getInstance()->subtractFromPlayerBalance(
