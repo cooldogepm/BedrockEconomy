@@ -1,7 +1,7 @@
 <?php
 
 /**
- *  Copyright (c) 2021 cooldogedev
+ *  Copyright (c) 2022 cooldogedev
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -29,7 +29,7 @@ namespace cooldogedev\BedrockEconomy\query\mysql\player;
 use cooldogedev\libSQL\query\MySQLQuery;
 use mysqli;
 
-final class MySQLPlayerRetrievalQuery extends MySQLQuery
+final class MySQLDeletionQuery extends MySQLQuery
 {
     public function __construct(protected string $playerName)
     {
@@ -41,10 +41,10 @@ final class MySQLPlayerRetrievalQuery extends MySQLQuery
         $statement = $connection->prepare($this->getQuery());
         $statement->bind_param("s", $playerName);
         $statement->execute();
-        $result = $statement->get_result()?->fetch_assoc();
+        $successful = $statement->affected_rows > 0;
         $statement->close();
 
-        $this->setResult($result);
+        $this->setResult($successful);
     }
 
     public function getPlayerName(): string
@@ -54,6 +54,6 @@ final class MySQLPlayerRetrievalQuery extends MySQLQuery
 
     public function getQuery(): string
     {
-        return "SELECT * FROM " . $this->getTable() . " WHERE username = ?";
+        return "DELETE FROM " . $this->getTable() . " WHERE username = ?";
     }
 }

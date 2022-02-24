@@ -1,7 +1,7 @@
 <?php
 
 /**
- *  Copyright (c) 2021 cooldogedev
+ *  Copyright (c) 2022 cooldogedev
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -24,39 +24,40 @@
 
 declare(strict_types=1);
 
-namespace cooldogedev\BedrockEconomy\query\mysql\player;
+namespace cooldogedev\BedrockEconomy\query\sqlite\player;
 
-use cooldogedev\libSQL\query\MySQLQuery;
-use mysqli;
+use cooldogedev\libSQL\query\SQLiteQuery;
+use SQLite3;
 
-final class MySQLBulkPlayersRetrievalQuery extends MySQLQuery
+final class SQLiteCreationQuery extends SQLiteQuery
 {
-    public function __construct(protected ?int $limit = null, protected ?int $offset = null)
+    public function __construct(protected string $playerName, protected int $balance)
     {
     }
 
-    public function onRun(mysqli $connection): void
+    public function onRun(SQLite3 $connection): void
     {
         $statement = $connection->prepare($this->getQuery());
+        $statement->bindValue(":username", strtolower($this->getPlayerName()));
+        $statement->bindValue(":balance", $this->getBalance());
         $statement->execute();
-        $result = $statement->get_result()?->fetch_all(MYSQLI_ASSOC);
         $statement->close();
 
-        $this->setResult($result);
+        $this->setResult($connection->changes() > 0);
     }
 
     public function getQuery(): string
     {
-        return $this->getLimit() ? "SELECT * FROM " . $this->getTable() . " ORDER BY balance DESC LIMIT " . $this->getLimit() . " OFFSET " . ($this->getOffset() ?? 0) : "SELECT * FROM " . $this->getTable();
+        return "INSERT OR IGNORE INTO " . $this->getTable() . " (username, balance) VALUES (:username, :balance)";
     }
 
-    public function getLimit(): ?int
+    public function getPlayerName(): string
     {
-        return $this->limit;
+        return $this->playerName;
     }
 
-    public function getOffset(): ?int
+    public function getBalance(): int
     {
-        return $this->offset;
+        return $this->balance;
     }
 }

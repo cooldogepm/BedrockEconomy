@@ -1,7 +1,7 @@
 <?php
 
 /**
- *  Copyright (c) 2021 cooldogedev
+ *  Copyright (c) 2022 cooldogedev
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -27,29 +27,25 @@ declare(strict_types=1);
 namespace cooldogedev\BedrockEconomy\query\sqlite\player;
 
 use cooldogedev\BedrockEconomy\transaction\Transaction;
+use cooldogedev\BedrockEconomy\transaction\types\UpdateTransaction;
 use cooldogedev\libSQL\query\SQLiteQuery;
 use SQLite3;
 
-final class SQLitePlayerUpdateQuery extends SQLiteQuery
+final class SQLiteUpdateQuery extends SQLiteQuery
 {
-    public function __construct(protected string $playerName, protected Transaction $transaction)
+    public function __construct(protected UpdateTransaction $transaction)
     {
     }
 
     public function onRun(SQLite3 $connection): void
     {
         $statement = $connection->prepare($this->getQuery());
-        $statement->bindValue(":username", strtolower($this->getPlayerName()));
+        $statement->bindValue(":username", strtolower($this->getTransaction()->getTarget()));
         // There's a bug with SQLite3::prepare() that causes the statement to be executed multiple times
         $statement->execute()?->finalize();
         $statement->close();
 
         $this->setResult($connection->changes() > 0);
-    }
-
-    public function getPlayerName(): string
-    {
-        return $this->playerName;
     }
 
     public function getQuery(): string
@@ -63,7 +59,7 @@ final class SQLitePlayerUpdateQuery extends SQLiteQuery
         return "UPDATE " . $this->getTable() . " SET balance = " . $statement . " WHERE username = :username";
     }
 
-    public function getTransaction(): Transaction
+    public function getTransaction(): UpdateTransaction
     {
         return $this->transaction;
     }

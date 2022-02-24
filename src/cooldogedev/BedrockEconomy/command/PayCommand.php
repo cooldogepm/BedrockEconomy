@@ -1,7 +1,7 @@
 <?php
 
 /**
- *  Copyright (c) 2021 cooldogedev
+ *  Copyright (c) 2022 cooldogedev
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -137,8 +137,7 @@ final class PayCommand extends BaseCommand
                                 return;
                             }
 
-                            BedrockEconomyAPI::getInstance()->subtractFromPlayerBalance($sender->getName(), $amount);
-                            BedrockEconomyAPI::getInstance()->addToPlayerBalance($receiver, $amount);
+                            BedrockEconomyAPI::getInstance()->transferFromPlayerBalance($sender->getName(), $receiver, $amount);
 
                             $receiverPlayer = $this->getOwningPlugin()->getServer()->getPlayerByPrefix($receiver);
 

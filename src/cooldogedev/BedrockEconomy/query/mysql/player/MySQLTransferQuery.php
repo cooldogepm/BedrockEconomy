@@ -1,7 +1,7 @@
 <?php
 
 /**
- *  Copyright (c) 2021 cooldogedev
+ *  Copyright (c) 2022 cooldogedev
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -26,46 +26,68 @@ declare(strict_types=1);
 
 namespace cooldogedev\BedrockEconomy\query\mysql\player;
 
-use cooldogedev\BedrockEconomy\transaction\Transaction;
+use cooldogedev\BedrockEconomy\transaction\types\TransferTransaction;
 use cooldogedev\libSQL\query\MySQLQuery;
 use mysqli;
 
-final class MySQLPlayerUpdateQuery extends MySQLQuery
+final class MySQLTransferQuery extends MySQLQuery
 {
-    public function __construct(protected string $playerName, protected Transaction $transaction)
+    public function __construct(protected TransferTransaction $transaction)
     {
     }
 
     public function onRun(mysqli $connection): void
     {
-        $playerName = strtolower($this->getPlayerName());
-        $statement = $connection->prepare($this->getQuery());
-        $statement->bind_param("s", $playerName);
+        $senderName = strtolower($this->getTransaction()->getSender());
+        $receiverName = strtolower($this->getTransaction()->getReceiver());
+
+        /*
+         * Deduct the amount from the sender's balance
+         */
+        $statement = $connection->prepare($this->getDeductionQuery());
+        $statement->bind_param("s", $senderName);
         $statement->execute();
         $successful = $statement->affected_rows > 0;
         $statement->close();
 
-        $this->setResult($successful);
+        if (!$successful) {
+            $this->setResult(false);
+            return;
+        }
+
+        /*
+         * Add the amount to the receiver's balance
+         */
+        $statement = $connection->prepare($this->getAdditionQuery());
+        $statement->bind_param("s", $receiverName);
+        $statement->execute();
+        $successful = $statement->affected_rows > 0;
+        $statement->close();
+
+        if (!$successful) {
+            $this->setResult(false);
+            return;
+        }
+
+        $this->setResult(true);
     }
 
-    public function getPlayerName(): string
+    public function getTransaction(): TransferTransaction
     {
-        return $this->playerName;
+        return $this->transaction;
     }
 
-    public function getQuery(): string
+    public function getDeductionQuery(): string
     {
-        $statement = match ($this->getTransaction()->getType()) {
-            Transaction::TRANSACTION_TYPE_INCREMENT => $this->getTransaction()->getBalanceCap() !== null ? "MIN (balance + " . $this->getTransaction()->getValue() . ", " . $this->getTransaction()->getBalanceCap() . ")" : "balance + " . $this->getTransaction()->getValue(),
-            Transaction::TRANSACTION_TYPE_DECREMENT => "MAX (balance - " . $this->getTransaction()->getValue() . ", 0)",
-            Transaction::TRANSACTION_TYPE_SET => $this->getTransaction()->getBalanceCap() !== null ? "MIN (" . $this->getTransaction()->getValue() . ", " . $this->getTransaction()->getBalanceCap() . ")" : $this->getTransaction()->getValue(),
-        };
+        $statement = "MAX (balance - " . $this->getTransaction()->getAmount() . ", 0)";
 
         return "UPDATE " . $this->getTable() . " SET balance = " . $statement . " WHERE username = ?";
     }
 
-    public function getTransaction(): Transaction
+    public function getAdditionQuery(): string
     {
-        return $this->transaction;
+        $statement = "MIN (balance + " . $this->getTransaction()->getAmount() . ", 0)";
+
+        return "UPDATE " . $this->getTable() . " SET balance = " . $statement . " WHERE username = ?";
     }
 }

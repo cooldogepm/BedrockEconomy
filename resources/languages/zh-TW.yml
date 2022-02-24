@@ -55,21 +55,21 @@ commands:
   add-balance:
     name: addbalance
     description: 增加某人的餘額
-    usage: "&c用法為 /addbalance [玩家：文字] <金額：數字>"
+    usage: "&c用法為 /addbalance <玩家：文字> <金額：數字>"
     aliases: [ ]
   remove-balance:
     name: removebalance
     description: 減少某人的餘額
-    usage: "&c用法為 /removebalance [玩家：文字] <金額：數字>"
+    usage: "&c用法為 /removebalance <玩家：文字> <金額：數字>"
     aliases: [ ]
   set-balance:
     name: setbalance
     description: 設置某人的餘額
-    usage: "&c用法為 /setbalance [玩家：文字] <金額：數字>"
+    usage: "&c用法為 /setbalance <玩家：文字> <金額：數字>"
     aliases: [ ]
   delete-account:
     name: deleteaccount
     description: 刪除帳戶
-    usage: "&c用法為 /deleteaccount [玩家：文字]"
+    usage: "&c用法為 /deleteaccount <玩家：文字>"
     aliases: [ ]
 ...

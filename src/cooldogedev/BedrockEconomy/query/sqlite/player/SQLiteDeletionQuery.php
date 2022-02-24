@@ -1,7 +1,7 @@
 <?php
 
 /**
- *  Copyright (c) 2021 cooldogedev
+ *  Copyright (c) 2022 cooldogedev
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -24,45 +24,34 @@
 
 declare(strict_types=1);
 
-namespace cooldogedev\BedrockEconomy\query\mysql\player;
+namespace cooldogedev\BedrockEconomy\query\sqlite\player;
 
-use cooldogedev\libSQL\query\MySQLQuery;
-use mysqli;
+use cooldogedev\libSQL\query\SQLiteQuery;
+use SQLite3;
 
-final class MySQLPlayerCreationQuery extends MySQLQuery
+final class SQLiteDeletionQuery extends SQLiteQuery
 {
-    public function __construct(
-        protected string $playerName,
-        protected int    $balance
-    )
+    public function __construct(protected string $playerName)
     {
     }
 
-    public function onRun(mysqli $connection): void
+    public function onRun(SQLite3 $connection): void
     {
-        $playerName = strtolower($this->getPlayerName());
-        $balance = $this->getBalance();
         $statement = $connection->prepare($this->getQuery());
-        $statement->bind_param("ss", $playerName, $balance);
+        $statement->bindValue(":username", strtolower($this->getPlayerName()));
         $statement->execute();
-        $successful = $statement->affected_rows > 0;
         $statement->close();
 
-        $this->setResult($successful);
+        $this->setResult($connection->changes() > 0);
+    }
+
+    public function getQuery(): string
+    {
+        return "DELETE FROM " . $this->getTable() . " WHERE username = :username";
     }
 
     public function getPlayerName(): string
     {
         return $this->playerName;
-    }
-
-    public function getBalance(): int
-    {
-        return $this->balance;
-    }
-
-    public function getQuery(): string
-    {
-        return "INSERT IGNORE INTO " . $this->getTable() . " (username, balance) VALUES (?, ?)";
     }
 }

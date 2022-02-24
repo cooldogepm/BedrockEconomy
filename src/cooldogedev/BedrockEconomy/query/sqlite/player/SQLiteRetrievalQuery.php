@@ -1,7 +1,7 @@
 <?php
 
 /**
- *  Copyright (c) 2021 cooldogedev
+ *  Copyright (c) 2022 cooldogedev
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -29,37 +29,29 @@ namespace cooldogedev\BedrockEconomy\query\sqlite\player;
 use cooldogedev\libSQL\query\SQLiteQuery;
 use SQLite3;
 
-final class SQLiteBulkPlayersRetrievalQuery extends SQLiteQuery
+final class SQLiteRetrievalQuery extends SQLiteQuery
 {
-    public function __construct(protected ?int $limit = null, protected ?int $offset = null)
+    public function __construct(protected string $playerName)
     {
     }
 
     public function onRun(SQLite3 $connection): void
     {
-        $players = [];
-        $result = $connection->query($this->getQuery());
-        if ($result) {
-            while ($player = $result->fetchArray(SQLITE3_ASSOC)) {
-                $players[] = $player;
-            }
-        }
+        $statement = $connection->prepare($this->getQuery());
+        $statement->bindValue(":username", strtolower($this->getPlayerName()));
+        $result = $statement->execute()?->fetchArray(SQLITE3_ASSOC) ?: null;
+        $statement->close();
 
-        $this->setResult($players);
+        $this->setResult($result);
     }
 
     public function getQuery(): string
     {
-        return $this->getLimit() ? "SELECT * FROM " . $this->getTable() . " ORDER BY balance DESC LIMIT " . $this->getLimit() . " OFFSET " . ($this->getOffset() ?? 0) : "SELECT * FROM " . $this->getTable();
+        return "SELECT * FROM " . $this->getTable() . " WHERE username = :username";
     }
 
-    public function getLimit(): ?int
+    public function getPlayerName(): string
     {
-        return $this->limit;
-    }
-
-    public function getOffset(): ?int
-    {
-        return $this->offset;
+        return $this->playerName;
     }
 }

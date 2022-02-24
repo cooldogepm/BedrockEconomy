@@ -1,7 +1,7 @@
 <?php
 
 /**
- *  Copyright (c) 2021 cooldogedev
+ *  Copyright (c) 2022 cooldogedev
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -24,40 +24,11 @@
 
 declare(strict_types=1);
 
-namespace cooldogedev\BedrockEconomy\query\sqlite\player;
+namespace cooldogedev\BedrockEconomy\event\transaction;
 
-use cooldogedev\libSQL\query\SQLiteQuery;
-use SQLite3;
-
-final class SQLitePlayerCreationQuery extends SQLiteQuery
+/**
+ * This event is ALWAYS called before a transaction is submitted to the database.
+ */
+final class TransactionSubmitEvent extends TransactionEvent
 {
-    public function __construct(protected string $playerName, protected int $balance)
-    {
-    }
-
-    public function onRun(SQLite3 $connection): void
-    {
-        $statement = $connection->prepare($this->getQuery());
-        $statement->bindValue(":username", strtolower($this->getPlayerName()));
-        $statement->bindValue(":balance", $this->getBalance());
-        $statement->execute();
-        $statement->close();
-
-        $this->setResult($connection->changes() > 0);
-    }
-
-    public function getQuery(): string
-    {
-        return "INSERT OR IGNORE INTO " . $this->getTable() . " (username, balance) VALUES (:username, :balance)";
-    }
-
-    public function getPlayerName(): string
-    {
-        return $this->playerName;
-    }
-
-    public function getBalance(): int
-    {
-        return $this->balance;
-    }
 }

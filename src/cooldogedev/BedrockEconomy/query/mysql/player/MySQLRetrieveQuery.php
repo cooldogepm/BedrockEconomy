@@ -1,7 +1,7 @@
 <?php
 
 /**
- *  Copyright (c) 2021 cooldogedev
+ *  Copyright (c) 2022 cooldogedev
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -24,34 +24,36 @@
 
 declare(strict_types=1);
 
-namespace cooldogedev\BedrockEconomy\query\sqlite\player;
+namespace cooldogedev\BedrockEconomy\query\mysql\player;
 
-use cooldogedev\libSQL\query\SQLiteQuery;
-use SQLite3;
+use cooldogedev\libSQL\query\MySQLQuery;
+use mysqli;
 
-final class SQLitePlayerDeletionQuery extends SQLiteQuery
+final class MySQLRetrieveQuery extends MySQLQuery
 {
     public function __construct(protected string $playerName)
     {
     }
 
-    public function onRun(SQLite3 $connection): void
+    public function onRun(mysqli $connection): void
     {
+        $playerName = strtolower($this->getPlayerName());
         $statement = $connection->prepare($this->getQuery());
-        $statement->bindValue(":username", strtolower($this->getPlayerName()));
+        $statement->bind_param("s", $playerName);
         $statement->execute();
+        $result = $statement->get_result()?->fetch_assoc();
         $statement->close();
 
-        $this->setResult($connection->changes() > 0);
-    }
-
-    public function getQuery(): string
-    {
-        return "DELETE FROM " . $this->getTable() . " WHERE username = :username";
+        $this->setResult($result);
     }
 
     public function getPlayerName(): string
     {
         return $this->playerName;
+    }
+
+    public function getQuery(): string
+    {
+        return "SELECT * FROM " . $this->getTable() . " WHERE username = ?";
     }
 }

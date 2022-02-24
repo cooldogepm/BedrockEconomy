@@ -1,7 +1,7 @@
 <?php
 
 /**
- *  Copyright (c) 2021 cooldogedev
+ *  Copyright (c) 2022 cooldogedev
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -24,28 +24,42 @@
 
 declare(strict_types=1);
 
-namespace cooldogedev\BedrockEconomy\event;
+namespace cooldogedev\BedrockEconomy\query\sqlite\player;
 
-use cooldogedev\BedrockEconomy\transaction\Transaction;
-use pocketmine\event\Cancellable;
-use pocketmine\event\CancellableTrait;
-use pocketmine\event\Event;
+use cooldogedev\libSQL\query\SQLiteQuery;
+use SQLite3;
 
-final class TransactionSubmitEvent extends Event implements Cancellable
+final class SQLiteBulkRetrieveQuery extends SQLiteQuery
 {
-    use CancellableTrait;
-
-    public function __construct(protected string $account, protected Transaction $transaction)
+    public function __construct(protected ?int $limit = null, protected ?int $offset = null)
     {
     }
 
-    public function getAccount(): string
+    public function onRun(SQLite3 $connection): void
     {
-        return $this->account;
+        $players = [];
+        $result = $connection->query($this->getQuery());
+        if ($result) {
+            while ($player = $result->fetchArray(SQLITE3_ASSOC)) {
+                $players[] = $player;
+            }
+        }
+
+        $this->setResult($players);
     }
 
-    public function getTransaction(): Transaction
+    public function getQuery(): string
     {
-        return $this->transaction;
+        return $this->getLimit() ? "SELECT * FROM " . $this->getTable() . " ORDER BY balance DESC LIMIT " . $this->getLimit() . " OFFSET " . ($this->getOffset() ?? 0) : "SELECT * FROM " . $this->getTable();
+    }
+
+    public function getLimit(): ?int
+    {
+        return $this->limit;
+    }
+
+    public function getOffset(): ?int
+    {
+        return $this->offset;
     }
 }

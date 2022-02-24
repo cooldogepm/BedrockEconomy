@@ -7,7 +7,7 @@ projects:
     path: ""
     libs:
       - src: cooldogedev/libSQL/libSQL
-        version: ^0.1.0
+        version: ^0.1.1
       - src: CortexPE/Commando/Commando
         version: ^3.0.0
         branch: PM4
@@ -15,3 +15,4 @@ projects:
       phpstan: false
 #      syntaxError: false
 ...
+

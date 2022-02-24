@@ -24,16 +24,45 @@
 
 declare(strict_types=1);
 
-namespace cooldogedev\BedrockEconomy\language;
+namespace cooldogedev\BedrockEconomy\query\mysql\player;
 
-final class TranslationKeys
+use cooldogedev\libSQL\query\MySQLQuery;
+use mysqli;
+
+final class MySQLCreationQuery extends MySQLQuery
 {
-    public const RECEIVER = "{RECEIVER}";
-    public const PAYER = "{PAYER}";
-    public const AMOUNT = "{AMOUNT}";
-    public const LIMIT = "{LIMIT}";
-    public const PLAYER = "{PLAYER}";
-    public const CURRENCY_SYMBOL = "{CURRENCY_SYMBOL}";
-    public const CURRENCY_NAME = "{CURRENCY_NAME}";
-    public const POSITION = "{POSITION}";
+    public function __construct(
+        protected string $playerName,
+        protected int    $balance
+    )
+    {
+    }
+
+    public function onRun(mysqli $connection): void
+    {
+        $playerName = strtolower($this->getPlayerName());
+        $balance = $this->getBalance();
+        $statement = $connection->prepare($this->getQuery());
+        $statement->bind_param("ss", $playerName, $balance);
+        $statement->execute();
+        $successful = $statement->affected_rows > 0;
+        $statement->close();
+
+        $this->setResult($successful);
+    }
+
+    public function getPlayerName(): string
+    {
+        return $this->playerName;
+    }
+
+    public function getBalance(): int
+    {
+        return $this->balance;
+    }
+
+    public function getQuery(): string
+    {
+        return "INSERT IGNORE INTO " . $this->getTable() . " (username, balance) VALUES (?, ?)";
+    }
 }

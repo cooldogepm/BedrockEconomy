@@ -1,7 +1,7 @@
 <?php
 
 /**
- *  Copyright (c) 2021 cooldogedev
+ *  Copyright (c) 2022 cooldogedev
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -27,6 +27,7 @@ declare(strict_types=1);
 namespace cooldogedev\BedrockEconomy;
 
 use cooldogedev\BedrockEconomy\account\AccountManager;
+use cooldogedev\BedrockEconomy\addon\AddonManager;
 use cooldogedev\BedrockEconomy\api\BedrockEconomyAPI;
 use cooldogedev\BedrockEconomy\command\admin\AddBalanceCommand;
 use cooldogedev\BedrockEconomy\command\admin\DeleteAccountCommand;
@@ -40,8 +41,8 @@ use cooldogedev\BedrockEconomy\currency\CurrencyManager;
 use cooldogedev\BedrockEconomy\language\LanguageManager;
 use cooldogedev\BedrockEconomy\listener\PlayerListener;
 use cooldogedev\BedrockEconomy\query\QueryManager;
+use cooldogedev\BedrockEconomy\transaction\TransactionManager;
 use cooldogedev\libSQL\ConnectionPool;
-use CortexPE\Commando\BaseCommand;
 use pocketmine\plugin\PluginBase;
 use pocketmine\utils\SingletonTrait;
 use pocketmine\utils\TextFormat;
@@ -57,10 +58,17 @@ final class BedrockEconomy extends PluginBase
     protected CurrencyManager $currencyManager;
     protected ConnectionPool $connector;
     protected AccountManager $accountManager;
+    protected TransactionManager $transactionManager;
+    protected AddonManager $addonManager;
 
     public static function getInstance(): BedrockEconomy
     {
         return BedrockEconomy::_getInstance();
+    }
+
+    public function getAddonManager(): AddonManager
+    {
+        return $this->addonManager;
     }
 
     public function getAccountManager(): AccountManager
@@ -71,6 +79,11 @@ final class BedrockEconomy extends PluginBase
     public function getAPI(): BedrockEconomyAPI
     {
         return BedrockEconomyAPI::getInstance();
+    }
+
+    public function getTransactionManager(): TransactionManager
+    {
+        return $this->transactionManager;
     }
 
     protected function onLoad(): void
@@ -88,7 +101,9 @@ final class BedrockEconomy extends PluginBase
         $this->configManager = new ConfigManager($this);
         $this->currencyManager = new CurrencyManager($this);
         $this->connector = new ConnectionPool($this, $this->getConfigManager()->getDatabaseConfig());
+        $this->transactionManager = new TransactionManager($this);
         $this->accountManager = new AccountManager($this);
+        $this->addonManager = new AddonManager($this);
 
         QueryManager::setIsMySQL($this->getConfigManager()->getDatabaseConfig()["provider"] === ConnectionPool::DATA_PROVIDER_MYSQL);
 
@@ -97,6 +112,13 @@ final class BedrockEconomy extends PluginBase
         $this->getServer()->getPluginManager()->registerEvents(new PlayerListener($this), $this);
 
         $this->initializeCommands();
+    }
+
+    protected function onDisable(): void
+    {
+        foreach ($this->getAddonManager()->getAddons() as $addon) {
+            $addon->setEnabled(false);
+        }
     }
 
     public function getConfigManager(): ConfigManager
@@ -116,33 +138,32 @@ final class BedrockEconomy extends PluginBase
 
     protected function initializeCommands(): void
     {
-        $commandsConfig = LanguageManager::getArray("commands");
+        $commands = [];
 
-        $commands = array_map(
-            function (array $data): array {
-                $className = match ($data["name"]) {
-                    "balance" => BalanceCommand::class,
-                    "pay" => PayCommand::class,
-                    "topbalance" => TopBalanceCommand::class,
-                    "addbalance" => AddBalanceCommand::class,
-                    "deleteaccount" => DeleteAccountCommand::class,
-                    "removebalance" => RemoveBalanceCommand::class,
-                    "setbalance" => SetBalanceCommand::class,
-                };
-                return [$data, $className];
-            },
-            $commandsConfig
-        );
+        $commandsData = LanguageManager::getArray("commands");
 
-        $commands = array_map(function (array $commandData): BaseCommand {
-            [$data, $className] = $commandData;
-            /**
-             * @var BaseCommand $command
-             */
-            $command = new $className($this, $data["name"], $data["description"], $data["aliases"]);
-            $command->setUsage(TextFormat::colorize($data["usage"]));
-            return $command;
-        }, $commands);
+        $classMap = [
+            "balance" => BalanceCommand::class,
+            "pay" => PayCommand::class,
+            "top-balance" => TopBalanceCommand::class,
+            "add-balance" => AddBalanceCommand::class,
+            "remove-balance" => RemoveBalanceCommand::class,
+            "set-balance" => SetBalanceCommand::class,
+            "delete-account" => DeleteAccountCommand::class
+        ];
+
+        foreach ($commandsData as $key => $commandData) {
+            $className = $classMap[$key] ?? null;
+
+            if ($className === null) {
+                continue;
+            }
+
+            $command = new $className($this, $commandData["name"], $commandData["description"], $commandData["aliases"]);
+            $command->setUsage(TextFormat::colorize($commandData["usage"]));
+
+            $commands[] = $command;
+        }
 
         $this->getServer()->getCommandMap()->registerAll("bedrockeconomy", $commands);
     }
