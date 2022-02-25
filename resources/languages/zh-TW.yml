@@ -36,7 +36,7 @@ top-balance-header: "&6最高餘額帳戶"
 top-balance-row-template: "&b{POSITION}. &a{PLAYER} &7: &b{AMOUNT}"
 top-balance-error: "&c未能檢索到最高餘額帳戶！"
 # Called when users attempt to edit someone's balance and the database doesn't update it
-update-error: "&cFailed to update {PLAYER}'s balance, no changes were made.
+update-error: "&cFailed to update {PLAYER}'s balance, no changes were made."
 
 commands:
   balance:
