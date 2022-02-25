@@ -26,10 +26,11 @@ declare(strict_types=1);
 
 namespace cooldogedev\BedrockEconomy\query\sqlite\player;
 
+use cooldogedev\BedrockEconomy\query\ErrorCodes;
 use cooldogedev\libSQL\query\SQLiteQuery;
 use SQLite3;
 
-final class SQLiteRetrievalQuery extends SQLiteQuery
+final class SQLiteRetrieveQuery extends SQLiteQuery
 {
     public function __construct(protected string $playerName)
     {
@@ -42,7 +43,12 @@ final class SQLiteRetrievalQuery extends SQLiteQuery
         $result = $statement->execute()?->fetchArray(SQLITE3_ASSOC) ?: null;
         $statement->close();
 
-        $this->setResult($result);
+        if ($result === null) {
+            $this->setError(ErrorCodes::ERROR_CODE_TARGET_NOT_FOUND);
+            $this->setResult(null);
+        } else {
+            $this->setResult($result);
+        }
     }
 
     public function getQuery(): string

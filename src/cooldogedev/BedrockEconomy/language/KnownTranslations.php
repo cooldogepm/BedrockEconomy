@@ -47,4 +47,5 @@ final class KnownTranslations
     public const TOP_BALANCE_HEADER = "top-balance-header";
     public const TOP_BALANCE_ROW_TEMPLATE = "top-balance-row-template";
     public const TOP_BALANCE_ERROR = "top-balance-error";
+    public const UPDATE_ERROR = "update-error";
 }

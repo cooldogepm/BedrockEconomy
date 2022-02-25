@@ -26,6 +26,7 @@ declare(strict_types=1);
 
 namespace cooldogedev\BedrockEconomy\query\mysql\player;
 
+use cooldogedev\BedrockEconomy\query\ErrorCodes;
 use cooldogedev\BedrockEconomy\transaction\types\TransferTransaction;
 use cooldogedev\libSQL\query\MySQLQuery;
 use mysqli;
@@ -51,6 +52,7 @@ final class MySQLTransferQuery extends MySQLQuery
         $statement->close();
 
         if (!$successful) {
+            $this->setError(ErrorCodes::ERROR_CODE_TARGET_NOT_FOUND);
             $this->setResult(false);
             return;
         }
@@ -65,11 +67,11 @@ final class MySQLTransferQuery extends MySQLQuery
         $statement->close();
 
         if (!$successful) {
+            $this->setError(ErrorCodes::ERROR_CODE_TARGET_NOT_FOUND);
             $this->setResult(false);
-            return;
+        } else {
+            $this->setResult(true);
         }
-
-        $this->setResult(true);
     }
 
     public function getTransaction(): TransferTransaction
@@ -77,16 +79,18 @@ final class MySQLTransferQuery extends MySQLQuery
         return $this->transaction;
     }
 
-    public function getDeductionQuery(): string
+    public function getAdditionQuery(): string
     {
-        $statement = "MAX (balance - " . $this->getTransaction()->getAmount() . ", 0)";
+        $amount = $this->getTransaction()->getAmount();
+        $statement = "balance + $amount";
 
         return "UPDATE " . $this->getTable() . " SET balance = " . $statement . " WHERE username = ?";
     }
 
-    public function getAdditionQuery(): string
+    public function getDeductionQuery(): string
     {
-        $statement = "MIN (balance + " . $this->getTransaction()->getAmount() . ", 0)";
+        $amount = $this->getTransaction()->getAmount();
+        $statement = "balance - $amount";
 
         return "UPDATE " . $this->getTable() . " SET balance = " . $statement . " WHERE username = ?";
     }

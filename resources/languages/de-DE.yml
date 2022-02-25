@@ -35,6 +35,8 @@ no-account: "&cDu hast kein Konto!"
 top-balance-header: "&6TOP KONTOSTÄNDE"
 top-balance-row-template: "&b{POSITION}. &a{PLAYER} &7: &b{AMOUNT}"
 top-balance-error: "&cTop-Kontostände konnten nicht abgerufen werden!"
+# Called when users attempt to edit someone's balance and the database doesn't update it
+update-error: "&cFailed to update {PLAYER}'s balance, no changes were made."
 
 commands:
   balance:

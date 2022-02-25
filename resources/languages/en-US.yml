@@ -35,6 +35,8 @@ no-account: "&cYou don't have an account!"
 top-balance-header: "&6TOP BALANCES"
 top-balance-row-template: "&b{POSITION}. &a{PLAYER} &7: &b{AMOUNT}"
 top-balance-error: "&cFailed to retrieve top balances!"
+# Called when users attempt to edit someone's balance and the database doesn't update it
+update-error: "&cFailed to update {PLAYER}'s balance, no changes were made."
 
 commands:
   balance:

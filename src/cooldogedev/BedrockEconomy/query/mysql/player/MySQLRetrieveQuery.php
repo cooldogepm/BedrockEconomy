@@ -26,6 +26,7 @@ declare(strict_types=1);
 
 namespace cooldogedev\BedrockEconomy\query\mysql\player;
 
+use cooldogedev\BedrockEconomy\query\ErrorCodes;
 use cooldogedev\libSQL\query\MySQLQuery;
 use mysqli;
 
@@ -44,7 +45,12 @@ final class MySQLRetrieveQuery extends MySQLQuery
         $result = $statement->get_result()?->fetch_assoc();
         $statement->close();
 
-        $this->setResult($result);
+        if ($result === null) {
+            $this->setError(ErrorCodes::ERROR_CODE_TARGET_NOT_FOUND);
+            $this->setResult(null);
+        } else {
+            $this->setResult($result);
+        }
     }
 
     public function getPlayerName(): string

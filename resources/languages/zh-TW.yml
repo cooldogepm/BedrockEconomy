@@ -1,40 +1,42 @@
 ---
- # 控制台使用玩家專用指令
- command-player-only: "&c此命令只能在遊戲中運行！"
- # 嘗試與不存在的帳戶互動
- player-not-found: "&f{PLAYER} &c不存在！"
- # 在餘額不足的情況下嘗試付款
- balance-insufficient: "&c你沒有足夠的餘額！"
- # 嘗試向已達到餘額上限的用戶付款
- balance-cap: "&f{PLAYER} &c已經達到餘額上限 {LIMIT}！"
- # 成功支付
- payment-send: "&a你已經向 &f{RECEIVER}&a 支付了 {CURRENCY_SYMBOL}{AMOUNT}！"
- # 成功收款
- payment-receive: "&a你從 &f{PAYER}&a 收到了 {CURRENCY_SYMBOL}{AMOUNT}！"
- # 付款金額超過上限
- payment-send-exceed-limit: "&c你的付款金額超過上限 &f{LIMIT} ！"
- # 付款金額超過下限
- payment-send-insufficient: "&c你的付款金額超過下限 &f{LIMIT} ！"
- # 嘗試向自己付款
- payment-send-self: "&c你不能向自己付款！"
- # 當用戶試圖查看自己的餘額
- balance-info: "&a你的餘額是 &f{CURRENCY_SYMBOL}{AMOUNT}"
- # 當用戶試圖查看某人的餘額
- balance-info-other: "&a{PLAYER} 的餘額為 &f{CURRENCY_SYMBOL}{AMOUNT}"
- # 增加某人的餘額
- balance-add: "&a您已將 {CURRENCY_SYMBOL}{AMOUNT} 添加到 &f{PLAYER}&a！"
- # 減少某人的餘額
- balance-remove: "&a你已經從 &f{PLAYER}&a 中移除了 {CURRENCY_SYMBOL}{AMOUNT}！"
- # 設置某人的餘額
- balance-set: "&a您已將 &f{PLAYER}&a 的餘額設置為 {CURRENCY_SYMBOL}{AMOUNT}！"
- # 刪除某人帳號時
- account-delete: "&a你已經刪除了 &f{PLAYER}&a 的帳號！"
- # 當用戶執行命令卻在資料庫中沒有帳戶
- no-account: "&c你沒有帳戶！"
- # 當用戶試圖查看擁有餘額最高的前數個帳戶（排行榜）
- top-balance-header: "&6最高餘額帳戶"
- top-balance-row-template: "&b{POSITION}. &a{PLAYER} &7: &b{AMOUNT}"
- top-balance-error: "&c未能檢索到最高餘額帳戶！"
+# 控制台使用玩家專用指令
+command-player-only: "&c此命令只能在遊戲中運行！"
+# 嘗試與不存在的帳戶互動
+player-not-found: "&f{PLAYER} &c不存在！"
+# 在餘額不足的情況下嘗試付款
+balance-insufficient: "&c你沒有足夠的餘額！"
+# 嘗試向已達到餘額上限的用戶付款
+balance-cap: "&f{PLAYER} &c已經達到餘額上限 {LIMIT}！"
+# 成功支付
+payment-send: "&a你已經向 &f{RECEIVER}&a 支付了 {CURRENCY_SYMBOL}{AMOUNT}！"
+# 成功收款
+payment-receive: "&a你從 &f{PAYER}&a 收到了 {CURRENCY_SYMBOL}{AMOUNT}！"
+# 付款金額超過上限
+payment-send-exceed-limit: "&c你的付款金額超過上限 &f{LIMIT} ！"
+# 付款金額超過下限
+payment-send-insufficient: "&c你的付款金額超過下限 &f{LIMIT} ！"
+# 嘗試向自己付款
+payment-send-self: "&c你不能向自己付款！"
+# 當用戶試圖查看自己的餘額
+balance-info: "&a你的餘額是 &f{CURRENCY_SYMBOL}{AMOUNT}"
+# 當用戶試圖查看某人的餘額
+balance-info-other: "&a{PLAYER} 的餘額為 &f{CURRENCY_SYMBOL}{AMOUNT}"
+# 增加某人的餘額
+balance-add: "&a您已將 {CURRENCY_SYMBOL}{AMOUNT} 添加到 &f{PLAYER}&a！"
+# 減少某人的餘額
+balance-remove: "&a你已經從 &f{PLAYER}&a 中移除了 {CURRENCY_SYMBOL}{AMOUNT}！"
+# 設置某人的餘額
+balance-set: "&a您已將 &f{PLAYER}&a 的餘額設置為 {CURRENCY_SYMBOL}{AMOUNT}！"
+# 刪除某人帳號時
+account-delete: "&a你已經刪除了 &f{PLAYER}&a 的帳號！"
+# 當用戶執行命令卻在資料庫中沒有帳戶
+no-account: "&c你沒有帳戶！"
+# 當用戶試圖查看擁有餘額最高的前數個帳戶（排行榜）
+top-balance-header: "&6最高餘額帳戶"
+top-balance-row-template: "&b{POSITION}. &a{PLAYER} &7: &b{AMOUNT}"
+top-balance-error: "&c未能檢索到最高餘額帳戶！"
+# Called when users attempt to edit someone's balance and the database doesn't update it
+update-error: "&cFailed to update {PLAYER}'s balance, no changes were made.
 
 commands:
   balance:

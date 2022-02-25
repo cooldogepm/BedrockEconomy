@@ -26,6 +26,7 @@ declare(strict_types=1);
 
 namespace cooldogedev\BedrockEconomy\query\mysql\player;
 
+use cooldogedev\BedrockEconomy\query\ErrorCodes;
 use cooldogedev\libSQL\query\MySQLQuery;
 use mysqli;
 
@@ -44,7 +45,12 @@ final class MySQLDeletionQuery extends MySQLQuery
         $successful = $statement->affected_rows > 0;
         $statement->close();
 
-        $this->setResult($successful);
+        if (!$successful) {
+            $this->setError(ErrorCodes::ERROR_CODE_TARGET_NOT_FOUND);
+            $this->setResult(false);
+        } else {
+            $this->setResult(true);
+        }
     }
 
     public function getPlayerName(): string

@@ -26,6 +26,7 @@ declare(strict_types=1);
 
 namespace cooldogedev\BedrockEconomy\query\sqlite\player;
 
+use cooldogedev\BedrockEconomy\query\ErrorCodes;
 use cooldogedev\BedrockEconomy\transaction\types\TransferTransaction;
 use cooldogedev\libSQL\query\SQLiteQuery;
 use SQLite3;
@@ -51,6 +52,7 @@ final class SQLiteTransferQuery extends SQLiteQuery
         $statement->close();
 
         if ($connection->changes() <= 0) {
+            $this->setError(ErrorCodes::ERROR_CODE_TARGET_NOT_FOUND . ": " . $senderName);
             $this->setResult(false);
             return;
         }
@@ -64,12 +66,12 @@ final class SQLiteTransferQuery extends SQLiteQuery
         $statement->execute()?->finalize();
         $statement->close();
 
-        if ($connection->changes() <= 0) {
+        if ($connection->changes() === 0) {
+            $this->setError(ErrorCodes::ERROR_CODE_TARGET_NOT_FOUND . ": " . $receiverName);
             $this->setResult(false);
-            return;
+        } else {
+            $this->setResult(true);
         }
-
-        $this->setResult(true);
     }
 
     public function getTransaction(): TransferTransaction
