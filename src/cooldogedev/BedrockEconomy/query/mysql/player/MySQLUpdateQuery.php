@@ -26,6 +26,7 @@ declare(strict_types=1);
 
 namespace cooldogedev\BedrockEconomy\query\mysql\player;
 
+use cooldogedev\BedrockEconomy\query\ErrorCodes;
 use cooldogedev\BedrockEconomy\transaction\Transaction;
 use cooldogedev\BedrockEconomy\transaction\types\UpdateTransaction;
 use cooldogedev\libSQL\query\MySQLQuery;
@@ -40,13 +41,34 @@ final class MySQLUpdateQuery extends MySQLQuery
     public function onRun(mysqli $connection): void
     {
         $playerName = strtolower($this->getTransaction()->getTarget());
-        $statement = $connection->prepare($this->getQuery());
+
+        $statement = $connection->prepare($this->getRetrieveQuery());
         $statement->bind_param("s", $playerName);
         $statement->execute();
-        $successful = $statement->affected_rows > 0;
+        $data = $statement->get_result()?->fetch_assoc();
         $statement->close();
 
-        $this->setResult($successful);
+        if (!$data) {
+            $this->setError(ErrorCodes::ERROR_CODE_TARGET_NOT_FOUND);
+            $this->setResult(false);
+            return;
+        }
+
+        $statement = $connection->prepare($this->getQuery($data["balance"]));
+        $statement->bind_param("s", $playerName);
+        $statement->execute();
+
+        $successful = $statement->affected_rows > 0;
+
+        $statement->close();
+
+        if (!$successful) {
+            $this->setError(ErrorCodes::ERROR_CODE_OPERATION_FAILED);
+            $this->setResult(false);
+            return;
+        }
+
+        $this->setResult(true);
     }
 
     public function getTransaction(): UpdateTransaction
@@ -54,12 +76,25 @@ final class MySQLUpdateQuery extends MySQLQuery
         return $this->transaction;
     }
 
-    public function getQuery(): string
+    public function getRetrieveQuery(): string
     {
-        $statement = match ($this->getTransaction()->getType()) {
-            Transaction::TRANSACTION_TYPE_INCREMENT => $this->getTransaction()->getBalanceCap() !== null ? "MIN (balance + " . $this->getTransaction()->getValue() . ", " . $this->getTransaction()->getBalanceCap() . ")" : "balance + " . $this->getTransaction()->getValue(),
-            Transaction::TRANSACTION_TYPE_DECREMENT => "MAX (balance - " . $this->getTransaction()->getValue() . ", 0)",
-            Transaction::TRANSACTION_TYPE_SET => $this->getTransaction()->getBalanceCap() !== null ? "MIN (" . $this->getTransaction()->getValue() . ", " . $this->getTransaction()->getBalanceCap() . ")" : $this->getTransaction()->getValue(),
+        return "SELECT * FROM " . $this->getTable() . " WHERE username = ?";
+    }
+
+    public function getQuery(int $balance): string
+    {
+        $type = $this->getTransaction()->getType();
+        $value = $this->getTransaction()->getValue();
+        $balanceCap = $this->getTransaction()->getBalanceCap();
+
+        if ($balanceCap !== null && $value > $balanceCap) {
+            $value = $balanceCap;
+        }
+
+        $statement = match ($type) {
+            Transaction::TRANSACTION_TYPE_INCREMENT => $balanceCap !== null ? "IF (balance + $value <= $balanceCap, balance + $value, $balanceCap)" : "balance + $value",
+            Transaction::TRANSACTION_TYPE_DECREMENT => $balance - $value >= 0 ? "balance - $value" : "balance - $balance",
+            Transaction::TRANSACTION_TYPE_SET => $value,
         };
 
         return "UPDATE " . $this->getTable() . " SET balance = " . $statement . " WHERE username = ?";

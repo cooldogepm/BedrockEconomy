@@ -49,7 +49,7 @@ abstract class Transaction extends Threaded implements JsonSerializable
     )
     {
         $this->id = $id ?? TransactionManager::getNextId();
-        $this->balanceCap = $balanceCap ?? BedrockEconomy::getInstance()->getCurrencyManager()->getBalanceCap();
+        $this->balanceCap = $balanceCap ?? BedrockEconomy::getInstance()->getCurrencyManager()->hasBalanceCap() ? BedrockEconomy::getInstance()->getCurrencyManager()->getBalanceCap() : null;
         $this->issueDate = $issueDate ?? time();
     }
 

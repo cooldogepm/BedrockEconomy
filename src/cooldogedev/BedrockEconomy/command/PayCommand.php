@@ -76,6 +76,28 @@ final class PayCommand extends BaseCommand
 
         $amount = (int)floor($amount);
 
+        if ($amount < $this->getOwningPlugin()->getCurrencyManager()->getMinimumPayment()) {
+            $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::PAYMENT_SEND_INSUFFICIENT, [
+                    TranslationKeys::AMOUNT => $amount,
+                    TranslationKeys::LIMIT => $this->getOwningPlugin()->getCurrencyManager()->getMinimumPayment(),
+                    TranslationKeys::CURRENCY_NAME => $this->getOwningPlugin()->getCurrencyManager()->getName(),
+                    TranslationKeys::CURRENCY_SYMBOL => $this->getOwningPlugin()->getCurrencyManager()->getSymbol()
+                ]
+            ));
+            return;
+        }
+
+        if ($amount > $this->getOwningPlugin()->getCurrencyManager()->getMaximumPayment()) {
+            $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::PAYMENT_SEND_EXCEED_LIMIT, [
+                    TranslationKeys::AMOUNT => $amount,
+                    TranslationKeys::LIMIT => $this->getOwningPlugin()->getCurrencyManager()->getMaximumPayment(),
+                    TranslationKeys::CURRENCY_NAME => $this->getOwningPlugin()->getCurrencyManager()->getName(),
+                    TranslationKeys::CURRENCY_SYMBOL => $this->getOwningPlugin()->getCurrencyManager()->getSymbol()
+                ]
+            ));
+            return;
+        }
+
         BedrockEconomyAPI::getInstance()->getPlayerBalance(
             $sender->getName(),
             ClosureContext::create(
@@ -87,28 +109,6 @@ final class PayCommand extends BaseCommand
 
                     if ($amount > $balance) {
                         $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::BALANCE_INSUFFICIENT));
-                        return $stop();
-                    }
-
-                    if ($amount > $this->getOwningPlugin()->getCurrencyManager()->getMaximumPayment()) {
-                        $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::PAYMENT_SEND_EXCEED_LIMIT, [
-                                TranslationKeys::AMOUNT => $amount,
-                                TranslationKeys::LIMIT => $this->getOwningPlugin()->getCurrencyManager()->getMaximumPayment(),
-                                TranslationKeys::CURRENCY_NAME => $this->getOwningPlugin()->getCurrencyManager()->getName(),
-                                TranslationKeys::CURRENCY_SYMBOL => $this->getOwningPlugin()->getCurrencyManager()->getSymbol()
-                            ]
-                        ));
-                        return $stop();
-                    }
-
-                    if ($amount < $this->getOwningPlugin()->getCurrencyManager()->getMinimumPayment()) {
-                        $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::PAYMENT_SEND_INSUFFICIENT, [
-                                TranslationKeys::AMOUNT => $amount,
-                                TranslationKeys::LIMIT => $this->getOwningPlugin()->getCurrencyManager()->getMinimumPayment(),
-                                TranslationKeys::CURRENCY_NAME => $this->getOwningPlugin()->getCurrencyManager()->getName(),
-                                TranslationKeys::CURRENCY_SYMBOL => $this->getOwningPlugin()->getCurrencyManager()->getSymbol()
-                            ]
-                        ));
                         return $stop();
                     }
 

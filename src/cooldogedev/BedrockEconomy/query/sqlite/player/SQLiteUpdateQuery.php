@@ -26,6 +26,7 @@ declare(strict_types=1);
 
 namespace cooldogedev\BedrockEconomy\query\sqlite\player;
 
+use cooldogedev\BedrockEconomy\query\ErrorCodes;
 use cooldogedev\BedrockEconomy\transaction\Transaction;
 use cooldogedev\BedrockEconomy\transaction\types\UpdateTransaction;
 use cooldogedev\libSQL\query\SQLiteQuery;
@@ -45,7 +46,12 @@ final class SQLiteUpdateQuery extends SQLiteQuery
         $statement->execute()?->finalize();
         $statement->close();
 
-        $this->setResult($connection->changes() > 0);
+        if ($connection->changes() === 0) {
+            $this->setError(ErrorCodes::ERROR_CODE_TARGET_NOT_FOUND);
+            $this->setResult(false);
+        } else {
+            $this->setResult(true);
+        }
     }
 
     public function getQuery(): string

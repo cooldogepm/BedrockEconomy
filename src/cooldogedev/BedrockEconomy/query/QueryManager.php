@@ -36,7 +36,7 @@ use cooldogedev\BedrockEconomy\query\mysql\player\MySQLUpdateQuery;
 use cooldogedev\BedrockEconomy\query\sqlite\player\SQLiteBulkRetrieveQuery;
 use cooldogedev\BedrockEconomy\query\sqlite\player\SQLiteCreationQuery;
 use cooldogedev\BedrockEconomy\query\sqlite\player\SQLiteDeletionQuery;
-use cooldogedev\BedrockEconomy\query\sqlite\player\SQLiteRetrievalQuery;
+use cooldogedev\BedrockEconomy\query\sqlite\player\SQLiteRetrieveQuery;
 use cooldogedev\BedrockEconomy\query\sqlite\player\SQLiteTransferQuery;
 use cooldogedev\BedrockEconomy\query\sqlite\player\SQLiteUpdateQuery;
 use cooldogedev\BedrockEconomy\query\sqlite\SQLiteTableCreationQuery;
@@ -83,7 +83,7 @@ final class QueryManager
 
     public static function getPlayerQuery(string $username): SQLQuery
     {
-        $class = QueryManager::isMySQL() ? MySQLRetrieveQuery::class : SQLiteRetrievalQuery::class;
+        $class = QueryManager::isMySQL() ? MySQLRetrieveQuery::class : SQLiteRetrieveQuery::class;
 
         return new $class($username);
     }

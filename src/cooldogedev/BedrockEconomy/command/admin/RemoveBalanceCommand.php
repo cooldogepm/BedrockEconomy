@@ -26,12 +26,14 @@ declare(strict_types=1);
 
 namespace cooldogedev\BedrockEconomy\command\admin;
 
+use Closure;
 use cooldogedev\BedrockEconomy\api\BedrockEconomyAPI;
 use cooldogedev\BedrockEconomy\BedrockEconomy;
 use cooldogedev\BedrockEconomy\language\KnownTranslations;
 use cooldogedev\BedrockEconomy\language\LanguageManager;
 use cooldogedev\BedrockEconomy\language\TranslationKeys;
 use cooldogedev\BedrockEconomy\permission\BedrockEconomyPermissions;
+use cooldogedev\BedrockEconomy\query\ErrorCodes;
 use cooldogedev\libSQL\context\ClosureContext;
 use CortexPE\Commando\args\IntegerArgument;
 use CortexPE\Commando\args\RawStringArgument;
@@ -39,6 +41,7 @@ use CortexPE\Commando\BaseCommand;
 use Exception;
 use pocketmine\command\CommandSender;
 use pocketmine\plugin\Plugin;
+use pocketmine\utils\Limits;
 
 final class RemoveBalanceCommand extends BaseCommand
 {
@@ -64,13 +67,22 @@ final class RemoveBalanceCommand extends BaseCommand
 
         $amount = (int)floor($amount);
 
+        if (0 > $amount) {
+            $amount = Limits::UINT32_MAX;
+        }
+
         BedrockEconomyAPI::getInstance()->subtractFromPlayerBalance(
             $player,
             $amount,
             ClosureContext::create(
-                function (bool $success) use ($sender, $player, $amount): void {
-                    if (!$success) {
-                        $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::PLAYER_NOT_FOUND, [
+                function (bool $_, Closure $__, ?string $error) use ($sender, $player, $amount): void {
+                    if ($error !== null) {
+                        $translation = match ($error) {
+                            ErrorCodes::ERROR_CODE_TARGET_NOT_FOUND => KnownTranslations::PLAYER_NOT_FOUND,
+                            default => KnownTranslations::UPDATE_ERROR,
+                        };
+
+                        $sender->sendMessage(LanguageManager::getTranslation($translation, [
                                 TranslationKeys::PLAYER => $player
                             ]
                         ));

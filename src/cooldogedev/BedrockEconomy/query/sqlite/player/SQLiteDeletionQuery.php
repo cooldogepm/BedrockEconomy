@@ -26,6 +26,7 @@ declare(strict_types=1);
 
 namespace cooldogedev\BedrockEconomy\query\sqlite\player;
 
+use cooldogedev\BedrockEconomy\query\ErrorCodes;
 use cooldogedev\libSQL\query\SQLiteQuery;
 use SQLite3;
 
@@ -42,7 +43,12 @@ final class SQLiteDeletionQuery extends SQLiteQuery
         $statement->execute();
         $statement->close();
 
-        $this->setResult($connection->changes() > 0);
+        if ($connection->changes() === 0) {
+            $this->setError(ErrorCodes::ERROR_CODE_TARGET_NOT_FOUND);
+            $this->setResult(false);
+        } else {
+            $this->setResult(true);
+        }
     }
 
     public function getQuery(): string
