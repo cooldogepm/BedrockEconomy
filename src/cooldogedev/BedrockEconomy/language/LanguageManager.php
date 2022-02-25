@@ -37,6 +37,7 @@ final class LanguageManager
         "de-DE",
         "vi-VN",
         "zh-TW",
+        "zh-CN",
     ];
 
     protected static string $language;
