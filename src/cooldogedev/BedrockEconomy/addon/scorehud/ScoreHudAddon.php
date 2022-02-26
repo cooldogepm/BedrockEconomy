@@ -36,6 +36,9 @@ use pocketmine\Server;
 final class ScoreHudAddon extends Addon
 {
     public const SCOREHUD_TAG_BALANCE = "bedrockeconomy.balance";
+    public const SCOREHUD_TAG_BALANCE_CAP = "bedrockeconomy.balance_cap";
+    public const SCOREHUD_TAG_CURRENCY_SYMBOL = "bedrockeconomy.currency_symbol";
+    public const SCOREHUD_TAG_CURRENCY_NAME = "bedrockeconomy.currency_name";
 
     /**
      * @var int|null[]

@@ -29,7 +29,7 @@ namespace cooldogedev\BedrockEconomy\addon\scorehud;
 use cooldogedev\BedrockEconomy\event\transaction\TransactionProcessEvent;
 use cooldogedev\BedrockEconomy\transaction\types\TransferTransaction;
 use cooldogedev\BedrockEconomy\transaction\types\UpdateTransaction;
-use Ifera\ScoreHud\event\PlayerTagUpdateEvent;
+use Ifera\ScoreHud\event\PlayerTagsUpdateEvent;
 use Ifera\ScoreHud\event\TagsResolveEvent;
 use Ifera\ScoreHud\scoreboard\ScoreTag;
 use pocketmine\event\Listener;
@@ -67,8 +67,14 @@ final class ScoreHudListener implements Listener
     {
         $player = $event->getPlayer();
         $balance = $this->getParent()->getPlayerCache($player->getName());
+        $balanceCap = $this->getParent()->getPlugin()->getCurrencyManager()->getBalanceCap();
 
-        $event = new PlayerTagUpdateEvent($player, new ScoreTag(ScoreHudAddon::SCOREHUD_TAG_BALANCE, $balance !== null ? (string)$balance : "N/A"));
+        $event = new PlayerTagsUpdateEvent($player, [
+            new ScoreTag(ScoreHudAddon::SCOREHUD_TAG_BALANCE, $balance !== null ? (string)$balance : "N/A"),
+            new ScoreTag(ScoreHudAddon::SCOREHUD_TAG_BALANCE_CAP, $balanceCap !== null ? (string)$balanceCap : "N/A"),
+            new ScoreTag(ScoreHudAddon::SCOREHUD_TAG_CURRENCY_NAME, $this->getParent()->getPlugin()->getCurrencyManager()->getName()),
+            new ScoreTag(ScoreHudAddon::SCOREHUD_TAG_CURRENCY_SYMBOL, $this->getParent()->getPlugin()->getCurrencyManager()->getSymbol()),
+        ]);
         $event->call();
     }
 
@@ -113,6 +119,16 @@ final class ScoreHudListener implements Listener
         switch ($tag->getName()) {
             case ScoreHudAddon::SCOREHUD_TAG_BALANCE:
                 $tag->setValue((string)($this->getParent()->getPlayerCache($player->getName()) ?? "N/A"));
+                break;
+            case ScoreHudAddon::SCOREHUD_TAG_BALANCE_CAP:
+                $balanceCap = $this->getParent()->getPlugin()->getCurrencyManager()->getBalanceCap();
+                $tag->setValue($balanceCap != null ? (string)$balanceCap : "N/A");
+                break;
+            case ScoreHudAddon::SCOREHUD_TAG_CURRENCY_NAME:
+                $tag->setValue($this->getParent()->getPlugin()->getCurrencyManager()->getName());
+                break;
+            case ScoreHudAddon::SCOREHUD_TAG_CURRENCY_SYMBOL:
+                $tag->setValue($this->getParent()->getPlugin()->getCurrencyManager()->getSymbol());
         }
     }
 }
