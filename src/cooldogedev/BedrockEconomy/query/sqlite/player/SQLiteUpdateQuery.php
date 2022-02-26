@@ -40,33 +40,102 @@ final class SQLiteUpdateQuery extends SQLiteQuery
 
     public function onRun(SQLite3 $connection): void
     {
+        $username = strtolower($this->getTransaction()->getTarget());
+
+        // Fail if the player doesn't exist, if the balance cap is exceeded or if the balance is insufficient
+        if (!$this->verifyAccount($connection, $username)) {
+            return;
+        }
+
+        // Prepare the update query
         $statement = $connection->prepare($this->getQuery());
-        $statement->bindValue(":username", strtolower($this->getTransaction()->getTarget()));
+        $statement->bindValue(":username", $username);
         // There's a bug with SQLite3::prepare() that causes the statement to be executed multiple times
         $statement->execute()?->finalize();
         $statement->close();
 
-        if ($connection->changes() === 0) {
-            $this->setError(ErrorCodes::ERROR_CODE_TARGET_NOT_FOUND);
+        if ($connection->changes() <= 0) {
+            $this->setError(ErrorCodes::ERROR_CODE_NO_CHANGES_MADE);
             $this->setResult(false);
-        } else {
-            $this->setResult(true);
+            return;
         }
-    }
 
-    public function getQuery(): string
-    {
-        $statement = match ($this->getTransaction()->getType()) {
-            Transaction::TRANSACTION_TYPE_INCREMENT => $this->getTransaction()->getBalanceCap() !== null ? "MIN (balance + " . $this->getTransaction()->getValue() . ", " . $this->getTransaction()->getBalanceCap() . ")" : "balance + " . $this->getTransaction()->getValue(),
-            Transaction::TRANSACTION_TYPE_DECREMENT => "MAX (balance - " . $this->getTransaction()->getValue() . ", 0)",
-            Transaction::TRANSACTION_TYPE_SET => $this->getTransaction()->getBalanceCap() !== null ? "MIN (" . $this->getTransaction()->getValue() . ", " . $this->getTransaction()->getBalanceCap() . ")" : $this->getTransaction()->getValue(),
-        };
-
-        return "UPDATE " . $this->getTable() . " SET balance = " . $statement . " WHERE username = :username";
+        $this->setResult(true);
     }
 
     public function getTransaction(): UpdateTransaction
     {
         return $this->transaction;
+    }
+
+    // Copied from SQLiteRetrieveQuery
+
+    protected function verifyAccount(SQLite3 $connection, string $username): bool
+    {
+        $type = $this->getTransaction()->getType();
+        $value = $this->getTransaction()->getValue();
+        $balanceCap = $this->getTransaction()->getBalanceCap();
+
+        $statement = $connection->prepare($this->getRetrieveQuery());
+        $statement->bindValue(":username", $username);
+
+        $data = $statement->execute()?->fetchArray(SQLITE3_ASSOC) ?: null;
+        $isVerified = $data !== null;
+        $balance = $data["balance"] ?? null;
+
+        $statement->close();
+
+        if (!$isVerified) {
+            $this->setError(ErrorCodes::ERROR_CODE_ACCOUNT_NOT_FOUND);
+            $this->setResult(false);
+        }
+
+        if ($isVerified && $balance !== null && $balanceCap !== null && $type === Transaction::TRANSACTION_TYPE_INCREMENT && $balance >= $balanceCap) {
+            $isVerified = false;
+
+            $this->setError(ErrorCodes::ERROR_CODE_BALANCE_CAP_EXCEEDED);
+            $this->setResult(false);
+        }
+
+        if ($isVerified && $balance !== null && $balanceCap !== null && $type === Transaction::TRANSACTION_TYPE_INCREMENT && ($balance + $value) > $balanceCap) {
+            $isVerified = false;
+
+            $this->setError(ErrorCodes::ERROR_CODE_NEW_BALANCE_EXCEEDS_CAP);
+            $this->setResult(false);
+        }
+
+        if ($isVerified && $balance !== null && $type === Transaction::TRANSACTION_TYPE_DECREMENT && ($balance - $value) < 0) {
+            $isVerified = false;
+
+            $this->setError(ErrorCodes::ERROR_CODE_BALANCE_INSUFFICIENT_OTHER);
+            $this->setResult(false);
+        }
+
+        return $isVerified;
+    }
+
+    public function getRetrieveQuery(): string
+    {
+        return "SELECT * FROM " . $this->getTable() . " WHERE username = :username";
+    }
+
+    public function getQuery(): string
+    {
+        $type = $this->getTransaction()->getType();
+        $value = $this->getTransaction()->getValue();
+        $balanceCap = $this->getTransaction()->getBalanceCap();
+
+        // If the value is more than the balance cap, set it to the balance cap
+        if ($balanceCap !== null && $value > $balanceCap) {
+            $value = $balanceCap;
+        }
+
+        $statement = match ($type) {
+            Transaction::TRANSACTION_TYPE_INCREMENT => $balanceCap !== null ? "IIF (balance + " . $value . " <= " . $balanceCap . ", balance + " . $value . ", balance)" : "balance + " . $value,
+            Transaction::TRANSACTION_TYPE_DECREMENT => "IIF (balance - " . $value . " >= 0, balance - " . $value . ", balance)",
+            Transaction::TRANSACTION_TYPE_SET => $value,
+        };
+
+        return "UPDATE " . $this->getTable() . " SET balance = " . $statement . " WHERE username = :username";
     }
 }

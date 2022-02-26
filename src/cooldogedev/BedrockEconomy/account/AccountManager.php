@@ -87,11 +87,11 @@ final class AccountManager extends BedrockEconomyOwned
         return $this->getPlugin()->getConnector()->submit(
             QueryManager::getPlayerQuery($username),
             QueryManager::DATA_TABLE_PLAYERS,
-            context: $context->first(fn(?array $data): ?int => $data["balance"] ?? null)
+            $context
         );
     }
 
-    public function updateBalance(string $username, UpdateTransaction $transaction, ClosureContext $context): ?SQLQuery
+    public function updateBalance(UpdateTransaction $transaction, ClosureContext $context): ?SQLQuery
     {
         if (!$this->getPlugin()->getTransactionManager()->submitTransaction($transaction)) {
             return null;

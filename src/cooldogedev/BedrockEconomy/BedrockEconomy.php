@@ -66,11 +66,6 @@ final class BedrockEconomy extends PluginBase
         return BedrockEconomy::_getInstance();
     }
 
-    public function getAddonManager(): AddonManager
-    {
-        return $this->addonManager;
-    }
-
     public function getAccountManager(): AccountManager
     {
         return $this->accountManager;
@@ -112,13 +107,6 @@ final class BedrockEconomy extends PluginBase
         $this->getServer()->getPluginManager()->registerEvents(new PlayerListener($this), $this);
 
         $this->initializeCommands();
-    }
-
-    protected function onDisable(): void
-    {
-        foreach ($this->getAddonManager()->getAddons() as $addon) {
-            $addon->setEnabled(false);
-        }
     }
 
     public function getConfigManager(): ConfigManager
@@ -166,5 +154,17 @@ final class BedrockEconomy extends PluginBase
         }
 
         $this->getServer()->getCommandMap()->registerAll("bedrockeconomy", $commands);
+    }
+
+    protected function onDisable(): void
+    {
+        foreach ($this->getAddonManager()->getAddons() as $addon) {
+            $addon->setEnabled(false);
+        }
+    }
+
+    public function getAddonManager(): AddonManager
+    {
+        return $this->addonManager;
     }
 }

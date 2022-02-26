@@ -46,7 +46,7 @@ final class MySQLDeletionQuery extends MySQLQuery
         $statement->close();
 
         if (!$successful) {
-            $this->setError(ErrorCodes::ERROR_CODE_TARGET_NOT_FOUND);
+            $this->setError(ErrorCodes::ERROR_CODE_ACCOUNT_NOT_FOUND);
             $this->setResult(false);
         } else {
             $this->setResult(true);

@@ -33,6 +33,9 @@ use mysqli;
 
 final class MySQLTransferQuery extends MySQLQuery
 {
+    protected const CHECK_TYPE_SUFFICIENCY = 0;
+    protected const CHECK_TYPE_CAP = 1;
+
     public function __construct(protected TransferTransaction $transaction)
     {
     }
@@ -42,36 +45,17 @@ final class MySQLTransferQuery extends MySQLQuery
         $senderName = strtolower($this->getTransaction()->getSender());
         $receiverName = strtolower($this->getTransaction()->getReceiver());
 
-        /*
-         * Deduct the amount from the sender's balance
-         */
-        $statement = $connection->prepare($this->getDeductionQuery());
-        $statement->bind_param("s", $senderName);
-        $statement->execute();
-        $successful = $statement->affected_rows > 0;
-        $statement->close();
-
-        if (!$successful) {
-            $this->setError(ErrorCodes::ERROR_CODE_TARGET_NOT_FOUND);
-            $this->setResult(false);
+        if (
+            !$this->verifyAccount($connection, $senderName, MySQLTransferQuery::CHECK_TYPE_SUFFICIENCY) ||
+            !$this->verifyAccount($connection, $receiverName, MySQLTransferQuery::CHECK_TYPE_CAP)
+        ) {
             return;
         }
 
-        /*
-         * Add the amount to the receiver's balance
-         */
-        $statement = $connection->prepare($this->getAdditionQuery());
-        $statement->bind_param("s", $receiverName);
-        $statement->execute();
-        $successful = $statement->affected_rows > 0;
-        $statement->close();
-
-        if (!$successful) {
-            $this->setError(ErrorCodes::ERROR_CODE_TARGET_NOT_FOUND);
-            $this->setResult(false);
-        } else {
-            $this->setResult(true);
-        }
+        $this->setResult(
+            $this->updateBalance($connection, $senderName, true) &&
+            $this->updateBalance($connection, $receiverName, false)
+        );
     }
 
     public function getTransaction(): TransferTransaction
@@ -79,18 +63,77 @@ final class MySQLTransferQuery extends MySQLQuery
         return $this->transaction;
     }
 
-    public function getAdditionQuery(): string
+    protected function verifyAccount(mysqli $connection, string $username, int $checkType): bool
     {
         $amount = $this->getTransaction()->getAmount();
-        $statement = "balance + $amount";
+        $balanceCap = $this->getTransaction()->getBalanceCap();
 
-        return "UPDATE " . $this->getTable() . " SET balance = " . $statement . " WHERE username = ?";
+        $statement = $connection->prepare($this->getRetrieveQuery());
+        $statement->bind_param("s", $username);
+        $statement->execute();
+
+        $data = $statement->get_result()?->fetch_assoc();
+        $isVerified = $data !== null;
+        $balance = $data["balance"] ?? null;
+
+        $statement->close();
+
+        if (!$isVerified) {
+            $this->setError(ErrorCodes::ERROR_CODE_ACCOUNT_NOT_FOUND . ":" . $username);
+            $this->setResult(false);
+        }
+
+        if ($checkType === MySQLTransferQuery::CHECK_TYPE_SUFFICIENCY && $balance < $amount) {
+            $isVerified = false;
+
+            $this->setError(ErrorCodes::ERROR_CODE_BALANCE_INSUFFICIENT . ":" . $username);
+            $this->setResult(false);
+        } elseif ($checkType === MySQLTransferQuery::CHECK_TYPE_CAP && $balanceCap !== null && ($balance + $amount) > $balanceCap) {
+            $isVerified = false;
+
+            $this->setError(ErrorCodes::ERROR_CODE_BALANCE_CAP_EXCEEDED . ":" . $username);
+            $this->setResult(false);
+        }
+
+        return $isVerified;
     }
+
+    public function getRetrieveQuery(): string
+    {
+        return "SELECT * FROM " . $this->getTable() . " WHERE username = ?";
+    }
+
+    protected function updateBalance(mysqli $connection, string $username, bool $deduction): bool
+    {
+        $statement = $connection->prepare($deduction ? $this->getDeductionQuery() : $this->getAdditionQuery());
+        $statement->bind_param("s", $username);
+        $statement->execute();
+        $successful = $statement->affected_rows > 0;
+        $statement->close();
+
+        if (!$successful) {
+            $this->setError(ErrorCodes::ERROR_CODE_NO_CHANGES_MADE . ":" . $username);
+            $this->setResult(false);
+            return false;
+        }
+
+        return true;
+    }
+
+    // Copied from MySQLRetrieveQuery
 
     public function getDeductionQuery(): string
     {
         $amount = $this->getTransaction()->getAmount();
         $statement = "balance - $amount";
+
+        return "UPDATE " . $this->getTable() . " SET balance = " . $statement . " WHERE username = ?";
+    }
+
+    public function getAdditionQuery(): string
+    {
+        $amount = $this->getTransaction()->getAmount();
+        $statement = "balance + $amount";
 
         return "UPDATE " . $this->getTable() . " SET balance = " . $statement . " WHERE username = ?";
     }

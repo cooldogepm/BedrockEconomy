@@ -67,6 +67,10 @@ final class AddBalanceCommand extends BaseCommand
 
         $amount = (int)floor($amount);
 
+        if ($this->getOwningPlugin()->getCurrencyManager()->hasBalanceCap() && $amount > $this->getOwningPlugin()->getCurrencyManager()->getBalanceCap()) {
+            $amount = $this->getOwningPlugin()->getCurrencyManager()->getBalanceCap();
+        }
+
         if (0 > $amount) {
             $amount = Limits::UINT32_MAX;
         }
@@ -78,12 +82,14 @@ final class AddBalanceCommand extends BaseCommand
                 function ($_, Closure $__, ?string $error) use ($sender, $player, $amount): void {
                     if ($error !== null) {
                         $translation = match ($error) {
-                            ErrorCodes::ERROR_CODE_TARGET_NOT_FOUND => KnownTranslations::PLAYER_NOT_FOUND,
-                            default => KnownTranslations::UPDATE_ERROR,
+                            ErrorCodes::ERROR_CODE_ACCOUNT_NOT_FOUND => KnownTranslations::PLAYER_NOT_FOUND,
+                            ErrorCodes::ERROR_CODE_BALANCE_CAP_EXCEEDED => KnownTranslations::BALANCE_CAP,
+                            ErrorCodes::ERROR_CODE_NO_CHANGES_MADE, ErrorCodes::ERROR_CODE_NEW_BALANCE_EXCEEDS_CAP => KnownTranslations::UPDATE_ERROR,
                         };
 
                         $sender->sendMessage(LanguageManager::getTranslation($translation, [
-                                TranslationKeys::PLAYER => $player
+                                TranslationKeys::PLAYER => $player,
+                                TranslationKeys::LIMIT => $this->getOwningPlugin()->getCurrencyManager()->getBalanceCap() ?? "N/A",
                             ]
                         ));
                         return;

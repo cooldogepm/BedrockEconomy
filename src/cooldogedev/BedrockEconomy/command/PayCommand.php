@@ -33,6 +33,7 @@ use cooldogedev\BedrockEconomy\language\KnownTranslations;
 use cooldogedev\BedrockEconomy\language\LanguageManager;
 use cooldogedev\BedrockEconomy\language\TranslationKeys;
 use cooldogedev\BedrockEconomy\permission\BedrockEconomyPermissions;
+use cooldogedev\BedrockEconomy\query\ErrorCodes;
 use cooldogedev\libSQL\context\ClosureContext;
 use CortexPE\Commando\args\IntegerArgument;
 use CortexPE\Commando\args\RawStringArgument;
@@ -98,75 +99,52 @@ final class PayCommand extends BaseCommand
             return;
         }
 
-        BedrockEconomyAPI::getInstance()->getPlayerBalance(
-            $sender->getName(),
-            ClosureContext::create(
-                function (?int $balance, Closure $stop) use ($sender, $amount, $receiver): ?int {
-                    if ($balance === null) {
-                        $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::NO_ACCOUNT));
-                        return $stop();
-                    }
+        BedrockEconomyAPI::getInstance()->transferFromPlayerBalance($sender->getName(), $receiver, $amount, ClosureContext::create(
+            function (bool $success, Closure $_, ?string $error) use ($sender, $receiver, $amount) {
+                if ($error !== null) {
+                    $causer = ltrim(strstr($error, ':'), ':');
+                    $error = substr($error, 0, strpos($error, ":"));
 
-                    if ($amount > $balance) {
-                        $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::BALANCE_INSUFFICIENT));
-                        return $stop();
-                    }
+                    $translation = match ($error) {
+                        ErrorCodes::ERROR_CODE_ACCOUNT_NOT_FOUND => KnownTranslations::PLAYER_NOT_FOUND,
+                        ErrorCodes::ERROR_CODE_BALANCE_INSUFFICIENT => KnownTranslations::BALANCE_INSUFFICIENT,
+                        ErrorCodes::ERROR_CODE_BALANCE_CAP_EXCEEDED => KnownTranslations::BALANCE_CAP,
+                        ErrorCodes::ERROR_CODE_NO_CHANGES_MADE, ErrorCodes::ERROR_CODE_NEW_BALANCE_EXCEEDS_CAP => KnownTranslations::UPDATE_ERROR,
+                    };
 
-                    return $balance;
+                    $sender->sendMessage(LanguageManager::getTranslation($translation, [
+                            TranslationKeys::PAYER => $sender->getName(),
+                            TranslationKeys::RECEIVER => $receiver,
+
+                            TranslationKeys::PLAYER => $causer,
+                            TranslationKeys::AMOUNT => $amount,
+                            TranslationKeys::CURRENCY_NAME => $this->getOwningPlugin()->getCurrencyManager()->getName(),
+                            TranslationKeys::CURRENCY_SYMBOL => $this->getOwningPlugin()->getCurrencyManager()->getSymbol(),
+                            TranslationKeys::LIMIT => $this->getOwningPlugin()->getCurrencyManager()->getBalanceCap() ?? "N/A",
+                        ]
+                    ));
+                    return;
                 }
-            )->push(
-                fn(int $balance) => BedrockEconomyAPI::getInstance()->getPlayerBalance(
-                    $receiver,
-                    ClosureContext::create(
-                        function (?int $receiverBalance) use ($balance, $sender, $amount, $receiver): void {
 
-                            if ($receiverBalance === null) {
-                                $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::PLAYER_NOT_FOUND, [
-                                        TranslationKeys::PLAYER => $receiver
-                                    ]
-                                ));
-                                return;
-                            }
+                $receiverPlayer = $this->getOwningPlugin()->getServer()->getPlayerByPrefix($receiver);
 
-                            if (
-                                $this->getOwningPlugin()->getCurrencyManager()->hasBalanceCap() &&
-                                $receiverBalance >= $this->getOwningPlugin()->getCurrencyManager()->getBalanceCap()
-                            ) {
-                                $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::BALANCE_CAP, [
-                                        TranslationKeys::AMOUNT => $amount,
-                                        TranslationKeys::LIMIT => $this->getOwningPlugin()->getCurrencyManager()->getBalanceCap(),
-                                        TranslationKeys::PLAYER => $receiver,
-                                        TranslationKeys::CURRENCY_NAME => $this->getOwningPlugin()->getCurrencyManager()->getName(),
-                                        TranslationKeys::CURRENCY_SYMBOL => $this->getOwningPlugin()->getCurrencyManager()->getSymbol()
-                                    ]
-                                ));
-                                return;
-                            }
+                $receiverPlayer?->sendMessage(LanguageManager::getTranslation(KnownTranslations::PAYMENT_RECEIVE, [
+                        TranslationKeys::AMOUNT => $amount,
+                        TranslationKeys::PAYER => $sender->getName(),
+                        TranslationKeys::CURRENCY_NAME => $this->getOwningPlugin()->getCurrencyManager()->getName(),
+                        TranslationKeys::CURRENCY_SYMBOL => $this->getOwningPlugin()->getCurrencyManager()->getSymbol()
+                    ]
+                ));
 
-                            BedrockEconomyAPI::getInstance()->transferFromPlayerBalance($sender->getName(), $receiver, $amount);
-
-                            $receiverPlayer = $this->getOwningPlugin()->getServer()->getPlayerByPrefix($receiver);
-
-                            $receiverPlayer?->sendMessage(LanguageManager::getTranslation(KnownTranslations::PAYMENT_RECEIVE, [
-                                    TranslationKeys::AMOUNT => $amount,
-                                    TranslationKeys::PAYER => $sender->getName(),
-                                    TranslationKeys::CURRENCY_NAME => $this->getOwningPlugin()->getCurrencyManager()->getName(),
-                                    TranslationKeys::CURRENCY_SYMBOL => $this->getOwningPlugin()->getCurrencyManager()->getSymbol()
-                                ]
-                            ));
-
-                            $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::PAYMENT_SEND, [
-                                    TranslationKeys::AMOUNT => $amount,
-                                    TranslationKeys::RECEIVER => $receiver,
-                                    TranslationKeys::CURRENCY_NAME => $this->getOwningPlugin()->getCurrencyManager()->getName(),
-                                    TranslationKeys::CURRENCY_SYMBOL => $this->getOwningPlugin()->getCurrencyManager()->getSymbol()
-                                ]
-                            ));
-                        }
-                    )
-                )
-            )
-        );
+                $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::PAYMENT_SEND, [
+                        TranslationKeys::AMOUNT => $amount,
+                        TranslationKeys::RECEIVER => $receiver,
+                        TranslationKeys::CURRENCY_NAME => $this->getOwningPlugin()->getCurrencyManager()->getName(),
+                        TranslationKeys::CURRENCY_SYMBOL => $this->getOwningPlugin()->getCurrencyManager()->getSymbol()
+                    ]
+                ));
+            }
+        ));
     }
 
     /**

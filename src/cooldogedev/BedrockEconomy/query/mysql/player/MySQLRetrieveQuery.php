@@ -46,10 +46,10 @@ final class MySQLRetrieveQuery extends MySQLQuery
         $statement->close();
 
         if ($result === null) {
-            $this->setError(ErrorCodes::ERROR_CODE_TARGET_NOT_FOUND);
+            $this->setError(ErrorCodes::ERROR_CODE_ACCOUNT_NOT_FOUND);
             $this->setResult(null);
         } else {
-            $this->setResult($result);
+            $this->setResult($result["balance"]);
         }
     }
 

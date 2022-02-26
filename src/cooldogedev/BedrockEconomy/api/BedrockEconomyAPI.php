@@ -91,7 +91,7 @@ final class BedrockEconomyAPI
             return null;
         }
 
-        return $this->getPlugin()->getAccountManager()->updateBalance($username, $transaction, $context ?? ClosureContext::create());
+        return $this->getPlugin()->getAccountManager()->updateBalance($transaction, $context ?? ClosureContext::create());
     }
 
     public static function getPlugin(): ?BedrockEconomy
@@ -113,7 +113,7 @@ final class BedrockEconomyAPI
             $subtraction,
         );
 
-        return $this->getPlugin()->getAccountManager()->updateBalance($username, $transaction, $context ?? ClosureContext::create());
+        return $this->getPlugin()->getAccountManager()->updateBalance($transaction, $context ?? ClosureContext::create());
     }
 
     public function transferFromPlayerBalance(string $sender, string $receiver, int $amount, ?ClosureContext $context = null): ?SQLQuery
@@ -137,7 +137,7 @@ final class BedrockEconomyAPI
             $addition,
         );
 
-        return $this->getPlugin()->getAccountManager()->updateBalance($username, $transaction, $context ?? ClosureContext::create());
+        return $this->getPlugin()->getAccountManager()->updateBalance($transaction, $context ?? ClosureContext::create());
     }
 
     public function isAccountExists(string $username, ?ClosureContext $context = null): ?SQLQuery

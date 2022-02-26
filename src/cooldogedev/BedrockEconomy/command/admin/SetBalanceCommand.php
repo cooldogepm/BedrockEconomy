@@ -78,8 +78,8 @@ final class SetBalanceCommand extends BaseCommand
                 function (bool $_, Closure $__, ?string $error) use ($sender, $player, $amount): void {
                     if ($error !== null) {
                         $translation = match ($error) {
-                            ErrorCodes::ERROR_CODE_TARGET_NOT_FOUND => KnownTranslations::PLAYER_NOT_FOUND,
-                            default => KnownTranslations::UPDATE_ERROR,
+                            ErrorCodes::ERROR_CODE_ACCOUNT_NOT_FOUND => KnownTranslations::PLAYER_NOT_FOUND,
+                            ErrorCodes::ERROR_CODE_NO_CHANGES_MADE => KnownTranslations::UPDATE_ERROR,
                         };
 
                         $sender->sendMessage(LanguageManager::getTranslation($translation, [

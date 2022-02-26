@@ -45,7 +45,7 @@ final class SQLiteCreationQuery extends SQLiteQuery
         $statement->close();
 
         if ($connection->changes() === 0) {
-            $this->setError(ErrorCodes::ERROR_CODE_TARGET_NOT_FOUND);
+            $this->setError(ErrorCodes::ERROR_CODE_ACCOUNT_NOT_FOUND);
             $this->setResult(false);
         } else {
             $this->setResult(true);

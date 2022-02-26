@@ -40,34 +40,30 @@ final class MySQLUpdateQuery extends MySQLQuery
 
     public function onRun(mysqli $connection): void
     {
-        $playerName = strtolower($this->getTransaction()->getTarget());
+        $username = strtolower($this->getTransaction()->getTarget());
 
-        $statement = $connection->prepare($this->getRetrieveQuery());
-        $statement->bind_param("s", $playerName);
-        $statement->execute();
-        $data = $statement->get_result()?->fetch_assoc();
-        $statement->close();
-
-        if (!$data) {
-            $this->setError(ErrorCodes::ERROR_CODE_TARGET_NOT_FOUND);
-            $this->setResult(false);
+        // Fail if the player doesn't exist, if the balance cap is exceeded or if the balance is insufficient
+        if (!$this->verifyAccount($connection, $username)) {
             return;
         }
 
-        $statement = $connection->prepare($this->getQuery($data["balance"]));
-        $statement->bind_param("s", $playerName);
+        // Prepare the update query
+        $statement = $connection->prepare($this->getQuery());
+        $statement->bind_param("s", $username);
         $statement->execute();
 
         $successful = $statement->affected_rows > 0;
 
         $statement->close();
 
+        // Fail if no changes were made
         if (!$successful) {
-            $this->setError(ErrorCodes::ERROR_CODE_OPERATION_FAILED);
+            $this->setError(ErrorCodes::ERROR_CODE_NO_CHANGES_MADE);
             $this->setResult(false);
             return;
         }
 
+        // Set the result
         $this->setResult(true);
     }
 
@@ -76,24 +72,73 @@ final class MySQLUpdateQuery extends MySQLQuery
         return $this->transaction;
     }
 
-    public function getRetrieveQuery(): string
-    {
-        return "SELECT * FROM " . $this->getTable() . " WHERE username = ?";
-    }
-
-    public function getQuery(int $balance): string
+    protected function verifyAccount(mysqli $connection, string $username): bool
     {
         $type = $this->getTransaction()->getType();
         $value = $this->getTransaction()->getValue();
         $balanceCap = $this->getTransaction()->getBalanceCap();
 
+        $statement = $connection->prepare($this->getRetrieveQuery());
+        $statement->bind_param("s", $username);
+        $statement->execute();
+
+        $data = $statement->get_result()?->fetch_assoc();
+        $isVerified = $data !== null;
+        $balance = $data["balance"] ?? null;
+
+        $statement->close();
+
+        if (!$isVerified) {
+            $this->setError(ErrorCodes::ERROR_CODE_ACCOUNT_NOT_FOUND);
+            $this->setResult(false);
+        }
+
+
+        if ($isVerified && $balance !== null && $balanceCap !== null && $type === Transaction::TRANSACTION_TYPE_INCREMENT && $balance >= $balanceCap) {
+            $isVerified = false;
+
+            $this->setError(ErrorCodes::ERROR_CODE_BALANCE_CAP_EXCEEDED);
+            $this->setResult(false);
+        }
+
+        if ($isVerified && $balance !== null && $balanceCap !== null && $type === Transaction::TRANSACTION_TYPE_INCREMENT && ($balance + $value) > $balanceCap) {
+            $isVerified = false;
+
+            $this->setError(ErrorCodes::ERROR_CODE_NEW_BALANCE_EXCEEDS_CAP);
+            $this->setResult(false);
+        }
+
+        if ($isVerified && $balance !== null && $type === Transaction::TRANSACTION_TYPE_DECREMENT && $balance - $value < 0) {
+            $isVerified = false;
+
+            $this->setError(ErrorCodes::ERROR_CODE_BALANCE_INSUFFICIENT_OTHER);
+            $this->setResult(false);
+        }
+
+        return $isVerified;
+    }
+
+    // Copied from MySQLRetrieveQuery
+
+    public function getRetrieveQuery(): string
+    {
+        return "SELECT * FROM " . $this->getTable() . " WHERE username = ?";
+    }
+
+    public function getQuery(): string
+    {
+        $type = $this->getTransaction()->getType();
+        $value = $this->getTransaction()->getValue();
+        $balanceCap = $this->getTransaction()->getBalanceCap();
+
+        // If the value is more than the balance cap, set it to the balance cap
         if ($balanceCap !== null && $value > $balanceCap) {
             $value = $balanceCap;
         }
 
         $statement = match ($type) {
-            Transaction::TRANSACTION_TYPE_INCREMENT => $balanceCap !== null ? "IF (balance + $value <= $balanceCap, balance + $value, $balanceCap)" : "balance + $value",
-            Transaction::TRANSACTION_TYPE_DECREMENT => $balance - $value >= 0 ? "balance - $value" : "balance - $balance",
+            Transaction::TRANSACTION_TYPE_INCREMENT => $balanceCap !== null ? "IF (balance + " . $value . " <= " . $balanceCap . ", balance + " . $value . ", balance)" : "balance + " . $value,
+            Transaction::TRANSACTION_TYPE_DECREMENT => "IF (balance - " . $value . " >= 0, balance - " . $value . ", balance)",
             Transaction::TRANSACTION_TYPE_SET => $value,
         };
 
