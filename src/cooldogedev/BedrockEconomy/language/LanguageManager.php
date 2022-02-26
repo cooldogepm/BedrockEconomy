@@ -38,6 +38,7 @@ final class LanguageManager
         "vi-VN",
         "zh-TW",
         "zh-CN",
+        "id-ID"
     ];
 
     protected static string $language;

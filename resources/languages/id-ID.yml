@@ -1,0 +1,77 @@
+---
+# Called when a player-only command ran by the console
+command-player-only: "&cPerintah ini hanya bisa dijalankan di permainan!"
+# Called when trying to interact with non-existing account
+player-not-found: "&f{PLAYER} &ctidak ditemukan!"
+# Called when attempting to send a payment without having sufficient balance
+balance-insufficient: "&cAnda tidak punya cukup saldo!"
+# Called when attempting to pay a user who already has reached the balance limit
+balance-cap: "&f{PLAYER} &csudah mencapai batas saldo sebesar {LIMIT}!"
+# Called when sending a successful transaction
+payment-send: "&aAnda telah membayar {CURRENCY_SYMBOL}{AMOUNT} ke &f{RECEIVER}&a!"
+# Called when receiving a successful transaction
+payment-receive: "&aAnda telah menerima {CURRENCY_SYMBOL}{AMOUNT} dari &f{PAYER}&a!"
+# Called when attempting to send a payment that exceeds the maximum limit
+payment-send-exceed-limit: "&cAnda telah melampaui batas pembayaran sebesar &f{LIMIT}!"
+# Called when attempting to send a payment below the minimum
+payment-send-insufficient: "&cPembayaran Anda di bawah persyaratan minimum dari &f{LIMIT}&c!"
+# Called when attempting to pay yourself
+payment-send-self: "&cAnda tidak dapat membayar diri sendiri!"
+# Called when users attempts to view their own balance
+balance-info: "&aSaldo anda adalah &f{CURRENCY_SYMBOL}{AMOUNT}"
+# Called when users attempts to view someone's balance
+balance-info-other: "&aSaldo {PLAYER} adalah &f{CURRENCY_SYMBOL}{AMOUNT}"
+# Called when incrementing someone's balance
+balance-add: "&aAnda telah menambahkan {CURRENCY_SYMBOL}{AMOUNT} ke &f{PLAYER}&a!"
+# Called when decrementing someone's balance
+balance-remove: "&aAnda telah mengurangi {CURRENCY_SYMBOL}{AMOUNT} dari &f{PLAYER}&a!"
+# Called when updating someone's balance to a new value
+balance-set: "&aAnda telah mengatur saldo &f{PLAYER}&a menjadi {CURRENCY_SYMBOL}{AMOUNT}!"
+# Called when deleting someone's account
+account-delete: "&aAnda telah menghapus akun &f{PLAYER}&a!"
+# Called when a user executes a command while they don't have an account in the database
+no-account: "&cAnda tidak punya akun!"
+# Called when users attempts to view the top balances
+top-balance-header: "&6SALDO TERATAS"
+top-balance-row-template: "&b{POSITION}. &a{PLAYER} &7: &b{AMOUNT}"
+top-balance-error: "&cGagal mengambil daftar saldo teratas!"
+# Called when users attempt to edit someone's balance and the database doesn't update it
+update-error: "&cGagal memperbarui saldo {PLAYER}, tidak ada perubahan yang dilakukan."
+
+commands:
+  balance:
+    name: balance
+    description: Menampilkan saldo Anda saat ini
+    usage: "&cPenggunaan /balance [pemain: string]"
+    aliases: [ ]
+  pay:
+    name: pay
+    description: Membayar orang lain dari saldo Anda
+    usage: "&cPenggunaan /pay <pemain: string> <jumlah: number>"
+    aliases: [ ]
+  top-balance:
+    name: topbalance
+    description: Menampilkan daftar saldo tertinggi
+    usage: "&cPenggunaan /topbalance [halaman: number]"
+    aliases: [ ]
+  add-balance:
+    name: addbalance
+    description: Menambahkan poin saldo ke pengguna
+    usage: "&cPenggunaan /addbalance <pemain: string> <jumlah: number>"
+    aliases: [ ]
+  remove-balance:
+    name: removebalance
+    description: Menghapus poin saldo dari pengguna
+    usage: "&cPenggunaan /removebalance <pemain: string> <jumlah: number>"
+    aliases: [ ]
+  set-balance:
+    name: setbalance
+    description: Mengatur saldo pengguna
+    usage: "&cPenggunaan /setbalance <pemain: string> <jumlah: number>"
+    aliases: [ ]
+  delete-account:
+    name: deleteaccount
+    description: Menghapus akun pengguna
+    usage: "&cPenggunaan /deleteaccount <pemain: string>"
+    aliases: [ ]
+...
