@@ -1,0 +1,75 @@
+---
+# Called when a player-only command ran by the console
+command-player-only: "&cDä befäu isch ned gfonde worde!"
+# Called when trying to interact with non-existing account
+player-not-found: "&f{PLAYER} &cisch ned gfonde worde"
+# Called when attempting to send a payment without having sufficient balance
+balance-insufficient: "&cDu hesch ned gnueg geld"
+# Called when attempting to pay a user who already has reached the balance limit
+balance-cap: "&f{PLAYER} &chet's Kontostands limit erreicht"
+# Called when sending a successful transaction
+payment-send: "&aDu hesch {CURRENCY_SYMBOL}{AMOUNT} a &f{RECEIVER}&azaut!"
+# Called when receiving a successful transaction
+payment-receive: "&aDu hesch {CURRENCY_SYMBOL}{AMOUNT} &fvo &f{PAYER}&aerhaute!"
+# Called when attempting to send a payment that exceeds the maximum limit
+payment-send-exceed-limit: "&cDu hesch s zaligsmittel vo &f{LIMIT} überschritten!"
+# Called when attempting to send a payment below the minimum
+payment-send-insufficient: "&cDini zahlig isch unterem Betrag vo &f{LIMIT}&c!"
+# Called when attempting to pay yourself
+payment-send-self: "&cDu chasch der ned säuber geld geh"
+# Called when users attempts to view their own balance
+balance-info: "&aDin Konto stand isch uf &f{CURRENCY_SYMBOL}{AMOUNT}"
+# Called when users attempts to view someone's balance
+balance-info-other: "&a{PLAYER}'s Kontostand isch uf &f{CURRENCY_SYMBOL}{AMOUNT}"
+# Called when incrementing someone's balance
+balance-add: "&aDu hesch {CURRENCY_SYMBOL}{AMOUNT} zum konto vo &f{PLAYER}&a hinzuegfügt!"
+# Called when decrementing someone's balance
+balance-remove: "&aDu hesch {CURRENCY_SYMBOL}{AMOUNT} vom Konto vo &f{PLAYER}&a wäggno!"
+# Called when updating someone's balance to a new value
+balance-set: "&aDu hesch de Kontostand von &f{PLAYER} &auf {CURRENCY_SYMBOL}{AMOUNT} gesetzt!"
+# Called when deleting someone's account
+account-delete: "&aDu hesch &f{PLAYER}&a's Konto glöscht!"
+# Called when a user executes a command while they don't have an account in the database
+no-account: "&cDu hesch no keis Konto!"
+# Called when users attempts to view the top balances
+top-balance-header: "&6Die richste spiler"
+top-balance-row-template: "&b{POSITION}. &a{PLAYER} &7: &b{AMOUNT}"
+top-balance-error: "&cD richsti Spiler sind ned ufglistet worde!"
+
+commands:
+  balance:
+    name: balance
+    description: Zeigt din Kontostand a
+    usage: "&cBenutzung [player: string]"
+    aliases: [ ]
+  pay:
+    name: pay
+    description: Bezau anderi
+    usage: "&cUsage /pay <player: string> <amount: number>"
+    aliases: [ ]
+  top-balance:
+    name: topbalance
+    description: D richsti spiler a luege
+    usage: "&cUsage /topbalance [page: number]"
+    aliases: [ ]
+  add-balance:
+    name: addbalance
+    description: Gib geld a nem spiler mit Admin rechte
+    usage: "&cUsage /addbalance <player: string> <amount: number>"
+    aliases: [ ]
+  remove-balance:
+    name: removebalance
+    description: Nimms gäld vo andere weg
+    usage: "&cUsage /removebalance <player: string> <amount: number>"
+    aliases: [ ]
+  set-balance:
+    name: setbalance
+    description: Setze dä Kontostand vo anderne 
+    usage: "&cUsage /setbalance <player: string> <amount: number>"
+    aliases: [ ]
+  delete-account:
+    name: deleteaccount
+    description: Lösch es Konto
+    usage: "&cUsage /deleteaccount <player: string>"
+    aliases: [ ]
+...
