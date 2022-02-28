@@ -53,7 +53,7 @@ final class LanguageManager
             $plugin->saveResource("languages" . DIRECTORY_SEPARATOR . $languageCode . ".yml");
         }
 
-        if (!$language || !isset(LanguageManager::SUPPORTED_LANGUAGES[$language])) {
+        if (!$language || !in_array($language, LanguageManager::SUPPORTED_LANGUAGES)) {
             $language = LanguageManager::DEFAULT_LANGUAGE;
         }
 
