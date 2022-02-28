@@ -170,18 +170,18 @@ public function getMinimumSupportedBedrockEconomyVersion(): string;
 /**
  * Called before a plugin is enabled, this should be only used for dependency checking.
  *
- * @return bool
+ * @return void
  */
-public function isLoadable(): bool;
+public function isLoadable(): void;
 ````
 
 ```php
 /**
  * Returns whether the addon is enabled or not.
  *
- * @return bool
+ * @return void
  */
-public function isEnabled(): bool;
+public function isEnabled(): void;
 ````
 
 ```php
