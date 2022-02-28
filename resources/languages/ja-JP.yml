@@ -1,0 +1,77 @@
+---
+# Called when a player-only command ran by the console
+command-player-only: "&cこのコマンドはゲームからのみ実行可能です!"
+# Called when trying to interact with non-existing account
+player-not-found: "&f{PLAYER} &cが見つかりません!"
+# Called when attempting to send a payment without having sufficient balance
+balance-insufficient: "&c十分な残高がありません!"
+# Called when attempting to pay a user who already has reached the balance limit
+balance-cap: "&f{PLAYER} &cはすでに残高の上限 {LIMIT} に達しています!"
+# Called when sending a successful transaction
+payment-send: "&a{CURRENCY_SYMBOL}{AMOUNT} を &f{RECEIVER} &aに支払いました!"
+# Called when receiving a successful transaction
+payment-receive: "&f{PAYER} &aから {CURRENCY_SYMBOL}{AMOUNT} を受け取りました!"
+# Called when attempting to send a payment that exceeds the maximum limit
+payment-send-exceed-limit: "&c支払い額が上限 &f{LIMIT} &cを超過しています!"
+# Called when attempting to send a payment below the minimum
+payment-send-insufficient: "&c支払い額が下限 &f{LIMIT} &cを下回っています!"
+# Called when attempting to pay yourself
+payment-send-self: "&c自分自身に支払うことはできません!"
+# Called when users attempts to view their own balance
+balance-info: "&aあなたの残高は &f{CURRENCY_SYMBOL}{AMOUNT} &aです"
+# Called when users attempts to view someone's balance
+balance-info-other: "&a{PLAYER} の残高は &f{CURRENCY_SYMBOL}{AMOUNT} &aです"
+# Called when incrementing someone's balance
+balance-add: "&f{PLAYER} &aに {CURRENCY_SYMBOL}{AMOUNT} &aを付与しました!"
+# Called when decrementing someone's balance
+balance-remove: "&f{PLAYER} &aから {CURRENCY_SYMBOL}{AMOUNT} &aを剥奪しました!"
+# Called when updating someone's balance to a new value
+balance-set: "&f{PLAYER} &aの残高を {CURRENCY_SYMBOL}{AMOUNT} に設定しました!"
+# Called when deleting someone's account
+account-delete: "&f{PLAYER} &aのアカウントを削除しました!"
+# Called when a user executes a command while they don't have an account in the database
+no-account: "&cあなたはアカウントを所持していません!"
+# Called when users attempts to view the top balances
+top-balance-header: "&6残高上位"
+top-balance-row-template: "&b{POSITION}. &a{PLAYER} &7: &b{AMOUNT}"
+top-balance-error: "&c残高上位の取得に失敗しました!"
+# Called when users attempt to edit someone's balance and the database doesn't update it
+update-error: "&c{PLAYER} の残高の更新に失敗しました。変更はありません"
+
+commands:
+  balance:
+    name: balance
+    description: 現在の残高を表示する
+    usage: "&c使用方法 /balance [プレイヤー: 文字列]"
+    aliases: [ ]
+  pay:
+    name: pay
+    description: 自分の残高から他人に支払う
+    usage: "&c使用方法 /pay <プレイヤー: 文字列> <金額: 数字>"
+    aliases: [ ]
+  top-balance:
+    name: topbalance
+    description: 残高の上位を表示する
+    usage: "&c使用方法 /topbalance [ページ: 数字]"
+    aliases: [ ]
+  add-balance:
+    name: addbalance
+    description: プレイヤーの残高を増やす
+    usage: "&c使用方法 /addbalance <プレイヤー: 文字列> <金額: 数字>"
+    aliases: [ ]
+  remove-balance:
+    name: removebalance
+    description: プレイヤーの残高を減らす
+    usage: "&c使用方法 /removebalance <プレイヤー: 文字列> <金額: 数字>"
+    aliases: [ ]
+  set-balance:
+    name: setbalance
+    description: プレイヤーの残高を設定する
+    usage: "&c使用方法 /setbalance <プレイヤー: 文字列> <金額: 数字>"
+    aliases: [ ]
+  delete-account:
+    name: deleteaccount
+    description: ユーザーのアカウントを削除する
+    usage: "&c使用方法 /deleteaccount <プレイヤー: 文字列>"
+    aliases: [ ]
+...

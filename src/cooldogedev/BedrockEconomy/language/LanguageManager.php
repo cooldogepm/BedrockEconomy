@@ -39,6 +39,7 @@ final class LanguageManager
         "zh-TW",
         "zh-CN",
         "id-ID",
+        "ja-JP",
         "de-CH"
     ];
 
