@@ -45,7 +45,7 @@ final class ScoreHudAddon extends Addon
      */
     protected array $cache;
 
-    public function onEnable(): void
+    protected function onEnable(): void
     {
         $this->cache = [];
         $this->getPlugin()->getServer()->getPluginManager()->registerEvents(new ScoreHudListener($this), $this->getPlugin());
