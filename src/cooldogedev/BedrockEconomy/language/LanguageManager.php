@@ -40,7 +40,8 @@ final class LanguageManager
         "zh-CN",
         "id-ID",
         "ja-JP",
-        "de-CH"
+        "de-CH",
+        "ru-RU"
     ];
 
     protected static string $language;
