@@ -1,0 +1,77 @@
+---
+# Called when a player-only command ran by the console
+command-player-only: "&cКоманда работает только в игре!"
+# Called when trying to interact with non-existing account
+player-not-found: "&f{PLAYER} &cбыл не найден!"
+# Called when attempting to send a payment without having sufficient balance
+balance-insufficient: "&cУ вас недостаточно баланса!"
+# Called when attempting to pay a user who already has reached the balance limit
+balance-cap: "&f{PLAYER} &cуже достиг лимита баланса в {LIMIT}!"
+# Called when sending a successful transaction
+payment-send: "&aВы перевели {CURRENCY_SYMBOL}{AMOUNT} &f{RECEIVER}&a!"
+# Called when receiving a successful transaction
+payment-receive: "&aВы получили {CURRENCY_SYMBOL}{AMOUNT} от &f{PAYER}&a!"
+# Called when attempting to send a payment that exceeds the maximum limit
+payment-send-exceed-limit: "&cВы превысили лимит платежей в &f{LIMIT}!"
+# Called when attempting to send a payment below the minimum
+payment-send-insufficient: "&cВаш платеж ниже минимального требования в &f{LIMIT}&c!"
+# Called when attempting to pay yourself
+payment-send-self: "&cВы не можете заплатить себе!"
+# Called when users attempts to view their own balance
+balance-info: "&aВаш баланс &f{CURRENCY_SYMBOL}{AMOUNT}"
+# Called when users attempts to view someone's balance
+balance-info-other: "&aУ {PLAYER} на балансе &f{CURRENCY_SYMBOL}{AMOUNT}"
+# Called when incrementing someone's balance
+balance-add: "&aВы добавили {CURRENCY_SYMBOL}{AMOUNT} &f{PLAYER}&a!"
+# Called when decrementing someone's balance
+balance-remove: "&aВы удалили {CURRENCY_SYMBOL}{AMOUNT} у &f{PLAYER}&a!"
+# Called when updating someone's balance to a new value
+balance-set: "&aВы установили &f{PLAYER}&a баланс {CURRENCY_SYMBOL}{AMOUNT}!"
+# Called when deleting someone's account
+account-delete: "&aВы удалили аккаунт &f{PLAYER}"
+# Called when a user executes a command while they don't have an account in the database
+no-account: "&cУ вас нет аккаунта!"
+# Called when users attempts to view the top balances
+top-balance-header: "&6ТОП БАЛАНСА"
+top-balance-row-template: "&b{POSITION}. &a{PLAYER} &7: &b{AMOUNT}"
+top-balance-error: "&cОшибка получения топа баланса!"
+# Called when users attempt to edit someone's balance and the database doesn't update it
+update-error: "&cОшибка обновления баланса {PLAYER}, данные остались без изменений."
+
+commands:
+  balance:
+    name: balance
+    description: Показывает ваш текущий баланс
+    usage: "&cИспользуйте /balance [player: строка]"
+    aliases: [ ]
+  pay:
+    name: pay
+    description: Первести кому-то с вашего баланса
+    usage: "&cИспользуйте /pay <player: строка> <amount: число>"
+    aliases: [ ]
+  top-balance:
+    name: topbalance
+    description: Показывает топ баланса
+    usage: "&cИспользуйте /topbalance [page: номер]"
+    aliases: [ ]
+  add-balance:
+    name: addbalance
+    description: Добавляет число на баланс пользователя
+    usage: "&cИспользуйте /addbalance <player: строка> <amount: число>"
+    aliases: [ ]
+  remove-balance:
+    name: removebalance
+    description: Удаляет число из баланса пользователя
+    usage: "&cИспользуйте /removebalance <player: строка> <amount: число>"
+    aliases: [ ]
+  set-balance:
+    name: setbalance
+    description: Устанавливает баланс пользователю
+    usage: "&cИспользуйте /setbalance <player: строка> <amount: число>"
+    aliases: [ ]
+  delete-account:
+    name: deleteaccount
+    description: Удаляет аккаунт пользователя
+    usage: "&cИспользуйте /deleteaccount <player: строка>"
+    aliases: [ ]
+...
