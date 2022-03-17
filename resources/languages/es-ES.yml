@@ -6,15 +6,15 @@ player-not-found: "&cNo se ha encontrado a &f{PLAYER}&c!"
 # Called when attempting to send a payment without having sufficient balance
 balance-insufficient: "&cNo tienes suficiente saldo!"
 # Called when attempting to pay a user who already has reached the balance limit
-balance-cap: "&f{PLAYER} &cya ha alcanzado el límite de saldo de {LIMIT}!"
+balance-cap: "&f{PLAYER} &cya ha alcanzado el límite de saldo de {LIMIT}{CURRENCY_SYMBOL}!"
 # Called when sending a successful transaction
 payment-send: "&aHas pagado {CURRENCY_SYMBOL}{AMOUNT} a &f{RECEIVER}&a!"
 # Called when receiving a successful transaction
 payment-receive: "&aHas recibido {AMOUNT}{CURRENCY_SYMBOL} de &f{PAYER}&a!"
 # Called when attempting to send a payment that exceeds the maximum limit
-payment-send-exceed-limit: "&cHas superado el límite de pago de &f{LIMIT}!"
+payment-send-exceed-limit: "&cHas superado el límite de pago de &f{LIMIT}{CURRENCY_SYMBOL}!"
 # Called when attempting to send a payment below the minimum
-payment-send-insufficient: "&cTu pago está por debajo del requisito mínimo de &f{LIMIT}&c!"
+payment-send-insufficient: "&cTu pago está por debajo del requisito mínimo de &f{LIMIT}{CURRENCY_SYMBOL}&c!"
 # Called when attempting to pay yourself
 payment-send-self: "&cNo puedes pagarte a ti mismo!"
 # Called when users attempts to view their own balance
@@ -32,8 +32,8 @@ account-delete: "&aHas eliminado la cuenta de &f{PLAYER}&a!"
 # Called when a user executes a command while they don't have an account in the database
 no-account: "&cNo tienes una cuenta!"
 # Called when users attempts to view the top balances
-top-balance-header: "&6TOP MÁS RICOS"
-top-balance-row-template: "&b{POSITION}. &a{PLAYER} &7: &b{AMOUNT}"
+top-balance-header: "&6TOP MAS RICOS"
+top-balance-row-template: "&b{POSITION}. &a{PLAYER}&7: &b{AMOUNT}"
 top-balance-error: "&cFallo en la recuperación de los top mas ricos!"
 # Called when users attempt to edit someone's balance and the database doesn't update it
 update-error: "&cFallo en la actualización del saldo de {PLAYER}, no se han hecho cambios."
