@@ -111,7 +111,7 @@ final class BetaBEAPI implements IBedrockEconomyAPI
 
         $this->getPlugin()->getAccountManager()->updateBalance($transaction, ClosureContext::create(
             function (bool $changed) use ($promise) {
-                $changed === true ? $promise->resolve(true) : $promise->reject();
+                $changed === true ? $promise->resolve(null) : $promise->reject();
             }
         ));
 
@@ -148,7 +148,7 @@ final class BetaBEAPI implements IBedrockEconomyAPI
 
         $this->getPlugin()->getAccountManager()->updateBalance($transaction, ClosureContext::create(
             function (bool $deducted) use ($promise) {
-                $deducted === true ? $promise->resolve(true) : $promise->reject();
+                $deducted === true ? $promise->resolve(null) : $promise->reject();
             }
         ));
 
@@ -185,7 +185,7 @@ final class BetaBEAPI implements IBedrockEconomyAPI
 
         $this->getPlugin()->getAccountManager()->updateBalance($transaction, ClosureContext::create(
             function (bool $added) use ($promise) {
-                $added === true ? $promise->resolve(true) : $promise->reject();
+                $added === true ? $promise->resolve(null) : $promise->reject();
             }
         ));
 
@@ -204,7 +204,7 @@ final class BetaBEAPI implements IBedrockEconomyAPI
 
         $this->getPlugin()->getAccountManager()->deleteAccount($player, ClosureContext::create(
             function (bool $deleted) use ($promise) {
-                $deleted === true ? $promise->resolve(true) : $promise->reject();
+                $deleted === true ? $promise->resolve(null) : $promise->reject();
             }
         ));
 
@@ -223,7 +223,7 @@ final class BetaBEAPI implements IBedrockEconomyAPI
 
         $this->getPlugin()->getAccountManager()->hasAccount($username, ClosureContext::create(
             function (bool $registered) use ($promise) {
-                $registered === true ? $promise->resolve(true) : $promise->reject();
+                $registered === true ? $promise->resolve(null) : $promise->reject();
             }
         ));
 
@@ -253,17 +253,17 @@ final class BetaBEAPI implements IBedrockEconomyAPI
     /**
      * Creates a new account for the given player.
      *
-     * @param string $username
+     * @param string $player
      * @param int|null $balance
      * @return Promise
      */
-    public function create(string $username, ?int $balance = null): Promise
+    public function create(string $player, ?int $balance = null): Promise
     {
         $promise = new PromiseResolver();
 
-        $this->getPlugin()->getAccountManager()->createAccount($username, ClosureContext::create(
+        $this->getPlugin()->getAccountManager()->createAccount($player, ClosureContext::create(
             function (bool $created) use ($promise) {
-                $created === true ? $promise->resolve(true) : $promise->reject();
+                $created === true ? $promise->resolve(null) : $promise->reject();
             }
         ), $balance);
 
@@ -287,7 +287,7 @@ final class BetaBEAPI implements IBedrockEconomyAPI
 
         $this->getPlugin()->getAccountManager()->transferFromBalance($transaction, ClosureContext::create(
             function (bool $transferred) use ($promise) {
-                $transferred === true ? $promise->resolve(true) : $promise->reject();
+                $transferred === true ? $promise->resolve(null) : $promise->reject();
             }
         ));
 
