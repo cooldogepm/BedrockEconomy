@@ -39,17 +39,17 @@ abstract class Transaction extends Threaded implements JsonSerializable
 
     protected int $id;
     protected int $issueDate;
-    protected int $balanceCap;
+    protected ?int $balanceCap;
 
     public function __construct(
         protected int $type,
-        ?int          $id = null,
-        ?int          $balanceCap = null,
-        ?int          $issueDate = null,
+        ?int $id = null,
+        ?int $balanceCap = null,
+        ?int $issueDate = null,
     )
     {
         $this->id = $id ?? TransactionManager::getNextId();
-        $this->balanceCap = $balanceCap ?? BedrockEconomy::getInstance()->getCurrencyManager()->hasBalanceCap() ? BedrockEconomy::getInstance()->getCurrencyManager()->getBalanceCap() : null;
+        $this->balanceCap = $balanceCap ?? BedrockEconomy::getInstance()->getCurrencyManager()->getBalanceCap();
         $this->issueDate = $issueDate ?? time();
     }
 

@@ -29,6 +29,7 @@ namespace cooldogedev\BedrockEconomy;
 use cooldogedev\BedrockEconomy\account\AccountManager;
 use cooldogedev\BedrockEconomy\addon\AddonManager;
 use cooldogedev\BedrockEconomy\api\BedrockEconomyAPI;
+use cooldogedev\BedrockEconomy\api\version\LegacyBEAPI;
 use cooldogedev\BedrockEconomy\command\admin\AddBalanceCommand;
 use cooldogedev\BedrockEconomy\command\admin\DeleteAccountCommand;
 use cooldogedev\BedrockEconomy\command\admin\RemoveBalanceCommand;
@@ -71,9 +72,15 @@ final class BedrockEconomy extends PluginBase
         return $this->accountManager;
     }
 
-    public function getAPI(): BedrockEconomyAPI
+    /**
+     * @return LegacyBEAPI
+     * @link BedrockEconomyAPI::beta() for the new API
+     *
+     * @deprecated used only for backwards compatibility.
+     */
+    public function getAPI(): LegacyBEAPI
     {
-        return BedrockEconomyAPI::getInstance();
+        return BedrockEconomyAPI::legacy();
     }
 
     public function getTransactionManager(): TransactionManager
@@ -88,7 +95,6 @@ final class BedrockEconomy extends PluginBase
         }
         LanguageManager::init($this, $this->getConfig()->get("language"));
         BedrockEconomy::setInstance($this);
-        BedrockEconomyAPI::register($this);
     }
 
     protected function onEnable(): void

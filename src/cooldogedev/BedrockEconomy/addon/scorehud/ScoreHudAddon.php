@@ -45,12 +45,6 @@ final class ScoreHudAddon extends Addon
      */
     protected array $cache;
 
-    protected function onEnable(): void
-    {
-        $this->cache = [];
-        $this->getPlugin()->getServer()->getPluginManager()->registerEvents(new ScoreHudListener($this), $this->getPlugin());
-    }
-
     public function isLoadable(): bool
     {
         return Server::getInstance()->getPluginManager()->getPlugin("ScoreHud") !== null;
@@ -120,5 +114,11 @@ final class ScoreHudAddon extends Addon
     public function getMinimumSupportedBedrockEconomyVersion(): string
     {
         return "2.0.5";
+    }
+
+    protected function onEnable(): void
+    {
+        $this->cache = [];
+        $this->getPlugin()->getServer()->getPluginManager()->registerEvents(new ScoreHudListener($this), $this->getPlugin());
     }
 }

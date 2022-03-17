@@ -89,9 +89,9 @@ final class CurrencyManager extends BedrockEconomyOwned
         return $this->getBalanceCap() > -1;
     }
 
-    public function getBalanceCap(): int
+    public function getBalanceCap(): ?int
     {
-        return $this->balanceCap;
+        return $this->hasBalanceCap ? $this->balanceCap : null;
     }
 
     public function hasPaymentLimit(): bool

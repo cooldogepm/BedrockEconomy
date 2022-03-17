@@ -13,12 +13,12 @@ BedrockEconomy is an economy plugin made for PocketMine-MP focused on stability 
 | setbalance | Set others balance | `setbalance <player: string> <balance: number>`  | `bedrockeconomy.command.setbalance` |
 | deleteaccount | Delete others account data | `deleteaccount <player: string>`  | `bedrockeconomy.command.deleteaccount` |
 
-## API
+## Legacy API
 
 ### Get the balance of a player
 
 ```php
-BedrockEconomyAPI::getInstance()->getPlayerBalance(
+BedrockEconomyAPI::legacy()->getPlayerBalance(
     "Steve",
     ClosureContext::create(
         function (?int $balance): void {
@@ -31,7 +31,7 @@ BedrockEconomyAPI::getInstance()->getPlayerBalance(
 ### Increment the balance of a player
 
 ```php
-BedrockEconomyAPI::getInstance()->addToPlayerBalance(
+BedrockEconomyAPI::legacy()->addToPlayerBalance(
     "Steve",
     1000,
     ClosureContext::create(
@@ -45,7 +45,7 @@ BedrockEconomyAPI::getInstance()->addToPlayerBalance(
 ### Decrement the balance of a player
 
 ```php
-BedrockEconomyAPI::getInstance()->subtractFromPlayerBalance(
+BedrockEconomyAPI::legacy()->subtractFromPlayerBalance(
     "Steve",
     1000,
     ClosureContext::create(
@@ -59,7 +59,7 @@ BedrockEconomyAPI::getInstance()->subtractFromPlayerBalance(
 ### Update the balance of a player
 
 ```php
-BedrockEconomyAPI::getInstance()->setPlayerBalance(
+BedrockEconomyAPI::legacy()->setPlayerBalance(
     "Steve",
     1000,
     ClosureContext::create(
@@ -73,7 +73,7 @@ BedrockEconomyAPI::getInstance()->setPlayerBalance(
 ### Transfer money from one player to another
 
 ```php
-BedrockEconomyAPI::getInstance()->transferFromPlayerBalance(
+BedrockEconomyAPI::legacy()->transferFromPlayerBalance(
     "Steve", // Sender
     "Alex",  // Receiver
     1000,    // Amount
@@ -88,7 +88,7 @@ BedrockEconomyAPI::getInstance()->transferFromPlayerBalance(
 ### Check if a player has an account
 
 ```php
-BedrockEconomyAPI::getInstance()->isAccountExists(
+BedrockEconomyAPI::legacy()->isAccountExists(
     "Steve",
     ClosureContext::create(
         function (bool $hasAccount): void {
@@ -101,7 +101,7 @@ BedrockEconomyAPI::getInstance()->isAccountExists(
 ### Delete a player's account
 
 ```php
-BedrockEconomyAPI::getInstance()->deletePlayerAccount(
+BedrockEconomyAPI::legacy()->deletePlayerAccount(
     "Steve",
     ClosureContext::create(
         function (bool $operationSuccessful): void {
@@ -114,7 +114,7 @@ BedrockEconomyAPI::getInstance()->deletePlayerAccount(
 ### Get highest balances
 
 ```php
-BedrockEconomyAPI::getInstance()->getHighestBalances(
+BedrockEconomyAPI::legacy()->getHighestBalances(
     limit: 10,
     context: ClosureContext::create(
         function (?array $accounts) use ($sender, $offset): void {
@@ -144,7 +144,7 @@ BedrockEconomyAPI::getInstance()->getHighestBalances(
  *
  * @return string
  */
-public function getName(): string;
+public function getName(): string
 ````
 
 ```php
@@ -153,7 +153,7 @@ public function getName(): string;
  *
  * @return string
  */
-public function getVersion(): string;
+public function getVersion(): string
 ````
 
 ```php
@@ -163,7 +163,7 @@ public function getVersion(): string;
  *
  * @return string
  */
-public function getMinimumSupportedBedrockEconomyVersion(): string;
+public function getMinimumSupportedBedrockEconomyVersion(): string
 ````
 
 ```php
@@ -172,7 +172,7 @@ public function getMinimumSupportedBedrockEconomyVersion(): string;
  *
  * @return void
  */
-public function isLoadable(): void;
+public function isLoadable(): void
 ````
 
 ```php
@@ -181,7 +181,7 @@ public function isLoadable(): void;
  *
  * @return void
  */
-public function isEnabled(): void;
+public function isEnabled(): void
 ````
 
 ```php
@@ -189,14 +189,14 @@ public function isEnabled(): void;
  * Called when the plugin is enabled. Similar to @link PluginBase::onEnable()
  * Should be used for listeners registration and such logic.
  */
-public function onEnable(): bool;
+public function onEnable(): bool
 ````
 
 ```php
 /**
  * Called when the addon is disabled. Similar to @link PluginBase::onDisable()
  */
-public function onDisable(): bool;
+public function onDisable(): bool
 ````
 
 ### Events
@@ -230,10 +230,17 @@ if($event->isSuccessful()){
 }
 ```
 
+## Scorehud integration
+
+BedrockEconomy will automatically integrate with the [Scorehud](https://github.com/Ifera/ScoreHud) if it is installed.
+
+### Available Tags
+
+- `{bedrockeconomy.balance}`
+- `{bedrockeconomy.balance_cap}`
+- `{bedrockeconomy.currency_symbol}`
+- `{bedrockeconomy.currency_name}`
+
 ## Tools
 
 * [Migration from EconomyAPI](https://github.com/cooldogedev/EconAPIToBE)
-
-## Memes
-
-<img width="250px" height="250px" src="https://user-images.githubusercontent.com/53002741/155570551-906c07ce-be6b-4d2e-87a2-a1fa733e05fb.png"  alt="Meme"/>

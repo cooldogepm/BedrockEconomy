@@ -34,7 +34,7 @@ final class MySQLCreationQuery extends MySQLQuery
 {
     public function __construct(
         protected string $playerName,
-        protected int    $balance
+        protected int $balance
     )
     {
     }

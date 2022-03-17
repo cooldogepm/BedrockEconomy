@@ -40,6 +40,7 @@ use CortexPE\Commando\args\RawStringArgument;
 use CortexPE\Commando\BaseCommand;
 use Exception;
 use pocketmine\command\CommandSender;
+use pocketmine\player\Player;
 use pocketmine\plugin\Plugin;
 use pocketmine\utils\Limits;
 
@@ -75,11 +76,15 @@ final class AddBalanceCommand extends BaseCommand
             $amount = Limits::UINT32_MAX;
         }
 
-        BedrockEconomyAPI::getInstance()->addToPlayerBalance(
+        BedrockEconomyAPI::legacy()->addToPlayerBalance(
             $player,
             $amount,
             ClosureContext::create(
                 function ($_, Closure $__, ?string $error) use ($sender, $player, $amount): void {
+                    if ($sender instanceof Player && !$sender->isConnected()) {
+                        return;
+                    }
+
                     if ($error !== null) {
                         $translation = match ($error) {
                             ErrorCodes::ERROR_CODE_ACCOUNT_NOT_FOUND => KnownTranslations::PLAYER_NOT_FOUND,

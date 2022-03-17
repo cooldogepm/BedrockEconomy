@@ -31,14 +31,14 @@ use cooldogedev\BedrockEconomy\transaction\Transaction;
 final class UpdateTransaction extends Transaction
 {
     public function __construct(
-        int               $type,
+        int $type,
         protected ?string $issuer,
-        protected string  $target,
-        protected int     $value,
+        protected string $target,
+        protected int $value,
 
-        ?int              $id = null,
-        ?int              $issueDate = null,
-        ?int              $balanceCap = null,
+        ?int $id = null,
+        ?int $issueDate = null,
+        ?int $balanceCap = null,
     )
     {
         parent::__construct($type, $id, $issueDate, $balanceCap);

@@ -33,10 +33,10 @@ final class TransferTransaction extends Transaction
     public function __construct(
         protected string $sender,
         protected string $receiver,
-        protected int    $amount,
-        ?int             $id = null,
-        ?int             $issueDate = null,
-        ?int             $balanceCap = null
+        protected int $amount,
+        ?int $id = null,
+        ?int $issueDate = null,
+        ?int $balanceCap = null
     )
     {
         parent::__construct(Transaction::TRANSACTION_TYPE_TRANSFER, $id, $issueDate, $balanceCap);

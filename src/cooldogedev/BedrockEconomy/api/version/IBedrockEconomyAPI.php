@@ -24,38 +24,21 @@
 
 declare(strict_types=1);
 
-namespace cooldogedev\BedrockEconomy\api;
+namespace cooldogedev\BedrockEconomy\api\version;
 
-use cooldogedev\BedrockEconomy\api\version\BetaBEAPI;
-use cooldogedev\BedrockEconomy\api\version\IBedrockEconomyAPI;
-use cooldogedev\BedrockEconomy\api\version\LegacyBEAPI;
-
-final class BedrockEconomyAPI
+interface IBedrockEconomyAPI
 {
-    public static function legacy(): LegacyBEAPI
-    {
-        return LegacyBEAPI::getInstance();
-    }
-
-    public static function beta(): BetaBEAPI
-    {
-        return BetaBEAPI::getInstance();
-    }
+    /**
+     * Returns the version of the API.
+     *
+     * @return string
+     */
+    public function getVersion(): string;
 
     /**
-     * @deprecated
+     * Returns the name of the API.
+     *
+     * @return string
      */
-    public static function getInstance(): LegacyBEAPI
-    {
-        return LegacyBEAPI::getInstance();
-    }
-
-    public function get(string $channel): ?IBedrockEconomyAPI
-    {
-        return match ($channel) {
-            "beta" => BetaBEAPI::getInstance(),
-            "legacy" => LegacyBEAPI::getInstance(),
-            default => null,
-        };
-    }
+    public function getChannel(): string;
 }

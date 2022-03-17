@@ -101,10 +101,10 @@ final class AccountManager extends BedrockEconomyOwned
             QueryManager::getPlayerUpdateQuery($transaction),
             QueryManager::DATA_TABLE_PLAYERS,
             context: $context->first(
-                function (bool $successful) use ($transaction): void {
-                    $this->getPlugin()->getTransactionManager()->processTransaction($transaction, $successful);
-                }
-            )
+            function (bool $successful) use ($transaction): void {
+                $this->getPlugin()->getTransactionManager()->processTransaction($transaction, $successful);
+            }
+        )
         );
     }
 
@@ -118,10 +118,10 @@ final class AccountManager extends BedrockEconomyOwned
             QueryManager::getPlayerTransferQuery($transaction),
             QueryManager::DATA_TABLE_PLAYERS,
             context: $context->first(
-                function (bool $successful) use ($transaction): void {
-                    $this->getPlugin()->getTransactionManager()->processTransaction($transaction, $successful);
-                }
-            )
+            function (bool $successful) use ($transaction): void {
+                $this->getPlugin()->getTransactionManager()->processTransaction($transaction, $successful);
+            }
+        )
         );
     }
 

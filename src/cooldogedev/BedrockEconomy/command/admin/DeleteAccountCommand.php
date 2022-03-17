@@ -32,11 +32,11 @@ use cooldogedev\BedrockEconomy\language\KnownTranslations;
 use cooldogedev\BedrockEconomy\language\LanguageManager;
 use cooldogedev\BedrockEconomy\language\TranslationKeys;
 use cooldogedev\BedrockEconomy\permission\BedrockEconomyPermissions;
-use cooldogedev\libSQL\context\ClosureContext;
 use CortexPE\Commando\args\RawStringArgument;
 use CortexPE\Commando\BaseCommand;
 use Exception;
 use pocketmine\command\CommandSender;
+use pocketmine\player\Player;
 use pocketmine\plugin\Plugin;
 
 final class DeleteAccountCommand extends BaseCommand
@@ -54,23 +54,27 @@ final class DeleteAccountCommand extends BaseCommand
             $onlinePlayer = null;
         }
 
-        BedrockEconomyAPI::getInstance()->deletePlayerAccount(
-            $player,
-            ClosureContext::create(
-                function (bool $successful) use ($sender, $player): void {
-                    if (!$successful) {
-                        $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::PLAYER_NOT_FOUND, [
-                                TranslationKeys::PLAYER => $player
-                            ]
-                        ));
-                        return;
-                    }
-                    $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::ACCOUNT_DELETE, [
-                            TranslationKeys::PLAYER => $player,
-                        ]
-                    ));
+        BedrockEconomyAPI::beta()->delete($player)->onCompletion(
+            function () use ($sender, $player): void {
+                if ($sender instanceof Player && !$sender->isConnected()) {
+                    return;
                 }
-            )
+
+                $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::ACCOUNT_DELETE, [
+                        TranslationKeys::PLAYER => $player,
+                    ]
+                ));
+            },
+            function () use ($sender, $player): void {
+                if ($sender instanceof Player && !$sender->isConnected()) {
+                    return;
+                }
+
+                $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::PLAYER_NOT_FOUND, [
+                        TranslationKeys::PLAYER => $player
+                    ]
+                ));
+            }
         );
     }
 
