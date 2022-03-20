@@ -93,7 +93,7 @@ final class TopBalanceCommand extends BaseCommand
                 [
                     TranslationKeys::PLAYER => $account["username"],
                     TranslationKeys::POSITION => $position + $offset,
-                    TranslationKeys::AMOUNT => $account["balance"],
+                    TranslationKeys::AMOUNT => number_format($account["balance"], 0, ".", $this->getOwningPlugin()->getCurrencyManager()->getNumberSeparator()),
                 ]
             );
         }

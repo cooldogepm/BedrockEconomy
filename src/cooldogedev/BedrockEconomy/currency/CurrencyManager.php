@@ -33,6 +33,7 @@ final class CurrencyManager extends BedrockEconomyOwned
 {
     protected string $name;
     protected string $symbol;
+    protected string $numberSeparator;
 
     protected int $defaultBalance;
     protected int $balanceCap;
@@ -48,6 +49,7 @@ final class CurrencyManager extends BedrockEconomyOwned
 
         $this->name = $this->getPlugin()->getConfigManager()->getCurrencyConfig()["name"];
         $this->symbol = $this->getPlugin()->getConfigManager()->getCurrencyConfig()["symbol"];
+        $this->numberSeparator = $this->getPlugin()->getConfigManager()->getCurrencyConfig()["number-separator"];
 
         $balanceConfig = $this->getPlugin()->getConfigManager()->getCurrencyConfig()["balance"];
         $this->defaultBalance = $balanceConfig["default-balance"];
@@ -62,6 +64,11 @@ final class CurrencyManager extends BedrockEconomyOwned
     public function hasBalanceCap(): bool
     {
         return $this->hasBalanceCap;
+    }
+
+    public function getNumberSeparator(): string
+    {
+        return $this->numberSeparator;
     }
 
     public function getSymbol(): string

@@ -3,9 +3,7 @@
 !.idea/codeStyles/
 !.idea/fileTemplates/
 nbproject/*
+# Virions
 src/CortexPE
+src/muqsit
 src/cooldogedev/libSQL
-src/cooldogedev/libPromise
-resources/config.new.yml
-tools/migration/Money.yml
-tools/migration/players.db

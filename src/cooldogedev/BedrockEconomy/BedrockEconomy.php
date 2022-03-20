@@ -44,6 +44,7 @@ use cooldogedev\BedrockEconomy\listener\PlayerListener;
 use cooldogedev\BedrockEconomy\query\QueryManager;
 use cooldogedev\BedrockEconomy\transaction\TransactionManager;
 use cooldogedev\libSQL\ConnectionPool;
+use CortexPE\Commando\PacketHooker;
 use pocketmine\plugin\PluginBase;
 use pocketmine\utils\SingletonTrait;
 use pocketmine\utils\TextFormat;
@@ -132,6 +133,10 @@ final class BedrockEconomy extends PluginBase
 
     protected function initializeCommands(): void
     {
+        if (!PacketHooker::isRegistered()) {
+            PacketHooker::register($this);
+        }
+
         $commands = [];
 
         $commandsData = LanguageManager::getArray("commands");

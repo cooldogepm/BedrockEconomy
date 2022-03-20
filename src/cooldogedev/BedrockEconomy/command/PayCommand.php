@@ -134,7 +134,7 @@ final class PayCommand extends BaseCommand
                             TranslationKeys::RECEIVER => $receiver,
 
                             TranslationKeys::PLAYER => $causer,
-                            TranslationKeys::AMOUNT => $amount,
+                            TranslationKeys::AMOUNT => number_format($amount, 0, ".", $this->getOwningPlugin()->getCurrencyManager()->getNumberSeparator()),
                             TranslationKeys::CURRENCY_NAME => $this->getOwningPlugin()->getCurrencyManager()->getName(),
                             TranslationKeys::CURRENCY_SYMBOL => $this->getOwningPlugin()->getCurrencyManager()->getSymbol(),
                             TranslationKeys::LIMIT => $this->getOwningPlugin()->getCurrencyManager()->getBalanceCap() ?? "N/A",
@@ -144,7 +144,7 @@ final class PayCommand extends BaseCommand
                 }
 
                 $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::PAYMENT_SEND, [
-                        TranslationKeys::AMOUNT => $amount,
+                        TranslationKeys::AMOUNT => number_format($amount, 0, ".", $this->getOwningPlugin()->getCurrencyManager()->getNumberSeparator()),
                         TranslationKeys::RECEIVER => $receiver,
                         TranslationKeys::CURRENCY_NAME => $this->getOwningPlugin()->getCurrencyManager()->getName(),
                         TranslationKeys::CURRENCY_SYMBOL => $this->getOwningPlugin()->getCurrencyManager()->getSymbol()

@@ -1,6 +1,6 @@
 ---
 # Configuration version, don't edit this.
-config-version: 2.0.7
+config-version: 2.0.8
 
 language: en-US
 
@@ -13,6 +13,8 @@ currency:
   name: USD
   # The symbol of the currency.
   symbol: $
+  # The string to use for thousands separator.
+  number-separator: ","
 
   balance:
     # The balance for new users.

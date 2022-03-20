@@ -71,7 +71,7 @@ final class BalanceCommand extends BaseCommand
 
                 $sender->sendMessage(LanguageManager::getTranslation($player ? KnownTranslations::BALANCE_INFO_OTHER : KnownTranslations::BALANCE_INFO, [
                         TranslationKeys::PLAYER => $player,
-                        TranslationKeys::AMOUNT => $balance,
+                        TranslationKeys::AMOUNT => number_format($balance, 0, ".", $this->getOwningPlugin()->getCurrencyManager()->getNumberSeparator()),
                         TranslationKeys::CURRENCY_NAME => $this->getOwningPlugin()->getCurrencyManager()->getName(),
                         TranslationKeys::CURRENCY_SYMBOL => $this->getOwningPlugin()->getCurrencyManager()->getSymbol()
                     ]
