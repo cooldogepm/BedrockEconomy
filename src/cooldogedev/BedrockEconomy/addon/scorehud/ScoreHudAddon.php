@@ -28,7 +28,6 @@ namespace cooldogedev\BedrockEconomy\addon\scorehud;
 
 use cooldogedev\BedrockEconomy\addon\Addon;
 use cooldogedev\BedrockEconomy\api\BedrockEconomyAPI;
-use cooldogedev\libSQL\context\ClosureContext;
 use Ifera\ScoreHud\event\PlayerTagUpdateEvent;
 use Ifera\ScoreHud\scoreboard\ScoreTag;
 use pocketmine\Server;
@@ -57,33 +56,41 @@ final class ScoreHudAddon extends Addon
 
     public function initializePlayerCache(string $player): void
     {
-        BedrockEconomyAPI::getInstance()->getPlayerBalance($player, ClosureContext::create(
-            function (?int $balance) use ($player): void {
-                $this->cache[strtolower($player)] = $balance;
-            }
-        ));
+        BedrockEconomyAPI::beta()->get($player)
+            ->onCompletion(
+                function (?int $balance) use ($player): void {
+                    $this->cache[strtolower($player)] = $balance;
+                },
+                function () use ($player): void {
+                    $this->getPlugin()->getLogger()->debug("ScoreHudAddon: Failed to initialize player cache for player '{$player}'");
+                }
+            );
     }
 
-    public function updatePlayerCache(string $player): void
+    public function updatePlayerCache(string $playerName): void
     {
-        $player = Server::getInstance()->getPlayerByPrefix($player);
+        $player = Server::getInstance()->getPlayerByPrefix($playerName);
 
         if (!$player?->isConnected()) {
             return;
         }
 
-        BedrockEconomyAPI::getInstance()->getPlayerBalance($player->getName(), ClosureContext::create(
-            function (?int $balance) use ($player): void {
-                if (!$player?->isConnected()) {
-                    return;
+        BedrockEconomyAPI::beta()->get($player->getName())
+            ->onCompletion(
+                function (?int $balance) use ($player): void {
+                    if (!$player?->isConnected()) {
+                        return;
+                    }
+
+                    $this->cache[strtolower($player->getName())] = $balance;
+
+                    $event = new PlayerTagUpdateEvent($player, new ScoreTag(ScoreHudAddon::SCOREHUD_TAG_BALANCE, $balance !== null ? (string)$balance : "N/A"));
+                    $event->call();
+                },
+                function () use ($playerName): void {
+                    $this->getPlugin()->getLogger()->debug("ScoreHudAddon: Failed to update player cache for player '{$playerName}'");
                 }
-
-                $this->cache[strtolower($player->getName())] = $balance;
-
-                $event = new PlayerTagUpdateEvent($player, new ScoreTag(ScoreHudAddon::SCOREHUD_TAG_BALANCE, $balance !== null ? (string)$balance : "N/A"));
-                $event->call();
-            }
-        ));
+            );
     }
 
     public function removePlayerCache(string $player): bool
