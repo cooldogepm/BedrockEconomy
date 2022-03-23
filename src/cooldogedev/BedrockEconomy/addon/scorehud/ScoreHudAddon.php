@@ -84,7 +84,7 @@ final class ScoreHudAddon extends Addon
 
                     $this->cache[strtolower($player->getName())] = $balance;
 
-                    $event = new PlayerTagUpdateEvent($player, new ScoreTag(ScoreHudAddon::SCOREHUD_TAG_BALANCE, $balance !== null ? (string)$balance : "N/A"));
+                    $event = new PlayerTagUpdateEvent($player, new ScoreTag(ScoreHudAddon::SCOREHUD_TAG_BALANCE, $balance !== null ? number_format($balance, 0, ".", $this->getPlugin()->getCurrencyManager()->getNumberSeparator()) : "N/A"));
                     $event->call();
                 },
                 function () use ($playerName): void {
