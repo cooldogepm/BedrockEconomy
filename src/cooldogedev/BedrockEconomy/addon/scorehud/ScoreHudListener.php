@@ -70,8 +70,8 @@ final class ScoreHudListener implements Listener
         $balanceCap = $this->getParent()->getPlugin()->getCurrencyManager()->getBalanceCap();
 
         $event = new PlayerTagsUpdateEvent($player, [
-            new ScoreTag(ScoreHudAddon::SCOREHUD_TAG_BALANCE, $balance !== null ? number_format($balance, 0, ".", $this->getParent()->getOwningPlugin()->getCurrencyManager()->getNumberSeparator()) : "N/A"),
-            new ScoreTag(ScoreHudAddon::SCOREHUD_TAG_BALANCE_CAP, $balanceCap !== null ? number_format($balanceCap, 0, ".", $this->getParent()->getOwningPlugin()->getCurrencyManager()->getNumberSeparator()) : "N/A"),
+            new ScoreTag(ScoreHudAddon::SCOREHUD_TAG_BALANCE, $balance !== null ? number_format($balance, 0, ".", $this->getParent()->getPlugin()->getCurrencyManager()->getNumberSeparator()) : "N/A"),
+            new ScoreTag(ScoreHudAddon::SCOREHUD_TAG_BALANCE_CAP, $balanceCap !== null ? number_format($balanceCap, 0, ".", $this->getParent()->getPlugin()->getCurrencyManager()->getNumberSeparator()) : "N/A"),
             new ScoreTag(ScoreHudAddon::SCOREHUD_TAG_CURRENCY_NAME, $this->getParent()->getPlugin()->getCurrencyManager()->getName()),
             new ScoreTag(ScoreHudAddon::SCOREHUD_TAG_CURRENCY_SYMBOL, $this->getParent()->getPlugin()->getCurrencyManager()->getSymbol()),
         ]);
@@ -107,23 +107,23 @@ final class ScoreHudListener implements Listener
     }
 
     /**
-     * Intercepts the tag resolve event and adds the balance tag.
+     * Intercepts the tags resolve event and updates the BedrockEconomy tags' value.
      *
      * @param TagsResolveEvent $event
      */
-    public function onTagResolve(TagsResolveEvent $event): void
+    public function onTagsResolve(TagsResolveEvent $event): void
     {
         $player = $event->getPlayer();
         $tag = $event->getTag();
 
         switch ($tag->getName()) {
             case ScoreHudAddon::SCOREHUD_TAG_BALANCE:
-                $balance = this->getParent()->getPlayerCache($player->getName());
-                $tag->setValue($balance !== null ? number_format($balance, 0, ".", $this->getParent()->getOwningPlugin()->getCurrencyManager()->getNumberSeparator()) : "N/A"));
+                $balance = $this->getParent()->getPlayerCache($player->getName());
+                $tag->setValue($balance !== null ? number_format($balance, 0, ".", $this->getParent()->getPlugin()->getCurrencyManager()->getNumberSeparator()) : "N/A");
                 break;
             case ScoreHudAddon::SCOREHUD_TAG_BALANCE_CAP:
                 $balanceCap = $this->getParent()->getPlugin()->getCurrencyManager()->getBalanceCap();
-                $tag->setValue($balanceCap != null ? number_format($balanceCap, 0, ".", $this->getParent()->getOwningPlugin()->getCurrencyManager()->getNumberSeparator()) : "N/A");
+                $tag->setValue($balanceCap != null ? number_format($balanceCap, 0, ".", $this->getParent()->getPlugin()->getCurrencyManager()->getNumberSeparator()) : "N/A");
                 break;
             case ScoreHudAddon::SCOREHUD_TAG_CURRENCY_NAME:
                 $tag->setValue($this->getParent()->getPlugin()->getCurrencyManager()->getName());
