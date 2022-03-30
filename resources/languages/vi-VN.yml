@@ -35,8 +35,8 @@ no-account: "&cBạn không có tài khoản!"
 top-balance-header: "&6BẢNG XẾP HẠNG SỐ DƯ"
 top-balance-row-template: "&b{POSITION}. &a{PLAYER} &7: &b{AMOUNT}"
 top-balance-error: "&cĐã thất bại khi truy xuất bảng xếp hạng số dư!"
-# Called when users attempt to edit someone's balance and the database doesn't update it
-update-error: "&cFailed to update {PLAYER}'s balance, no changes were made."
+# Được gọi khi người dùng cố gắng chỉnh sửa số dư của ai đó và cơ sở dữ liệu không cập nhật nó
+update-error: "&cCập nhật số dư của {PLAYER} không thành công, không có thay đổi nào được thực hiện."
 
 commands:
   balance:
