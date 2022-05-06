@@ -1,0 +1,77 @@
+---
+# Called when a player-only command ran by the console
+command-player-only: "&cCette commande n'est exécutable que depuis le jeu!"
+# Called when trying to interact with non-existing account
+player-not-found: "&f{PLAYER} &cn'a pas été trouvé!"
+# Called when attempting to send a payment without having sufficient balance
+balance-insufficient: "&cVous n'avez pas assez d'argent!"
+# Called when attempting to pay a user who already has reached the balance limit
+balance-cap: "&f{PLAYER} &ca déja atteint la limite de money de {LIMIT}!"
+# Called when sending a successful transaction
+payment-send: "&aVous avez payé {CURRENCY_SYMBOL}{AMOUNT} à &f{RECEIVER}&a!"
+# Called when receiving a successful transaction
+payment-receive: "&aVous avez reçu {CURRENCY_SYMBOL}{AMOUNT} de la part de &f{PAYER}&a!"
+# Called when attempting to send a payment that exceeds the maximum limit
+payment-send-exceed-limit: "&cVous avez dépassé la limite de paiement &f{LIMIT}!"
+# Called when attempting to send a payment below the minimum
+payment-send-insufficient: "&cVotre paiement est en dessous de la limite de &f{LIMIT}&c!"
+# Called when attempting to pay yourself
+payment-send-self: "&cVous ne pouvez pas vous payer vous même!"
+# Called when users attempts to view their own balance
+balance-info: "&aVotre solde est de &f{CURRENCY_SYMBOL}{AMOUNT}"
+# Called when users attempts to view someone's balance
+balance-info-other: "&a Le solde de {PLAYER}'s est de &f{CURRENCY_SYMBOL}{AMOUNT}"
+# Called when incrementing someone's balance
+balance-add: "&aVous avez ajouté {CURRENCY_SYMBOL}{AMOUNT} a &f{PLAYER}&a!"
+# Called when decrementing someone's balance
+balance-remove: "&aVous avez enlevé {CURRENCY_SYMBOL}{AMOUNT} de &f{PLAYER}&a!"
+# Called when updating someone's balance to a new value
+balance-set: "&aVous avez réglé le solde de &f{PLAYER}&a sur {CURRENCY_SYMBOL}{AMOUNT} !"
+# Called when deleting someone's account
+account-delete: "&aVous avez supprimé le compte de &f{PLAYER}&a!"
+# Called when a user executes a command while they don't have an account in the database
+no-account: "&cVous ne possédez pas de compte!"
+# Called when users attempts to view the top balances
+top-balance-header: "&6Top money"
+top-balance-row-template: "&b{POSITION}. &a{PLAYER} &7: &b{AMOUNT}"
+top-balance-error: "&cÉchec de la récupération des Top money!"
+# Called when users attempt to edit someone's balance and the database doesn't update it
+update-error: "&cÉchec de la mise à jour de la solde de {PLAYER}, aucun changement n'a été effectué."
+
+commands:
+  balance:
+    name: balance
+    description: Permet de consulter votre argent
+    usage: "&cUsage /balance [player: string]"
+    aliases: [mymoney]
+  pay:
+    name: pay
+    description: Pays others from your balance
+    usage: "&cUsage /pay <player: string> <amount: number>"
+    aliases: [ ]
+  top-balance:
+    name: topbalance
+    description: Displays the top balances
+    usage: "&cUsage /topbalance [page: number]"
+    aliases: [topmoney]
+  add-balance:
+    name: addbalance
+    description: Adds balance points to a user
+    usage: "&cUsage /addbalance <player: string> <amount: number>"
+    aliases: [ ]
+  remove-balance:
+    name: removebalance
+    description: Removes balance points from a user
+    usage: "&cUsage /removebalance <player: string> <amount: number>"
+    aliases: [ ]
+  set-balance:
+    name: setbalance
+    description: Sets the balance of a user
+    usage: "&cUsage /setbalance <player: string> <amount: number>"
+    aliases: [ ]
+  delete-account:
+    name: deleteaccount
+    description: Deletes an account of a user
+    usage: "&cUsage /deleteaccount <player: string>"
+    aliases: [ ]
+...
