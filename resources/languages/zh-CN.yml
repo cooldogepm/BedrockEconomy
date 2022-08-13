@@ -35,8 +35,8 @@ no-account: "&c你没有账户！"
 top-balance-header: "&6最高余额账户"
 top-balance-row-template: "&b{POSITION}. &a{PLAYER} &7: &b{AMOUNT}"
 top-balance-error: "&c未能检索到最高余额账户！"
-# Called when users attempt to edit someone's balance and the database doesn't update it
-update-error: "&cFailed to update {PLAYER}'s balance, no changes were made."
+# 当数据库在用户试图更新某人的余额时发生错误
+update-error: "&c更新 {PLAYER} 的余额时发生错误，此行动作废。"
 
 commands:
   balance:
