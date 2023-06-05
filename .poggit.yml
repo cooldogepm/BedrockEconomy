@@ -7,7 +7,7 @@ projects:
   BedrockEconomy:
     path: ""
     libs:
-      - src: cooldogedev/libSQL/libSQL
+      - src: cooldogepm/libSQL/libSQL
         version: ^0.2.1
         branch: pm5
       - src: ACM-PocketMine-MP/Commando/Commando
