@@ -2,15 +2,17 @@
 build-by-default: true
 branches:
 - main
+- pm5
 projects:
   BedrockEconomy:
     path: ""
     libs:
       - src: cooldogedev/libSQL/libSQL
-        version: ^0.1.2
-      - src: CortexPE/Commando/Commando
-        version: ^3.0.0
-        branch: PM4
+        version: ^0.2.1
+        branch: pm5
+      - src: ACM-PocketMine-MP/Commando/Commando
+        version: ^3.2.0
+        branch: PM5
     lint:
       phpstan: false
 #      syntaxError: false
