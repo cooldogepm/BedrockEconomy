@@ -28,13 +28,13 @@ namespace cooldogedev\BedrockEconomy\command;
 
 use Closure;
 use cooldogedev\BedrockEconomy\api\BedrockEconomyAPI;
+use cooldogedev\BedrockEconomy\api\legacy\ClosureContext;
 use cooldogedev\BedrockEconomy\BedrockEconomy;
 use cooldogedev\BedrockEconomy\language\KnownTranslations;
 use cooldogedev\BedrockEconomy\language\LanguageManager;
 use cooldogedev\BedrockEconomy\language\TranslationKeys;
 use cooldogedev\BedrockEconomy\permission\BedrockEconomyPermissions;
 use cooldogedev\BedrockEconomy\query\ErrorCodes;
-use cooldogedev\libSQL\context\ClosureContext;
 use CortexPE\Commando\args\IntegerArgument;
 use CortexPE\Commando\args\RawStringArgument;
 use CortexPE\Commando\BaseCommand;

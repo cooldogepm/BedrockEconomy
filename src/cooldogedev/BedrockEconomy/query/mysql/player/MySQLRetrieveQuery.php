@@ -27,7 +27,9 @@ declare(strict_types=1);
 namespace cooldogedev\BedrockEconomy\query\mysql\player;
 
 use cooldogedev\BedrockEconomy\query\ErrorCodes;
+use cooldogedev\BedrockEconomy\query\QueryManager;
 use cooldogedev\libSQL\query\MySQLQuery;
+use Exception;
 use mysqli;
 
 final class MySQLRetrieveQuery extends MySQLQuery
@@ -46,8 +48,8 @@ final class MySQLRetrieveQuery extends MySQLQuery
         $statement->close();
 
         if ($result === null) {
-            $this->setError(ErrorCodes::ERROR_CODE_ACCOUNT_NOT_FOUND);
-            $this->setResult(null);
+            $this->setResult(false);
+            throw new Exception(ErrorCodes::ERROR_CODE_ACCOUNT_NOT_FOUND);
         } else {
             $this->setResult($result["balance"]);
         }
@@ -60,6 +62,6 @@ final class MySQLRetrieveQuery extends MySQLQuery
 
     public function getQuery(): string
     {
-        return "SELECT * FROM " . $this->getTable() . " WHERE username = ?";
+        return "SELECT * FROM " . QueryManager::DATA_TABLE_PLAYERS . " WHERE username = ?";
     }
 }

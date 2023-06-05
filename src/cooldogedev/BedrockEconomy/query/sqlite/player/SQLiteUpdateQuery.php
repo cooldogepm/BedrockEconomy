@@ -27,9 +27,11 @@ declare(strict_types=1);
 namespace cooldogedev\BedrockEconomy\query\sqlite\player;
 
 use cooldogedev\BedrockEconomy\query\ErrorCodes;
+use cooldogedev\BedrockEconomy\query\QueryManager;
 use cooldogedev\BedrockEconomy\transaction\Transaction;
 use cooldogedev\BedrockEconomy\transaction\types\UpdateTransaction;
 use cooldogedev\libSQL\query\SQLiteQuery;
+use Exception;
 use SQLite3;
 
 final class SQLiteUpdateQuery extends SQLiteQuery
@@ -55,9 +57,8 @@ final class SQLiteUpdateQuery extends SQLiteQuery
         $statement->close();
 
         if ($connection->changes() <= 0) {
-            $this->setError(ErrorCodes::ERROR_CODE_NO_CHANGES_MADE);
             $this->setResult(false);
-            return;
+            throw new Exception(ErrorCodes::ERROR_CODE_NO_CHANGES_MADE);
         }
 
         $this->setResult(true);
@@ -67,8 +68,6 @@ final class SQLiteUpdateQuery extends SQLiteQuery
     {
         return $this->transaction;
     }
-
-    // Copied from SQLiteRetrieveQuery
 
     protected function verifyAccount(SQLite3 $connection, string $username): bool
     {
@@ -86,29 +85,29 @@ final class SQLiteUpdateQuery extends SQLiteQuery
         $statement->close();
 
         if (!$isVerified) {
-            $this->setError(ErrorCodes::ERROR_CODE_ACCOUNT_NOT_FOUND);
             $this->setResult(false);
+            throw new Exception(ErrorCodes::ERROR_CODE_ACCOUNT_NOT_FOUND);
         }
 
         if ($isVerified && $balance !== null && $balanceCap !== null && $type === Transaction::TRANSACTION_TYPE_INCREMENT && $balance >= $balanceCap) {
+            $this->setResult(false);
             $isVerified = false;
 
-            $this->setError(ErrorCodes::ERROR_CODE_BALANCE_CAP_EXCEEDED);
-            $this->setResult(false);
+            throw new Exception(ErrorCodes::ERROR_CODE_BALANCE_CAP_EXCEEDED);
         }
 
         if ($isVerified && $balance !== null && $balanceCap !== null && $type === Transaction::TRANSACTION_TYPE_INCREMENT && ($balance + $value) > $balanceCap) {
+            $this->setResult(false);
             $isVerified = false;
 
-            $this->setError(ErrorCodes::ERROR_CODE_NEW_BALANCE_EXCEEDS_CAP);
-            $this->setResult(false);
+            throw new Exception(ErrorCodes::ERROR_CODE_BALANCE_INSUFFICIENT);
         }
 
         if ($isVerified && $balance !== null && $type === Transaction::TRANSACTION_TYPE_DECREMENT && ($balance - $value) < 0) {
+            $this->setResult(false);
             $isVerified = false;
 
-            $this->setError(ErrorCodes::ERROR_CODE_BALANCE_INSUFFICIENT_OTHER);
-            $this->setResult(false);
+            throw new Exception(ErrorCodes::ERROR_CODE_BALANCE_INSUFFICIENT_OTHER);
         }
 
         return $isVerified;
@@ -116,7 +115,7 @@ final class SQLiteUpdateQuery extends SQLiteQuery
 
     public function getRetrieveQuery(): string
     {
-        return "SELECT * FROM " . $this->getTable() . " WHERE username = :username";
+        return "SELECT * FROM " . QueryManager::DATA_TABLE_PLAYERS . " WHERE username = :username";
     }
 
     public function getQuery(): string
@@ -136,6 +135,6 @@ final class SQLiteUpdateQuery extends SQLiteQuery
             Transaction::TRANSACTION_TYPE_SET => $value,
         };
 
-        return "UPDATE " . $this->getTable() . " SET balance = " . $statement . " WHERE username = :username";
+        return "UPDATE " . QueryManager::DATA_TABLE_PLAYERS . " SET balance = " . $statement . " WHERE username = :username";
     }
 }

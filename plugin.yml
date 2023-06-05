@@ -1,11 +1,11 @@
 name: BedrockEconomy
-version: 2.0.8
-api: [ 4.0.0 ]
+version: 2.1.0
+api: [ 5.0.0 ]
 php: [ 8.0 ]
 author: cooldogedev
 main: cooldogedev\BedrockEconomy\BedrockEconomy
 description: An economy plugin focused on stability and simplicity
-website: "https://github.com/cooldogedev/BedrockEconomy"
+website: "https://github.com/cooldogepm/BedrockEconomy"
 permissions:
   bedrockeconomy.command.balance:
     description: Allows users to view their balance

@@ -27,9 +27,11 @@ declare(strict_types=1);
 namespace cooldogedev\BedrockEconomy\query\mysql\player;
 
 use cooldogedev\BedrockEconomy\query\ErrorCodes;
+use cooldogedev\BedrockEconomy\query\QueryManager;
 use cooldogedev\BedrockEconomy\transaction\Transaction;
 use cooldogedev\BedrockEconomy\transaction\types\UpdateTransaction;
 use cooldogedev\libSQL\query\MySQLQuery;
+use Exception;
 use mysqli;
 
 final class MySQLUpdateQuery extends MySQLQuery
@@ -58,9 +60,8 @@ final class MySQLUpdateQuery extends MySQLQuery
 
         // Fail if no changes were made
         if (!$successful) {
-            $this->setError(ErrorCodes::ERROR_CODE_NO_CHANGES_MADE);
             $this->setResult(false);
-            return;
+            throw new Exception(ErrorCodes::ERROR_CODE_NO_CHANGES_MADE);
         }
 
         // Set the result
@@ -89,40 +90,37 @@ final class MySQLUpdateQuery extends MySQLQuery
         $statement->close();
 
         if (!$isVerified) {
-            $this->setError(ErrorCodes::ERROR_CODE_ACCOUNT_NOT_FOUND);
             $this->setResult(false);
+            throw new Exception(ErrorCodes::ERROR_CODE_ACCOUNT_NOT_FOUND);
         }
 
-
         if ($isVerified && $balance !== null && $balanceCap !== null && $type === Transaction::TRANSACTION_TYPE_INCREMENT && $balance >= $balanceCap) {
+            $this->setResult(false);
             $isVerified = false;
 
-            $this->setError(ErrorCodes::ERROR_CODE_BALANCE_CAP_EXCEEDED);
-            $this->setResult(false);
+            throw new Exception(ErrorCodes::ERROR_CODE_BALANCE_CAP_EXCEEDED);
         }
 
         if ($isVerified && $balance !== null && $balanceCap !== null && $type === Transaction::TRANSACTION_TYPE_INCREMENT && ($balance + $value) > $balanceCap) {
+            $this->setResult(false);
             $isVerified = false;
 
-            $this->setError(ErrorCodes::ERROR_CODE_NEW_BALANCE_EXCEEDS_CAP);
-            $this->setResult(false);
+            throw new Exception(ErrorCodes::ERROR_CODE_NEW_BALANCE_EXCEEDS_CAP);
         }
 
         if ($isVerified && $balance !== null && $type === Transaction::TRANSACTION_TYPE_DECREMENT && $balance - $value < 0) {
+            $this->setResult(false);
             $isVerified = false;
 
-            $this->setError(ErrorCodes::ERROR_CODE_BALANCE_INSUFFICIENT_OTHER);
-            $this->setResult(false);
+            throw new Exception(ErrorCodes::ERROR_CODE_BALANCE_INSUFFICIENT_OTHER);
         }
 
         return $isVerified;
     }
 
-    // Copied from MySQLRetrieveQuery
-
     public function getRetrieveQuery(): string
     {
-        return "SELECT * FROM " . $this->getTable() . " WHERE username = ?";
+        return "SELECT * FROM " . QueryManager::DATA_TABLE_PLAYERS . " WHERE username = ?";
     }
 
     public function getQuery(): string
@@ -142,6 +140,6 @@ final class MySQLUpdateQuery extends MySQLQuery
             Transaction::TRANSACTION_TYPE_SET => $value,
         };
 
-        return "UPDATE " . $this->getTable() . " SET balance = " . $statement . " WHERE username = ?";
+        return "UPDATE " . QueryManager::DATA_TABLE_PLAYERS . " SET balance = " . $statement . " WHERE username = ?";
     }
 }

@@ -26,12 +26,12 @@ declare(strict_types=1);
 
 namespace cooldogedev\BedrockEconomy\api\version;
 
+use cooldogedev\BedrockEconomy\api\legacy\ClosureContext;
 use cooldogedev\BedrockEconomy\BedrockEconomy;
 use cooldogedev\BedrockEconomy\event\transaction\TransactionSubmitEvent;
 use cooldogedev\BedrockEconomy\transaction\Transaction;
 use cooldogedev\BedrockEconomy\transaction\types\TransferTransaction;
 use cooldogedev\BedrockEconomy\transaction\types\UpdateTransaction;
-use cooldogedev\libSQL\context\ClosureContext;
 use pocketmine\promise\Promise;
 use pocketmine\promise\PromiseResolver;
 use pocketmine\utils\SingletonTrait;

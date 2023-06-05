@@ -27,7 +27,9 @@ declare(strict_types=1);
 namespace cooldogedev\BedrockEconomy\query\mysql\player;
 
 use cooldogedev\BedrockEconomy\query\ErrorCodes;
+use cooldogedev\BedrockEconomy\query\QueryManager;
 use cooldogedev\libSQL\query\MySQLQuery;
+use Exception;
 use mysqli;
 
 final class MySQLCreationQuery extends MySQLQuery
@@ -50,8 +52,8 @@ final class MySQLCreationQuery extends MySQLQuery
         $statement->close();
 
         if (!$successful) {
-            $this->setError(ErrorCodes::ERROR_CODE_ACCOUNT_NOT_FOUND);
             $this->setResult(false);
+            throw new Exception(ErrorCodes::ERROR_CODE_ACCOUNT_NOT_FOUND);
         } else {
             $this->setResult(true);
         }
@@ -69,6 +71,6 @@ final class MySQLCreationQuery extends MySQLQuery
 
     public function getQuery(): string
     {
-        return "INSERT IGNORE INTO " . $this->getTable() . " (username, balance) VALUES (?, ?)";
+        return "INSERT IGNORE INTO " . QueryManager::DATA_TABLE_PLAYERS . " (username, balance) VALUES (?, ?)";
     }
 }

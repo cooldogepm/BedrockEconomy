@@ -27,7 +27,9 @@ declare(strict_types=1);
 namespace cooldogedev\BedrockEconomy\query\sqlite\player;
 
 use cooldogedev\BedrockEconomy\query\ErrorCodes;
+use cooldogedev\BedrockEconomy\query\QueryManager;
 use cooldogedev\libSQL\query\SQLiteQuery;
+use Exception;
 use SQLite3;
 
 final class SQLiteCreationQuery extends SQLiteQuery
@@ -45,8 +47,8 @@ final class SQLiteCreationQuery extends SQLiteQuery
         $statement->close();
 
         if ($connection->changes() === 0) {
-            $this->setError(ErrorCodes::ERROR_CODE_ACCOUNT_NOT_FOUND);
             $this->setResult(false);
+            throw new Exception(ErrorCodes::ERROR_CODE_ACCOUNT_NOT_FOUND);
         } else {
             $this->setResult(true);
         }
@@ -54,7 +56,7 @@ final class SQLiteCreationQuery extends SQLiteQuery
 
     public function getQuery(): string
     {
-        return "INSERT OR IGNORE INTO " . $this->getTable() . " (username, balance) VALUES (:username, :balance)";
+        return "INSERT OR IGNORE INTO " . QueryManager::DATA_TABLE_PLAYERS . " (username, balance) VALUES (:username, :balance)";
     }
 
     public function getPlayerName(): string

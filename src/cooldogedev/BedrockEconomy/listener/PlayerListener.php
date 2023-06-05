@@ -28,7 +28,7 @@ namespace cooldogedev\BedrockEconomy\listener;
 
 use cooldogedev\BedrockEconomy\api\BedrockEconomyAPI;
 use cooldogedev\BedrockEconomY\api\BedrockEconomyOwned;
-use cooldogedev\libSQL\context\ClosureContext;
+use cooldogedev\BedrockEconomy\api\legacy\ClosureContext;
 use pocketmine\event\Listener;
 use pocketmine\event\player\PlayerLoginEvent;
 
@@ -42,11 +42,11 @@ final class PlayerListener extends BedrockEconomyOwned implements Listener
     {
         $player = $event->getPlayer();
 
-        BedrockEconomyAPI::getInstance()->getPlayerBalance(
+        BedrockEconomyAPI::getInstance()->isAccountExists(
             $player->getName(),
             ClosureContext::create(
-                function (?int $balance) use ($player): void {
-                    if ($balance === null) {
+                function (bool $exists) use ($player): void {
+                    if (!$exists) {
                         BedrockEconomyAPI::getInstance()->createAccount($player->getName());
                     }
                 }

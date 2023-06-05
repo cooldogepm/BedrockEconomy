@@ -26,6 +26,7 @@ declare(strict_types=1);
 
 namespace cooldogedev\BedrockEconomy\query\mysql\player;
 
+use cooldogedev\BedrockEconomy\query\QueryManager;
 use cooldogedev\libSQL\query\MySQLQuery;
 use mysqli;
 
@@ -47,7 +48,7 @@ final class MySQLBulkRetrieveQuery extends MySQLQuery
 
     public function getQuery(): string
     {
-        return $this->getLimit() ? "SELECT * FROM " . $this->getTable() . " ORDER BY balance DESC LIMIT " . $this->getLimit() . " OFFSET " . ($this->getOffset() ?? 0) : "SELECT * FROM " . $this->getTable();
+        return $this->getLimit() ? "SELECT * FROM " . QueryManager::DATA_TABLE_PLAYERS . " ORDER BY balance DESC LIMIT " . $this->getLimit() . " OFFSET " . ($this->getOffset() ?? 0) : "SELECT * FROM " . QueryManager::DATA_TABLE_PLAYERS;
     }
 
     public function getLimit(): ?int

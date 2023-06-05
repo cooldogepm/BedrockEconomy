@@ -27,14 +27,14 @@ declare(strict_types=1);
 namespace cooldogedev\BedrockEconomy\account;
 
 use cooldogedev\BedrockEconomY\api\BedrockEconomyOwned;
+use cooldogedev\BedrockEconomy\api\legacy\ClosureContext;
 use cooldogedev\BedrockEconomy\BedrockEconomy;
 use cooldogedev\BedrockEconomy\event\account\AccountCreationEvent;
 use cooldogedev\BedrockEconomy\event\account\AccountDeletionEvent;
 use cooldogedev\BedrockEconomy\query\QueryManager;
 use cooldogedev\BedrockEconomy\transaction\types\TransferTransaction;
 use cooldogedev\BedrockEconomy\transaction\types\UpdateTransaction;
-use cooldogedev\libSQL\context\ClosureContext;
-use cooldogedev\libSQL\query\SQLQuery;
+use cooldogedev\libSQL\exception\SQLException;
 
 final class AccountManager extends BedrockEconomyOwned
 {
@@ -46,14 +46,9 @@ final class AccountManager extends BedrockEconomyOwned
     }
 
     /**
-     * @param string $username
-     * @param ClosureContext $context
-     * @param int|null $balance
-     * @return SQLQuery|null
-     *
-     * @internal This method is not meant to be used outside of the BedrockEconomy scope.
+     * @internal This method is not meant to be used outside the BedrockEconomy scope.
      */
-    public function createAccount(string $username, ClosureContext $context, ?int $balance = null): ?SQLQuery
+    public function createAccount(string $username, ClosureContext $context, ?int $balance = null): void
     {
         if ($balance === null) {
             $balance = $this->getPlugin()->getCurrencyManager()->getDefaultBalance();
@@ -63,91 +58,97 @@ final class AccountManager extends BedrockEconomyOwned
         $event->call();
 
         if ($event->isCancelled()) {
-            $context->invoke(false, AccountManager::ERROR_EVENT_CANCELLED);
-            return null;
+            $context->wrap(false, AccountManager::ERROR_EVENT_CANCELLED)();
+            return;
         }
 
-        return $this->getPlugin()->getConnector()->submit(
-            QueryManager::getPlayerCreationQuery($username, $event->getBalance()),
-            table: QueryManager::DATA_TABLE_PLAYERS,
-            context: $context
+        $this->getPlugin()->getConnector()->submit(
+            query: QueryManager::getPlayerCreationQuery($username, $event->getBalance()),
+
+            onSuccess: static fn (mixed $result) => $context->wrap($result, null)(),
+            onFail: static fn (SQLException $exception) => $context->wrap(false, $exception->_getMessage())()
         );
     }
 
-    public function hasAccount(string $username, ClosureContext $context): ?SQLQuery
+    public function hasAccount(string $username, ClosureContext $context): void
     {
-        return $this->getBalance(
+        $this->getBalance(
             $username,
             context: $context->first(fn(?int $balance) => $balance !== null)
         );
     }
 
-    public function getBalance(string $username, ClosureContext $context): ?SQLQuery
+    public function getBalance(string $username, ClosureContext $context): void
     {
-        return $this->getPlugin()->getConnector()->submit(
-            QueryManager::getPlayerQuery($username),
-            QueryManager::DATA_TABLE_PLAYERS,
-            $context
+        $this->getPlugin()->getConnector()->submit(
+            query: QueryManager::getPlayerQuery($username),
+
+            onSuccess: static fn (mixed $result) => $context->wrap($result, null)(),
+            onFail: static fn (SQLException $exception) => $context->wrap(null, $exception->_getMessage())()
         );
     }
 
-    public function updateBalance(UpdateTransaction $transaction, ClosureContext $context): ?SQLQuery
+    public function updateBalance(UpdateTransaction $transaction, ClosureContext $context): void
     {
         if (!$this->getPlugin()->getTransactionManager()->submitTransaction($transaction)) {
-            return null;
+            $context->wrap(false, AccountManager::ERROR_EVENT_CANCELLED)();
+            return;
         }
 
-        return $this->getPlugin()->getConnector()->submit(
-            QueryManager::getPlayerUpdateQuery($transaction),
-            QueryManager::DATA_TABLE_PLAYERS,
-            context: $context->first(
+        $this->getPlugin()->getConnector()->submit(
+            query: QueryManager::getPlayerUpdateQuery($transaction),
+
+            onSuccess: static fn (mixed $result) => $context->wrap($result, null)(),
+            onFail: static fn (SQLException $exception) => $context->wrap(false, $exception->_getMessage())()
+        );
+    }
+
+    public function transferFromBalance(TransferTransaction $transaction, ClosureContext $context): void
+    {
+        if (!$this->getPlugin()->getTransactionManager()->submitTransaction($transaction)) {
+            $context->wrap(false, AccountManager::ERROR_EVENT_CANCELLED)();
+            return;
+        }
+
+        $context->first(
             function (bool $successful) use ($transaction): void {
                 $this->getPlugin()->getTransactionManager()->processTransaction($transaction, $successful);
             }
-        )
+        );
+
+        $this->getPlugin()->getConnector()->submit(
+            query: QueryManager::getPlayerTransferQuery($transaction),
+
+            onSuccess: static fn (mixed $result) => $context->wrap($result, null)(),
+            onFail: static fn (SQLException $exception) => $context->wrap(false, $exception->_getMessage())()
         );
     }
 
-    public function transferFromBalance(TransferTransaction $transaction, ClosureContext $context): ?SQLQuery
+    public function getHighestBalances(int $limit, ClosureContext $context, ?int $offset = null): void
     {
-        if (!$this->getPlugin()->getTransactionManager()->submitTransaction($transaction)) {
-            return null;
-        }
+        $this->getPlugin()->getConnector()->submit(
+            query: QueryManager::getBulkPlayersQuery($limit, $offset),
 
-        return $this->getPlugin()->getConnector()->submit(
-            QueryManager::getPlayerTransferQuery($transaction),
-            QueryManager::DATA_TABLE_PLAYERS,
-            context: $context->first(
-            function (bool $successful) use ($transaction): void {
-                $this->getPlugin()->getTransactionManager()->processTransaction($transaction, $successful);
-            }
-        )
+            onSuccess: static fn (mixed $result) => $context->wrap($result, null)(),
+            onFail: static fn (SQLException $exception) => $context->wrap([], $exception->_getMessage())()
         );
     }
 
-    public function getHighestBalances(int $limit, ClosureContext $context, ?int $offset = null): ?SQLQuery
-    {
-        return $this->getPlugin()->getConnector()->submit(
-            QueryManager::getBulkPlayersQuery($limit, $offset),
-            table: QueryManager::DATA_TABLE_PLAYERS,
-            context: $context
-        );
-    }
-
-    public function deleteAccount(string $username, ClosureContext $context): ?SQLQuery
+    public function deleteAccount(string $username, ClosureContext $context): void
     {
         $event = new AccountDeletionEvent($username);
         $event->call();
 
         if ($event->isCancelled()) {
-            $context->invoke(false, AccountManager::ERROR_EVENT_CANCELLED);
-            return null;
+            $context->wrap(false, AccountManager::ERROR_EVENT_CANCELLED)();
+            return;
         }
 
-        return $this->getPlugin()->getConnector()->submit(
-            QueryManager::getPlayerDeletionQuery($username),
-            QueryManager::DATA_TABLE_PLAYERS,
-            context: $context
+        $this->getPlugin()->getConnector()->submit(
+            query: QueryManager::getPlayerDeletionQuery($username),
+
+            onSuccess: static fn (mixed $result) => $context->wrap($result, null)(),
+            onFail: static fn (SQLException $exception) => $context->wrap(false, $exception->_getMessage())()
         );
     }
 }

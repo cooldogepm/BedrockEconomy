@@ -107,7 +107,7 @@ final class BedrockEconomy extends PluginBase
         $this->accountManager = new AccountManager($this);
         $this->addonManager = new AddonManager($this);
 
-        QueryManager::setIsMySQL($this->getConfigManager()->getDatabaseConfig()["provider"] === ConnectionPool::DATA_PROVIDER_MYSQL);
+        QueryManager::setIsMySQL($this->getConfigManager()->getDatabaseConfig()["provider"] === "mysql");
 
         $this->getConnector()->submit(QueryManager::getTableCreationQuery($this->getCurrencyManager()->getDefaultBalance()));
 

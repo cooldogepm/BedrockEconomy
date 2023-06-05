@@ -27,7 +27,9 @@ declare(strict_types=1);
 namespace cooldogedev\BedrockEconomy\query\mysql\player;
 
 use cooldogedev\BedrockEconomy\query\ErrorCodes;
+use cooldogedev\BedrockEconomy\query\QueryManager;
 use cooldogedev\libSQL\query\MySQLQuery;
+use Exception;
 use mysqli;
 
 final class MySQLDeletionQuery extends MySQLQuery
@@ -46,8 +48,8 @@ final class MySQLDeletionQuery extends MySQLQuery
         $statement->close();
 
         if (!$successful) {
-            $this->setError(ErrorCodes::ERROR_CODE_ACCOUNT_NOT_FOUND);
             $this->setResult(false);
+            throw new Exception(ErrorCodes::ERROR_CODE_ACCOUNT_NOT_FOUND);
         } else {
             $this->setResult(true);
         }
@@ -60,6 +62,6 @@ final class MySQLDeletionQuery extends MySQLQuery
 
     public function getQuery(): string
     {
-        return "DELETE FROM " . $this->getTable() . " WHERE username = ?";
+        return "DELETE FROM " . QueryManager::DATA_TABLE_PLAYERS . " WHERE username = ?";
     }
 }

@@ -26,19 +26,18 @@ declare(strict_types=1);
 
 namespace cooldogedev\BedrockEconomy\api\version;
 
+use cooldogedev\BedrockEconomy\account\AccountManager;
+use cooldogedev\BedrockEconomy\api\legacy\ClosureContext;
 use cooldogedev\BedrockEconomy\BedrockEconomy;
 use cooldogedev\BedrockEconomy\event\transaction\TransactionSubmitEvent;
 use cooldogedev\BedrockEconomy\transaction\Transaction;
 use cooldogedev\BedrockEconomy\transaction\types\TransferTransaction;
 use cooldogedev\BedrockEconomy\transaction\types\UpdateTransaction;
-use cooldogedev\libSQL\context\ClosureContext;
-use cooldogedev\libSQL\query\SQLQuery;
 use pocketmine\utils\SingletonTrait;
 
-/*
- * This API is deprecated and will NOT be removed in the future.
+/**
+ * @deprecated
  */
-
 final class LegacyBEAPI implements IBedrockEconomyAPI
 {
     use SingletonTrait {
@@ -51,7 +50,7 @@ final class LegacyBEAPI implements IBedrockEconomyAPI
         return LegacyBEAPI::_getInstance();
     }
 
-    public function setPlayerBalance(string $username, int $balance, ?ClosureContext $context = null, ?string $issuer = null): ?SQLQuery
+    public function setPlayerBalance(string $username, int $balance, ?ClosureContext $context = null, ?string $issuer = null): void
     {
         $transaction = new UpdateTransaction(
             Transaction::TRANSACTION_TYPE_SET,
@@ -64,10 +63,11 @@ final class LegacyBEAPI implements IBedrockEconomyAPI
         $event->call();
 
         if ($event->isCancelled()) {
-            return null;
+            $context->wrap(false, AccountManager::ERROR_EVENT_CANCELLED)();
+            return;
         }
 
-        return $this->getPlugin()->getAccountManager()->updateBalance($transaction, $context ?? ClosureContext::create());
+        $this->getPlugin()->getAccountManager()->updateBalance($transaction, $context ?? ClosureContext::create());
     }
 
     protected function getPlugin(): BedrockEconomy
@@ -75,7 +75,7 @@ final class LegacyBEAPI implements IBedrockEconomyAPI
         return BedrockEconomy::getInstance();
     }
 
-    public function subtractFromPlayerBalance(string $username, int $subtraction, ?ClosureContext $context = null, ?string $issuer = null): ?SQLQuery
+    public function subtractFromPlayerBalance(string $username, int $subtraction, ?ClosureContext $context = null, ?string $issuer = null): void
     {
         $transaction = new UpdateTransaction(
             Transaction::TRANSACTION_TYPE_DECREMENT,
@@ -84,14 +84,14 @@ final class LegacyBEAPI implements IBedrockEconomyAPI
             $subtraction,
         );
 
-        return $this->getPlugin()->getAccountManager()->updateBalance($transaction, $context ?? ClosureContext::create());
+        $this->getPlugin()->getAccountManager()->updateBalance($transaction, $context ?? ClosureContext::create());
     }
 
-    public function transferFromPlayerBalance(string $sender, string $receiver, int $amount, ?ClosureContext $context = null): ?SQLQuery
+    public function transferFromPlayerBalance(string $sender, string $receiver, int $amount, ?ClosureContext $context = null): void
     {
         $transaction = new TransferTransaction($sender, $receiver, $amount);
 
-        return $this->getPlugin()->getAccountManager()->transferFromBalance($transaction, $context ?? ClosureContext::create());
+        $this->getPlugin()->getAccountManager()->transferFromBalance($transaction, $context ?? ClosureContext::create());
     }
 
     public function deletePlayerAccount(string $username, ?ClosureContext $context = null): void
@@ -99,7 +99,7 @@ final class LegacyBEAPI implements IBedrockEconomyAPI
         $this->getPlugin()->getAccountManager()->deleteAccount($username, $context ?? ClosureContext::create());
     }
 
-    public function addToPlayerBalance(string $username, int $addition, ?ClosureContext $context = null, ?string $issuer = null): ?SQLQuery
+    public function addToPlayerBalance(string $username, int $addition, ?ClosureContext $context = null, ?string $issuer = null): void
     {
         $transaction = new UpdateTransaction(
             Transaction::TRANSACTION_TYPE_INCREMENT,
@@ -108,35 +108,27 @@ final class LegacyBEAPI implements IBedrockEconomyAPI
             $addition,
         );
 
-        return $this->getPlugin()->getAccountManager()->updateBalance($transaction, $context ?? ClosureContext::create());
+        $this->getPlugin()->getAccountManager()->updateBalance($transaction, $context ?? ClosureContext::create());
     }
 
-    public function isAccountExists(string $username, ?ClosureContext $context = null): ?SQLQuery
+    public function isAccountExists(string $username, ?ClosureContext $context = null): void
     {
-        return $this->getPlugin()->getAccountManager()->hasAccount($username, $context ?? ClosureContext::create());
+        $this->getPlugin()->getAccountManager()->hasAccount($username, $context ?? ClosureContext::create());
     }
 
-    /**
-     * @param string $username
-     * @param int|null $balance
-     * @param ClosureContext|null $context
-     * @return SQLQuery|null
-     *
-     * @internal This method is not meant to be used outside of the BedrockEconomy scope.
-     */
-    public function createAccount(string $username, ?int $balance = null, ?ClosureContext $context = null): ?SQLQuery
+    public function createAccount(string $username, ?int $balance = null, ?ClosureContext $context = null): void
     {
-        return $this->getPlugin()->getAccountManager()->createAccount($username, $context ?? ClosureContext::create(), $balance);
+        $this->getPlugin()->getAccountManager()->createAccount($username, $context ?? ClosureContext::create(), $balance);
     }
 
-    public function getHighestBalances(int $limit, ?ClosureContext $context = null, ?int $offset = null): ?SQLQuery
+    public function getHighestBalances(int $limit, ?ClosureContext $context = null, ?int $offset = null): void
     {
-        return $this->getPlugin()->getAccountManager()->getHighestBalances($limit, $context ?? ClosureContext::create(), $offset);
+        $this->getPlugin()->getAccountManager()->getHighestBalances($limit, $context ?? ClosureContext::create(), $offset);
     }
 
-    public function getPlayerBalance(string $username, ?ClosureContext $context = null): SQLQuery
+    public function getPlayerBalance(string $username, ?ClosureContext $context = null): void
     {
-        return $this->getPlugin()->getAccountManager()->getBalance($username, $context ?? ClosureContext::create());
+        $this->getPlugin()->getAccountManager()->getBalance($username, $context ?? ClosureContext::create());
     }
 
     public function getVersion(): string

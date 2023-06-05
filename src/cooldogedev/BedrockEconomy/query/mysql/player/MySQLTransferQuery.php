@@ -27,8 +27,10 @@ declare(strict_types=1);
 namespace cooldogedev\BedrockEconomy\query\mysql\player;
 
 use cooldogedev\BedrockEconomy\query\ErrorCodes;
+use cooldogedev\BedrockEconomy\query\QueryManager;
 use cooldogedev\BedrockEconomy\transaction\types\TransferTransaction;
 use cooldogedev\libSQL\query\MySQLQuery;
+use Exception;
 use mysqli;
 
 final class MySQLTransferQuery extends MySQLQuery
@@ -79,20 +81,20 @@ final class MySQLTransferQuery extends MySQLQuery
         $statement->close();
 
         if (!$isVerified) {
-            $this->setError(ErrorCodes::ERROR_CODE_ACCOUNT_NOT_FOUND . ":" . $username);
             $this->setResult(false);
+            throw new Exception(ErrorCodes::ERROR_CODE_ACCOUNT_NOT_FOUND . ":" . $username);
         }
 
         if ($checkType === MySQLTransferQuery::CHECK_TYPE_SUFFICIENCY && $balance < $amount) {
+            $this->setResult(false);
             $isVerified = false;
 
-            $this->setError(ErrorCodes::ERROR_CODE_BALANCE_INSUFFICIENT . ":" . $username);
-            $this->setResult(false);
+            throw new Exception(ErrorCodes::ERROR_CODE_BALANCE_INSUFFICIENT . ":" . $username);
         } elseif ($checkType === MySQLTransferQuery::CHECK_TYPE_CAP && $balanceCap !== null && ($balance + $amount) > $balanceCap) {
+            $this->setResult(false);
             $isVerified = false;
 
-            $this->setError(ErrorCodes::ERROR_CODE_BALANCE_CAP_EXCEEDED . ":" . $username);
-            $this->setResult(false);
+            throw new Exception(ErrorCodes::ERROR_CODE_BALANCE_CAP_EXCEEDED . ":" . $username);
         }
 
         return $isVerified;
@@ -100,7 +102,7 @@ final class MySQLTransferQuery extends MySQLQuery
 
     public function getRetrieveQuery(): string
     {
-        return "SELECT * FROM " . $this->getTable() . " WHERE username = ?";
+        return "SELECT * FROM " . QueryManager::DATA_TABLE_PLAYERS . " WHERE username = ?";
     }
 
     protected function updateBalance(mysqli $connection, string $username, bool $deduction): bool
@@ -112,22 +114,19 @@ final class MySQLTransferQuery extends MySQLQuery
         $statement->close();
 
         if (!$successful) {
-            $this->setError(ErrorCodes::ERROR_CODE_NO_CHANGES_MADE . ":" . $username);
             $this->setResult(false);
-            return false;
+            throw new Exception(ErrorCodes::ERROR_CODE_NO_CHANGES_MADE . ":" . $username);
         }
 
         return true;
     }
-
-    // Copied from MySQLRetrieveQuery
 
     public function getDeductionQuery(): string
     {
         $amount = $this->getTransaction()->getAmount();
         $statement = "balance - $amount";
 
-        return "UPDATE " . $this->getTable() . " SET balance = " . $statement . " WHERE username = ?";
+        return "UPDATE " . QueryManager::DATA_TABLE_PLAYERS . " SET balance = " . $statement . " WHERE username = ?";
     }
 
     public function getAdditionQuery(): string
@@ -135,6 +134,6 @@ final class MySQLTransferQuery extends MySQLQuery
         $amount = $this->getTransaction()->getAmount();
         $statement = "balance + $amount";
 
-        return "UPDATE " . $this->getTable() . " SET balance = " . $statement . " WHERE username = ?";
+        return "UPDATE " . QueryManager::DATA_TABLE_PLAYERS . " SET balance = " . $statement . " WHERE username = ?";
     }
 }

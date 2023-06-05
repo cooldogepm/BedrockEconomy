@@ -27,7 +27,9 @@ declare(strict_types=1);
 namespace cooldogedev\BedrockEconomy\query\sqlite\player;
 
 use cooldogedev\BedrockEconomy\query\ErrorCodes;
+use cooldogedev\BedrockEconomy\query\QueryManager;
 use cooldogedev\libSQL\query\SQLiteQuery;
+use Exception;
 use SQLite3;
 
 final class SQLiteRetrieveQuery extends SQLiteQuery
@@ -44,8 +46,8 @@ final class SQLiteRetrieveQuery extends SQLiteQuery
         $statement->close();
 
         if ($result === null) {
-            $this->setError(ErrorCodes::ERROR_CODE_ACCOUNT_NOT_FOUND);
-            $this->setResult(null);
+            $this->setResult(false);
+            throw new Exception(ErrorCodes::ERROR_CODE_ACCOUNT_NOT_FOUND);
         } else {
             $this->setResult($result["balance"]);
         }
@@ -53,7 +55,7 @@ final class SQLiteRetrieveQuery extends SQLiteQuery
 
     public function getQuery(): string
     {
-        return "SELECT * FROM " . $this->getTable() . " WHERE username = :username";
+        return "SELECT * FROM " . QueryManager::DATA_TABLE_PLAYERS . " WHERE username = :username";
     }
 
     public function getPlayerName(): string

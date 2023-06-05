@@ -26,6 +26,7 @@ declare(strict_types=1);
 
 namespace cooldogedev\BedrockEconomy\query\sqlite\player;
 
+use cooldogedev\BedrockEconomy\query\QueryManager;
 use cooldogedev\libSQL\query\SQLiteQuery;
 use SQLite3;
 
@@ -50,7 +51,7 @@ final class SQLiteBulkRetrieveQuery extends SQLiteQuery
 
     public function getQuery(): string
     {
-        return $this->getLimit() ? "SELECT * FROM " . $this->getTable() . " ORDER BY balance DESC LIMIT " . $this->getLimit() . " OFFSET " . ($this->getOffset() ?? 0) : "SELECT * FROM " . $this->getTable();
+        return $this->getLimit() ? "SELECT * FROM " . QueryManager::DATA_TABLE_PLAYERS . " ORDER BY balance DESC LIMIT " . $this->getLimit() . " OFFSET " . ($this->getOffset() ?? 0) : "SELECT * FROM " . QueryManager::DATA_TABLE_PLAYERS;
     }
 
     public function getLimit(): ?int

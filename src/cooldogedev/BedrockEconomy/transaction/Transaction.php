@@ -28,9 +28,9 @@ namespace cooldogedev\BedrockEconomy\transaction;
 
 use cooldogedev\BedrockEconomy\BedrockEconomy;
 use JsonSerializable;
-use Threaded;
+use pmmp\thread\ThreadSafe;
 
-abstract class Transaction extends Threaded implements JsonSerializable
+abstract class Transaction extends ThreadSafe implements JsonSerializable
 {
     public const TRANSACTION_TYPE_TRANSFER = 0;
     public const TRANSACTION_TYPE_INCREMENT = 1;

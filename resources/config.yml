@@ -1,6 +1,6 @@
 ---
 # Configuration version, don't edit this.
-config-version: 2.0.8
+config-version: 2.1.0
 
 language: en-US
 
@@ -46,5 +46,5 @@ database:
 
   # The database file name.
   sqlite:
-    file: players.db
+    path: players.db
 ...

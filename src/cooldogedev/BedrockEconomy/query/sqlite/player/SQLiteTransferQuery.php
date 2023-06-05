@@ -27,8 +27,10 @@ declare(strict_types=1);
 namespace cooldogedev\BedrockEconomy\query\sqlite\player;
 
 use cooldogedev\BedrockEconomy\query\ErrorCodes;
+use cooldogedev\BedrockEconomy\query\QueryManager;
 use cooldogedev\BedrockEconomy\transaction\types\TransferTransaction;
 use cooldogedev\libSQL\query\SQLiteQuery;
+use Exception;
 use SQLite3;
 
 final class SQLiteTransferQuery extends SQLiteQuery
@@ -78,29 +80,30 @@ final class SQLiteTransferQuery extends SQLiteQuery
         $statement->close();
 
         if (!$isVerified) {
-            $this->setError(ErrorCodes::ERROR_CODE_ACCOUNT_NOT_FOUND . ":" . $username);
             $this->setResult(false);
+            throw new Exception(ErrorCodes::ERROR_CODE_ACCOUNT_NOT_FOUND . ":" . $username);
         }
 
         if ($isVerified && $checkType === SQLiteTransferQuery::CHECK_TYPE_SUFFICIENCY && $balance < $amount) {
+            $this->setResult(false);
+
             $isVerified = false;
 
-            $this->setError(ErrorCodes::ERROR_CODE_BALANCE_INSUFFICIENT . ":" . $username);
-            $this->setResult(false);
+            throw new Exception(ErrorCodes::ERROR_CODE_BALANCE_INSUFFICIENT . ":" . $username);
         }
 
         if ($isVerified && $checkType === SQLiteTransferQuery::CHECK_TYPE_CAP && $balanceCap !== null && $balance >= $balanceCap) {
+            $this->setResult(false);
             $isVerified = false;
 
-            $this->setError(ErrorCodes::ERROR_CODE_BALANCE_CAP_EXCEEDED . ":" . $username);
-            $this->setResult(false);
+            throw new Exception(ErrorCodes::ERROR_CODE_BALANCE_CAP_EXCEEDED . ":" . $username);
         }
 
         if ($isVerified && $checkType === SQLiteTransferQuery::CHECK_TYPE_CAP && $balanceCap !== null && ($balance + $amount) > $balanceCap) {
+            $this->setResult(false);
             $isVerified = false;
 
-            $this->setError(ErrorCodes::ERROR_CODE_NEW_BALANCE_EXCEEDS_CAP . ":" . $username);
-            $this->setResult(false);
+            throw new Exception(ErrorCodes::ERROR_CODE_NEW_BALANCE_EXCEEDS_CAP . ":" . $username);
         }
 
         return $isVerified;
@@ -108,10 +111,8 @@ final class SQLiteTransferQuery extends SQLiteQuery
 
     public function getRetrieveQuery(): string
     {
-        return "SELECT * FROM " . $this->getTable() . " WHERE username = :username";
+        return "SELECT * FROM " . QueryManager::DATA_TABLE_PLAYERS . " WHERE username = :username";
     }
-
-    // Copied from SQLiteRetrieveQuery
 
     protected function updateBalance(SQLite3 $connection, string $username, bool $deduction): bool
     {
@@ -122,9 +123,8 @@ final class SQLiteTransferQuery extends SQLiteQuery
         $statement->close();
 
         if ($connection->changes() <= 0) {
-            $this->setError(ErrorCodes::ERROR_CODE_NO_CHANGES_MADE . ":" . $username);
             $this->setResult(false);
-            return false;
+            throw new Exception(ErrorCodes::ERROR_CODE_NO_CHANGES_MADE . ":" . $username);
         }
 
         return true;
@@ -135,7 +135,7 @@ final class SQLiteTransferQuery extends SQLiteQuery
         $value = $this->getTransaction()->getAmount();
         $statement = "IIF (balance - " . $value . " >= 0, balance - " . $value . ", balance)";
 
-        return "UPDATE " . $this->getTable() . " SET balance = " . $statement . " WHERE username = :username";
+        return "UPDATE " . QueryManager::DATA_TABLE_PLAYERS . " SET balance = " . $statement . " WHERE username = :username";
     }
 
     public function getAdditionQuery(): string
@@ -144,6 +144,6 @@ final class SQLiteTransferQuery extends SQLiteQuery
         $balanceCap = $this->getTransaction()->getBalanceCap();
         $statement = $balanceCap !== null ? "IIF (balance + " . $value . " <= " . $balanceCap . ", balance + " . $value . ", balance)" : "balance + " . $value;
 
-        return "UPDATE " . $this->getTable() . " SET balance = " . $statement . " WHERE username = :username";
+        return "UPDATE " . QueryManager::DATA_TABLE_PLAYERS . " SET balance = " . $statement . " WHERE username = :username";
     }
 }
