@@ -1,0 +1,77 @@
+---
+# Called when a player-only command ran by the console
+command-player-only: "&cBu komutu sadece oyunda kullanabilirsin!"
+# Called when trying to interact with non-existing account
+player-not-found: "&f{PLAYER} &cadlı oyuncu bulunamadı!"
+# Called when attempting to send a payment without having sufficient balance
+balance-insufficient: "&cYeterli bakiyen yok!"
+# Called when attempting to pay a user who already has reached the balance limit
+balance-cap: "&f{PLAYER} &cadlı oyuncu zaten {LIMIT}{CURRENCY_SYMBOL} bakiye limitinde!"
+# Called when sending a successful transaction
+payment-send: "&f{RECEIVER} &aadlı oyuncuya {AMOUNT}{CURRENCY_SYMBOL} gönderdin!"
+# Called when receiving a successful transaction
+payment-receive: "&f{PAYER} &aadlı oyuncu sana {AMOUNT}{CURRENCY_SYMBOL} gönderdi!"
+# Called when attempting to send a payment that exceeds the maximum limit
+payment-send-exceed-limit: "&cEn fazla &f{LIMIT}{CURRENCY_SYMBOL} &cgönderebilirsin!"
+# Called when attempting to send a payment below the minimum
+payment-send-insufficient: "&cEn az &f{LIMIT}{CURRENCY_SYMBOL} &cgönderebilirsin!"
+# Called when attempting to pay yourself
+payment-send-self: "&cKendine para gönderemezsin!"
+# Called when users attempts to view their own balance
+balance-info: "&aBakiyen: &f{AMOUNT}{CURRENCY_SYMBOL}"
+# Called when users attempts to view someone's balance
+balance-info-other: "&a{PLAYER} adlı oyuncunun bakiyesi: &f{CURRENCY_SYMBOL}{AMOUNT}"
+# Called when incrementing someone's balance
+balance-add: "&f{PLAYER} &aadlı oyuncuya {AMOUNT}{CURRENCY_SYMBOL} verdin!"
+# Called when decrementing someone's balance
+balance-remove: "&f{PLAYER} &aadlı oyuncudan {AMOUNT}{CURRENCY_SYMBOL} sildin!"
+# Called when updating someone's balance to a new value
+balance-set: "&f{PLAYER} &aadlı oyuncunun bakiyesini {AMOUNT}{CURRENCY_SYMBOL} olarak ayarladın!"
+# Called when deleting someone's account
+account-delete: "&f{PLAYER} &aadlı oyuncunun hesabını sildin!"
+# Called when a user executes a command while they don't have an account in the database
+no-account: "&cHesabın yok!"
+# Called when users attempts to view the top balances
+top-balance-header: "&6ZENGİNLER"
+top-balance-row-template: "&b{POSITION}. &a{PLAYER} &7: &b{AMOUNT}"
+top-balance-error: "&cZenginler listelenirken bir hata oluştu!"
+# Called when users attempt to edit someone's balance and the database doesn't update it
+update-error: "&c{PLAYER} adlı oyuncunun parası değiştirilirken sorun oluştu."
+
+commands:
+  balance:
+    name: para
+    description: Bakiyeni görüntülersin
+    usage: "&cKullanım /para [oyuncu]"
+    aliases: ["param"]
+  pay:
+    name: pay
+    description: Belirttiğin oyuncuya para gönderirsin
+    usage: "&cKullanım /pay <oyuncu> <miktar>"
+    aliases: ["paragonder"]
+  top-balance:
+    name: zenginler
+    description: Sunucunun zenginlerini listelersin
+    usage: "&cKullanım /zenginler [sayfa]"
+    aliases: [ ]
+  add-balance:
+    name: paraver
+    description: Belirttiğin oyuncuya para verirsin
+    usage: "&cKullanım /paraver <oyuncu> <miktar>"
+    aliases: [ ]
+  remove-balance:
+    name: parasil
+    description: Belirttiğin oyuncunun parasını silersin
+    usage: "&cKullanım /parasil <oyuncu> <miktar>"
+    aliases: [ ]
+  set-balance:
+    name: paraayarla
+    description: Belirttiğin oyuncunun parasını ayarlarsın
+    usage: "&cKullanım /paraayarla <oyuncu> <miktar>"
+    aliases: [ ]
+  delete-account:
+    name: hesapsil
+    description: Belirttiğin oyuncunun hesabını silersin
+    usage: "&cKullanım /hesapsil <oyuncu>"
+    aliases: [ ]
+...
