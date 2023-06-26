@@ -42,7 +42,8 @@ final class LanguageManager
         "ja-JP",
         "de-CH",
         "ru-RU",
-        "es-ES"
+        "es-ES",
+        "tr-TR"
     ];
 
     protected static string $language;
