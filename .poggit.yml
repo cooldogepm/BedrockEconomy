@@ -1,4 +1,4 @@
---- # Poggit-CI Manifest. Open the CI at https://poggit.pmmp.io/ci/cooldogedev/BedrockEconomy
+--- # Poggit-CI Manifest. Open the CI at https://poggit.pmmp.io/ci/cooldogepm/BedrockEconomy
 build-by-default: true
 branches:
 - main
@@ -8,11 +8,10 @@ projects:
     path: ""
     libs:
       - src: cooldogepm/libSQL/libSQL
-        version: ^0.2.2
+        version: ^0.2.3
         branch: pm5
-      - src: ACM-PocketMine-MP/Commando/Commando
-        version: ^3.2.0
-        branch: PM5
+      - src: Paroxity/Commando/Commando
+        version: ^3.0.0
     lint:
       phpstan: false
 #      syntaxError: false
