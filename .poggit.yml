@@ -10,8 +10,8 @@ projects:
       - src: cooldogepm/libSQL/libSQL
         version: ^0.2.3
         branch: pm5
-      - src: Paroxity/Commando/Commando
-        version: ^3.0.0
+      - src: ACM-PocketMine-MP/Commando/Commando
+        version: ^3.2.1
     lint:
       phpstan: false
 #      syntaxError: false
