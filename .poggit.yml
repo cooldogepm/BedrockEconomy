@@ -6,7 +6,7 @@ projects:
   BedrockEconomy:
     path: ""
     libs:
-      - src: cooldogedev/libSQL/libSQL
+      - src: cooldogepm/libSQL/libSQL
         version: ^0.1.2
       - src: cooldogepm/Commando/Commando
         version: ^3.0.1
