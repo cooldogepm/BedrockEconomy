@@ -8,9 +8,8 @@ projects:
     libs:
       - src: cooldogedev/libSQL/libSQL
         version: ^0.1.2
-      - src: CortexPE/Commando/Commando
-        version: ^3.0.0
-        branch: PM4
+      - src: cooldogepm/Commando/Commando
+        version: ^3.0.1
     lint:
       phpstan: false
 #      syntaxError: false
