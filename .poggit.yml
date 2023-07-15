@@ -8,6 +8,7 @@ projects:
     libs:
       - src: cooldogepm/libSQL/libSQL
         version: ^0.1.2
+        branch: main
       - src: cooldogepm/Commando/Commando
         version: ^3.0.1
     lint:
