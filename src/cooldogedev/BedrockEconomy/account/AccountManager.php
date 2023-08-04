@@ -95,6 +95,12 @@ final class AccountManager extends BedrockEconomyOwned
             return;
         }
 
+        $context->first(
+            function (bool $successful) use ($transaction): void {
+                $this->getPlugin()->getTransactionManager()->processTransaction($transaction, $successful);
+            }
+        );
+
         $this->getPlugin()->getConnector()->submit(
             query: QueryManager::getPlayerUpdateQuery($transaction),
 
