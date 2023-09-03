@@ -91,6 +91,8 @@ final class BedrockEconomy extends PluginBase
 
     protected function onLoad(): void
     {
+        class_alias(ClosureContext::class, \cooldogedev\libSQL\context\ClosureContext::class);
+
         foreach ($this->getResources() as $resource) {
             $this->saveResource($resource->getFilename());
         }

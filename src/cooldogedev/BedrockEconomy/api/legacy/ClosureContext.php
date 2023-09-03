@@ -79,5 +79,3 @@ final class ClosureContext
         return new self($closures);
     }
 }
-
-class_alias(ClosureContext::class, "cooldogedev\BedrockEconomy\libs\cooldogedev\libSQL\context\ClosureContext");
