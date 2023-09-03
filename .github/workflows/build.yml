@@ -1,0 +1,23 @@
+name: Build phar
+on:
+  push:
+    branches: [pm5]
+jobs:
+  pharynx:
+    name: build phar
+    permissions:
+      contents: write
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v3
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          tools: composer
+      - run: composer install --ignore-platform-reqs
+      - uses: SOF3/pharynx@v0.2
+        id: pharynx
+      - uses: actions/upload-artifact@v3
+        with:
+          name: BedrockEconomy.phar
+          path: ${{steps.pharynx.outputs.output-phar}}
