@@ -1,42 +1,27 @@
 ---
-# Configuration version, don't edit this.
-config-version: 2.1.0
+config-version: 3.0.0
 
 language: en-US
 
-utility:
-  # The numbers of accounts to display when using the command.
-  top-balance-accounts-limit: 10
+cache-invalidation: 300 # The cache invalidation time in seconds, set to 0 to disable. (Default: 5 minutes)
 
 currency:
-  # The name of the currency.
-  name: USD
-  # The symbol of the currency.
+  name: United States Dollar
+  code: USD
   symbol: $
-  # The string to use for thousands separator.
-  number-separator: ","
-
-  balance:
-    # The balance for new users.
-    default-balance: 100
-    # This has no effect if `enable-balance-cap` is false.
-    balance-cap: 100000
-    # Enabling this will disallow users from exceeding the balance cap.
-    enable-balance-cap: false
-
-  payment:
-    # The minimum amount of money a user can send.
-    minimum-payment: 100
-    # The maximum amount of money a user can send.
-    maximum-payment: 1000
+  formatter: "compact" # The currency formatter, compact or commadot
+  default:
+    amount: 0
+    decimals: 00
+  decimals: true
 
 database:
-  # The database provider, mysql or sqlite.
+  # The database provider, mysql or sqlite
   provider: sqlite
-  # Number of threads to use for the database query processing, 2 is recommended.
+  # Number of threads to use for the database query processing, 2 is recommended
   threads: 2
 
-  # The database connection information.
+  # The database connection information
   mysql:
     host: 127.0.0.1
     username: your_username
@@ -44,7 +29,7 @@ database:
     schema: db_name
     port: 3306
 
-  # The database file name.
+  # The database file path (relative to the plugin folder)
   sqlite:
     path: players.db
 ...

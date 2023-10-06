@@ -1,5 +1,5 @@
 name: BedrockEconomy
-version: 2.1.2
+version: 4.0.0
 api: [ 5.0.0 ]
 php: [ 8.0 ]
 author: cooldogedev
@@ -13,7 +13,7 @@ permissions:
   bedrockeconomy.command.pay:
     description: Allows users to pay others with their balance
     default: true
-  bedrockeconomy.command.topbalance:
+  bedrockeconomy.command.rich:
     description: Allows users to view the top balances
     default: true
   bedrockeconomy.command.addbalance:
@@ -24,7 +24,4 @@ permissions:
     default: op
   bedrockeconomy.command.setbalance:
     description: Allows users to change others balance
-    default: op
-  bedrockeconomy.command.deleteaccount:
-    description: Allows users to delete others account data
     default: op

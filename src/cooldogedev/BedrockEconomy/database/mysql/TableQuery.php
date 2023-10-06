@@ -28,30 +28,18 @@
 
 declare(strict_types=1);
 
-namespace cooldogedev\BedrockEconomy\language;
+namespace cooldogedev\BedrockEconomy\database\mysql;
 
-final class KnownTranslations
+use cooldogedev\BedrockEconomy\database\helper\TableHolder;
+use cooldogedev\libSQL\query\MySQLQuery;
+use mysqli;
+
+final class TableQuery extends MySQLQuery
 {
-    public const ERROR_DATABASE = "error.database";
+    use TableHolder;
 
-    public const ERROR_ACCOUNT_NONEXISTENT = "error.account.nonexistent";
-    public const ERROR_ACCOUNT_INSUFFICIENT = "error.account.insufficient";
-
-    public const ERROR_AMOUNT_INVALID = "error.amount.invalid";
-    public const ERROR_AMOUNT_SMALL = "error.amount.small";
-    public const ERROR_AMOUNT_LARGE = "error.amount.large";
-
-    public const ERROR_RICH_NO_RECORDS = "error.rich.no_records";
-
-    public const BALANCE_INFO = "balance.info";
-    public const BALANCE_INFO_OTHER = "balance.info.other";
-
-    public const BALANCE_PAY = "balance.pay";
-    public const BALANCE_ADD = "balance.add";
-    public const BALANCE_REMOVE = "balance.remove";
-    public const BALANCE_SET = "balance.set";
-
-    public const RICH_HEADER = "rich.header";
-    public const RICH_ENTRY = "rich.entry";
-    public const RICH_FOOTER = "rich.footer";
+    public function onRun(mysqli $connection): void
+    {
+        $connection->query("CREATE TABLE IF NOT EXISTS " . $this->table . " (xuid VARCHAR(32) PRIMARY KEY, username VARCHAR(32), amount BIGINT, decimals TINYINT)");
+    }
 }

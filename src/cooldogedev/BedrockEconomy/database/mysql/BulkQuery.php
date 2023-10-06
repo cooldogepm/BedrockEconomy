@@ -28,29 +28,48 @@
 
 declare(strict_types=1);
 
-namespace cooldogedev\BedrockEconomy\api;
+namespace cooldogedev\BedrockEconomy\database\mysql;
 
-use cooldogedev\BedrockEconomy\api\type\AsyncAPI;
-use cooldogedev\BedrockEconomy\api\type\ClosureAPI;
+use cooldogedev\BedrockEconomy\database\exception\NoRecordsException;
+use cooldogedev\BedrockEconomy\database\helper\TableHolder;
+use cooldogedev\libSQL\query\MySQLQuery;
+use mysqli;
 
-final class BedrockEconomyAPI
+final class BulkQuery extends MySQLQuery
 {
-    protected static AsyncAPI $async;
-    protected static ClosureAPI $closure;
+    use TableHolder;
 
-    public static function init(): void
+    protected string $list;
+
+    public function __construct(array $list)
     {
-        BedrockEconomyAPI::$async = new AsyncAPI();
-        BedrockEconomyAPI::$closure = new ClosureAPI();
+        $this->list = igbinary_serialize(array_values($list));
     }
 
-    public static function ASYNC(): AsyncAPI
+    /**
+     * @throws NoRecordsException
+     */
+    public function onRun(mysqli $connection): void
     {
-        return BedrockEconomyAPI::$async;
-    }
+        $list = igbinary_unserialize($this->list);
+        $params = implode(", ", array_fill(0, count($list), "?"));
 
-    public static function CLOSURE(): ClosureAPI
-    {
-        return BedrockEconomyAPI::$closure;
+        $statement = $connection->prepare("SELECT * FROM " . $this->table . " WHERE xuid IN (" . $params . ")");
+        $statement->bind_param(str_repeat("s", count($list)), ...$list);
+        $statement->execute();
+
+        $result = $statement->get_result();
+
+        if ($result->num_rows === 0) {
+            throw new NoRecordsException(
+                _message: "No records found in table " . $this->table,
+            );
+        }
+
+        $this->setResult($result->fetch_all(MYSQLI_ASSOC));
+
+        $result->free();
+
+        $statement->close();
     }
 }

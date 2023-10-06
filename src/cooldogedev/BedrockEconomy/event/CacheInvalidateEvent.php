@@ -28,30 +28,19 @@
 
 declare(strict_types=1);
 
-namespace cooldogedev\BedrockEconomy\language;
+namespace cooldogedev\BedrockEconomy\event;
 
-final class KnownTranslations
+use pocketmine\event\Cancellable;
+use pocketmine\event\CancellableTrait;
+use pocketmine\event\Event;
+
+final class CacheInvalidateEvent extends Event implements Cancellable
 {
-    public const ERROR_DATABASE = "error.database";
+    use CancellableTrait;
 
-    public const ERROR_ACCOUNT_NONEXISTENT = "error.account.nonexistent";
-    public const ERROR_ACCOUNT_INSUFFICIENT = "error.account.insufficient";
-
-    public const ERROR_AMOUNT_INVALID = "error.amount.invalid";
-    public const ERROR_AMOUNT_SMALL = "error.amount.small";
-    public const ERROR_AMOUNT_LARGE = "error.amount.large";
-
-    public const ERROR_RICH_NO_RECORDS = "error.rich.no_records";
-
-    public const BALANCE_INFO = "balance.info";
-    public const BALANCE_INFO_OTHER = "balance.info.other";
-
-    public const BALANCE_PAY = "balance.pay";
-    public const BALANCE_ADD = "balance.add";
-    public const BALANCE_REMOVE = "balance.remove";
-    public const BALANCE_SET = "balance.set";
-
-    public const RICH_HEADER = "rich.header";
-    public const RICH_ENTRY = "rich.entry";
-    public const RICH_FOOTER = "rich.footer";
+    /**
+     * @param array<int, string> $old
+     * @param array<int, string> $new
+     */
+    public function __construct(protected readonly array $old, protected readonly array $new) {}
 }

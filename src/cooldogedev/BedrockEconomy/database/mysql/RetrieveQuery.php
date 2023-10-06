@@ -28,30 +28,39 @@
 
 declare(strict_types=1);
 
-namespace cooldogedev\BedrockEconomy\language;
+namespace cooldogedev\BedrockEconomy\database\mysql;
 
-final class KnownTranslations
+use cooldogedev\BedrockEconomy\database\exception\AccountNotFoundException;
+use cooldogedev\BedrockEconomy\database\helper\AccountHolder;
+use cooldogedev\BedrockEconomy\database\helper\TableHolder;
+use cooldogedev\libSQL\query\MySQLQuery;
+use mysqli;
+
+final class RetrieveQuery extends MySQLQuery
 {
-    public const ERROR_DATABASE = "error.database";
+    use AccountHolder;
+    use TableHolder;
 
-    public const ERROR_ACCOUNT_NONEXISTENT = "error.account.nonexistent";
-    public const ERROR_ACCOUNT_INSUFFICIENT = "error.account.insufficient";
+    /**
+     * @throws AccountNotFoundException
+     */
+    public function onRun(mysqli $connection): void
+    {
+        $statement = $connection->prepare("SELECT * FROM " . $this->table . " WHERE xuid = ? OR username = ?");
+        $statement->bind_param("ss", $this->xuid, $this->username);
+        $statement->execute();
 
-    public const ERROR_AMOUNT_INVALID = "error.amount.invalid";
-    public const ERROR_AMOUNT_SMALL = "error.amount.small";
-    public const ERROR_AMOUNT_LARGE = "error.amount.large";
+        $result = $statement->get_result();
+        $statement->close();
 
-    public const ERROR_RICH_NO_RECORDS = "error.rich.no_records";
+        if ($result->num_rows === 0) {
+            throw new AccountNotFoundException(
+                _message: "Account not found for xuid " . $this->xuid . " or username " . $this->username
+            );
+        }
 
-    public const BALANCE_INFO = "balance.info";
-    public const BALANCE_INFO_OTHER = "balance.info.other";
+        $this->setResult($result->fetch_assoc());
 
-    public const BALANCE_PAY = "balance.pay";
-    public const BALANCE_ADD = "balance.add";
-    public const BALANCE_REMOVE = "balance.remove";
-    public const BALANCE_SET = "balance.set";
-
-    public const RICH_HEADER = "rich.header";
-    public const RICH_ENTRY = "rich.entry";
-    public const RICH_FOOTER = "rich.footer";
+        $result->free();
+    }
 }

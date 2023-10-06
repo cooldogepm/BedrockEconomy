@@ -28,30 +28,31 @@
 
 declare(strict_types=1);
 
-namespace cooldogedev\BedrockEconomy\language;
+namespace cooldogedev\BedrockEconomy\database\sqlite;
 
-final class KnownTranslations
+use cooldogedev\BedrockEconomy\database\helper\AccountHolder;
+use cooldogedev\BedrockEconomy\database\helper\TableHolder;
+use cooldogedev\libSQL\query\SQLiteQuery;
+use SQLite3;
+
+final class InsertionQuery extends SQLiteQuery
 {
-    public const ERROR_DATABASE = "error.database";
+    use AccountHolder;
+    use TableHolder;
 
-    public const ERROR_ACCOUNT_NONEXISTENT = "error.account.nonexistent";
-    public const ERROR_ACCOUNT_INSUFFICIENT = "error.account.insufficient";
+    public function __construct(protected int $amount, protected int $decimals) {}
 
-    public const ERROR_AMOUNT_INVALID = "error.amount.invalid";
-    public const ERROR_AMOUNT_SMALL = "error.amount.small";
-    public const ERROR_AMOUNT_LARGE = "error.amount.large";
+    public function onRun(SQLite3 $connection): void
+    {
+        $statement = $connection->prepare("INSERT OR IGNORE INTO " . $this->table . " (xuid, username, amount, decimals) VALUES (?, ?, ?, ?)");
+        $statement->bindValue(1, $this->xuid);
+        $statement->bindValue(2, $this->username);
+        $statement->bindValue(3, $this->amount, SQLITE3_INTEGER);
+        $statement->bindValue(4, $this->decimals, SQLITE3_INTEGER);
+        $statement->execute();
 
-    public const ERROR_RICH_NO_RECORDS = "error.rich.no_records";
+        $this->setResult($connection->changes() > 0);
 
-    public const BALANCE_INFO = "balance.info";
-    public const BALANCE_INFO_OTHER = "balance.info.other";
-
-    public const BALANCE_PAY = "balance.pay";
-    public const BALANCE_ADD = "balance.add";
-    public const BALANCE_REMOVE = "balance.remove";
-    public const BALANCE_SET = "balance.set";
-
-    public const RICH_HEADER = "rich.header";
-    public const RICH_ENTRY = "rich.entry";
-    public const RICH_FOOTER = "rich.footer";
+        $statement->close();
+    }
 }

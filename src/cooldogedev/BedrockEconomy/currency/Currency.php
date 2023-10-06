@@ -28,30 +28,23 @@
 
 declare(strict_types=1);
 
-namespace cooldogedev\BedrockEconomy\language;
+namespace cooldogedev\BedrockEconomy\currency;
 
-final class KnownTranslations
+final class Currency
 {
-    public const ERROR_DATABASE = "error.database";
+    public readonly CurrencyFormatter $formatter;
 
-    public const ERROR_ACCOUNT_NONEXISTENT = "error.account.nonexistent";
-    public const ERROR_ACCOUNT_INSUFFICIENT = "error.account.insufficient";
+    public function __construct(
+        public readonly string $name,
+        public readonly string $code ,
+        public readonly string $symbol,
+        public readonly string $format,
 
-    public const ERROR_AMOUNT_INVALID = "error.amount.invalid";
-    public const ERROR_AMOUNT_SMALL = "error.amount.small";
-    public const ERROR_AMOUNT_LARGE = "error.amount.large";
+        public readonly int    $defaultAmount,
+        public readonly int    $defaultDecimals,
 
-    public const ERROR_RICH_NO_RECORDS = "error.rich.no_records";
-
-    public const BALANCE_INFO = "balance.info";
-    public const BALANCE_INFO_OTHER = "balance.info.other";
-
-    public const BALANCE_PAY = "balance.pay";
-    public const BALANCE_ADD = "balance.add";
-    public const BALANCE_REMOVE = "balance.remove";
-    public const BALANCE_SET = "balance.set";
-
-    public const RICH_HEADER = "rich.header";
-    public const RICH_ENTRY = "rich.entry";
-    public const RICH_FOOTER = "rich.footer";
+        public readonly bool   $decimals,
+    ) {
+        $this->formatter = new CurrencyFormatter($this);
+    }
 }

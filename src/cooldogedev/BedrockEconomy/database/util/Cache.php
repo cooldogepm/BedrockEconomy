@@ -28,30 +28,48 @@
 
 declare(strict_types=1);
 
-namespace cooldogedev\BedrockEconomy\language;
+namespace cooldogedev\BedrockEconomy\database\util;
 
-final class KnownTranslations
+final class Cache
 {
-    public const ERROR_DATABASE = "error.database";
+    protected static array $cache = [];
 
-    public const ERROR_ACCOUNT_NONEXISTENT = "error.account.nonexistent";
-    public const ERROR_ACCOUNT_INSUFFICIENT = "error.account.insufficient";
+    public static function getAll(): array
+    {
+        return Cache::$cache;
+    }
 
-    public const ERROR_AMOUNT_INVALID = "error.amount.invalid";
-    public const ERROR_AMOUNT_SMALL = "error.amount.small";
-    public const ERROR_AMOUNT_LARGE = "error.amount.large";
+    public static function get(string $key): ?string
+    {
+        return Cache::$cache[$key] ?? null;
+    }
 
-    public const ERROR_RICH_NO_RECORDS = "error.rich.no_records";
+    public static function set(string $key, string $value): void
+    {
+        Cache::$cache[$key] = $value;
+    }
 
-    public const BALANCE_INFO = "balance.info";
-    public const BALANCE_INFO_OTHER = "balance.info.other";
+    public static function setAll(array $data): void
+    {
+        Cache::$cache = $data;
+    }
 
-    public const BALANCE_PAY = "balance.pay";
-    public const BALANCE_ADD = "balance.add";
-    public const BALANCE_REMOVE = "balance.remove";
-    public const BALANCE_SET = "balance.set";
+    public static function delete(string $key): void
+    {
+        if (!Cache::exists($key)) {
+            return;
+        }
 
-    public const RICH_HEADER = "rich.header";
-    public const RICH_ENTRY = "rich.entry";
-    public const RICH_FOOTER = "rich.footer";
+        unset(Cache::$cache[$key]);
+    }
+
+    public static function exists(string $key): bool
+    {
+        return isset(Cache::$cache[$key]);
+    }
+
+    public static function clear(): void
+    {
+        Cache::$cache = [];
+    }
 }
