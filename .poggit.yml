@@ -8,12 +8,12 @@ projects:
     path: ""
     libs:
       - src: cooldogepm/libSQL/libSQL
-        version: ^0.2.3
+        version: ^0.2.4
         branch: pm5
       - src: ACM-PocketMine-MP/Commando/Commando
         version: ^3.2.1
       - src: SOF3/await-generator/await-generator
-        version: ^3.0.0
+        version: ^3.6.1
     lint:
       phpstan: false
 #      syntaxError: false
