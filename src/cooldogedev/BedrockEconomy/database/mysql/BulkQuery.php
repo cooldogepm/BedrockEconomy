@@ -30,7 +30,7 @@ declare(strict_types=1);
 
 namespace cooldogedev\BedrockEconomy\database\mysql;
 
-use cooldogedev\BedrockEconomy\database\exception\NoRecordsException;
+use cooldogedev\BedrockEconomy\database\exception\RecordNotFoundException;
 use cooldogedev\BedrockEconomy\database\helper\TableHolder;
 use cooldogedev\libSQL\query\MySQLQuery;
 use mysqli;
@@ -47,7 +47,7 @@ final class BulkQuery extends MySQLQuery
     }
 
     /**
-     * @throws NoRecordsException
+     * @throws RecordNotFoundException
      */
     public function onRun(mysqli $connection): void
     {
@@ -61,7 +61,7 @@ final class BulkQuery extends MySQLQuery
         $result = $statement->get_result();
 
         if ($result->num_rows === 0) {
-            throw new NoRecordsException(
+            throw new RecordNotFoundException(
                 _message: "No records found in table " . $this->table,
             );
         }

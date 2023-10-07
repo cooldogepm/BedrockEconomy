@@ -32,4 +32,4 @@ namespace cooldogedev\BedrockEconomy\database\exception;
 
 use cooldogedev\libSQL\exception\SQLException;
 
-final class AccountNotFoundException extends SQLException {}
+final class RecordNotFoundException extends SQLException {}

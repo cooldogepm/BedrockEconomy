@@ -30,18 +30,14 @@ declare(strict_types=1);
 
 namespace cooldogedev\BedrockEconomy\command;
 
-use cooldogedev\BedrockEconomy\api\BedrockEconomyAPI;
 use cooldogedev\BedrockEconomy\command\constant\PermissionList;
-use cooldogedev\BedrockEconomy\database\exception\NoRecordsException;
+use cooldogedev\BedrockEconomy\database\cache\GlobalCache;
 use cooldogedev\BedrockEconomy\language\KnownTranslations;
 use cooldogedev\BedrockEconomy\language\LanguageManager;
 use cooldogedev\BedrockEconomy\language\TranslationKeys;
-use cooldogedev\libSQL\exception\SQLException;
 use CortexPE\Commando\args\IntegerArgument;
 use CortexPE\Commando\BaseCommand;
-use Generator;
 use pocketmine\command\CommandSender;
-use SOFe\AwaitGenerator\Await;
 use function max;
 
 final class RichCommand extends BaseCommand
@@ -56,48 +52,40 @@ final class RichCommand extends BaseCommand
         $this->registerArgument(0, new IntegerArgument(RichCommand::ARGUMENT_PAGE, true));
     }
 
-    protected function handleData(array $entries, int $offset): array
-    {
-        $results = [];
-        $position = 0;
-
-        foreach ($entries as $entry) {
-            $position++;
-            $results[] = LanguageManager::getTranslation(KnownTranslations::RICH_ENTRY,
-                [
-                    TranslationKeys::PLAYER => $entry["username"],
-                    TranslationKeys::POSITION => $position + $offset,
-                    TranslationKeys::AMOUNT => $this->getOwningPlugin()->getCurrency()->formatter->format($entry["amount"], $entry["decimals"]),
-                ]
-            );
-        }
-
-        return $results;
-    }
-
     public function onRun(CommandSender $sender, string $aliasUsed, array $args): void
     {
+        if (count(GlobalCache::TOP()->getAll()) === 0) {
+            GlobalCache::invalidate();
+            $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::ERROR_RICH_NO_RECORDS));
+            return;
+        }
+
         $offset = $args[RichCommand::ARGUMENT_PAGE] ?? 0;
         $offset = max($offset, 1);
         $offset = ($offset - 1) * RichCommand::DEFAULT_LIMIT;
 
-        Await::f2c(
-            function () use ($sender, $offset): Generator {
-                try {
-                    $entries = yield from BedrockEconomyAPI::ASYNC()->top(RichCommand::DEFAULT_LIMIT, $offset, false);
-                    $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::RICH_HEADER));
+        $entries = GlobalCache::TOP()->getAll();
+        $entries = array_slice($entries, $offset, RichCommand::DEFAULT_LIMIT);
 
-                    foreach ($this->handleData($entries, $offset) as $entry) {
-                        $sender->sendMessage($entry);
-                    }
+        if (count($entries) === 0) {
+            $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::ERROR_RICH_NO_RECORDS));
+            return;
+        }
 
-                    $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::RICH_FOOTER));
-                } catch (NoRecordsException) {
-                    $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::ERROR_RICH_NO_RECORDS));
-                } catch (SQLException) {
-                    $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::ERROR_DATABASE));
-                }
-            }
-        );
+        $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::RICH_HEADER));
+
+        foreach ($entries as $username => $entry) {
+            $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::RICH_ENTRY,
+                [
+                    TranslationKeys::PLAYER => $username,
+                    TranslationKeys::AMOUNT => $this->getOwningPlugin()->getCurrency()->formatter->format($entry->amount, $entry->decimals),
+                    TranslationKeys::POSITION => $entry->position,
+                ]
+            ));
+        }
+
+        $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::RICH_FOOTER, [
+            TranslationKeys::POSITION => GlobalCache::ONLINE()->get($sender->getName())->position ?? "N/A",
+        ]));
     }
 }

@@ -30,7 +30,7 @@ declare(strict_types=1);
 
 namespace cooldogedev\BedrockEconomy\database\mysql;
 
-use cooldogedev\BedrockEconomy\database\exception\AccountNotFoundException;
+use cooldogedev\BedrockEconomy\database\exception\RecordNotFoundException;
 use cooldogedev\BedrockEconomy\database\helper\AccountHolder;
 use cooldogedev\BedrockEconomy\database\helper\TableHolder;
 use cooldogedev\libSQL\query\MySQLQuery;
@@ -42,11 +42,11 @@ final class RetrieveQuery extends MySQLQuery
     use TableHolder;
 
     /**
-     * @throws AccountNotFoundException
+     * @throws RecordNotFoundException
      */
     public function onRun(mysqli $connection): void
     {
-        $statement = $connection->prepare("SELECT * FROM " . $this->table . " WHERE xuid = ? OR username = ?");
+        $statement = $connection->prepare("SELECT *, COUNT(*) AS position FROM " . $this->table . " WHERE xuid = ? OR username = ? ORDER BY amount, decimals DESC");
         $statement->bind_param("ss", $this->xuid, $this->username);
         $statement->execute();
 
@@ -54,7 +54,7 @@ final class RetrieveQuery extends MySQLQuery
         $statement->close();
 
         if ($result->num_rows === 0) {
-            throw new AccountNotFoundException(
+            throw new RecordNotFoundException(
                 _message: "Account not found for xuid " . $this->xuid . " or username " . $this->username
             );
         }

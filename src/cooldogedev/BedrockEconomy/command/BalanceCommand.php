@@ -33,7 +33,7 @@ namespace cooldogedev\BedrockEconomy\command;
 use cooldogedev\BedrockEconomy\api\BedrockEconomyAPI;
 use cooldogedev\BedrockEconomy\command\constant\PermissionList;
 use cooldogedev\BedrockEconomy\database\constant\Search;
-use cooldogedev\BedrockEconomy\database\exception\AccountNotFoundException;
+use cooldogedev\BedrockEconomy\database\exception\RecordNotFoundException;
 use cooldogedev\BedrockEconomy\language\KnownTranslations;
 use cooldogedev\BedrockEconomy\language\LanguageManager;
 use cooldogedev\BedrockEconomy\language\TranslationKeys;
@@ -79,17 +79,18 @@ final class BalanceCommand extends BaseCommand
 
         Await::f2c(
             function () use ($sender, $player, $isSelf): Generator {
-try {
-    $result = yield from BedrockEconomyAPI::ASYNC()->get(Search::EMPTY, $player);
-    $sender->sendMessage(LanguageManager::getTranslation($isSelf ? KnownTranslations::BALANCE_INFO : KnownTranslations::BALANCE_INFO_OTHER, [
-        TranslationKeys::PLAYER => $player,
-        TranslationKeys::AMOUNT => $this->getOwningPlugin()->getCurrency()->formatter->format($result["amount"], $result["decimals"]),
-    ]));
-} catch (AccountNotFoundException) {
-    $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::ERROR_ACCOUNT_NONEXISTENT));
-} catch (SQLException) {
-    $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::ERROR_DATABASE));
-}
+                try {
+                    $result = yield from BedrockEconomyAPI::ASYNC()->get(Search::EMPTY, $player);
+                    $sender->sendMessage(LanguageManager::getTranslation($isSelf ? KnownTranslations::BALANCE_INFO : KnownTranslations::BALANCE_INFO_OTHER, [
+                        TranslationKeys::PLAYER => $player,
+                        TranslationKeys::AMOUNT => $this->getOwningPlugin()->getCurrency()->formatter->format($result["amount"], $result["decimals"]),
+                        TranslationKeys::POSITION => number_format($result["position"]),
+                    ]));
+                } catch (RecordNotFoundException) {
+                    $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::ERROR_ACCOUNT_NONEXISTENT));
+                } catch (SQLException) {
+                    $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::ERROR_DATABASE));
+                }
             }
         );
     }

@@ -30,7 +30,7 @@ declare(strict_types=1);
 
 namespace cooldogedev\BedrockEconomy\database\sqlite;
 
-use cooldogedev\BedrockEconomy\database\exception\AccountNotFoundException;
+use cooldogedev\BedrockEconomy\database\exception\RecordNotFoundException;
 use cooldogedev\BedrockEconomy\database\helper\AccountHolder;
 use cooldogedev\BedrockEconomy\database\helper\TableHolder;
 use cooldogedev\libSQL\query\SQLiteQuery;
@@ -42,11 +42,11 @@ final class RetrieveQuery extends SQLiteQuery
     use TableHolder;
 
     /**
-     * @throws AccountNotFoundException
+     * @throws RecordNotFoundException
      */
     public function onRun(SQLite3 $connection): void
     {
-        $statement = $connection->prepare("SELECT * FROM " . $this->table . " WHERE xuid = ? OR username = ?");
+        $statement = $connection->prepare("SELECT *, ROW_NUMBER() OVER (ORDER BY amount, decimals DESC) as position FROM " . $this->table . " WHERE xuid = ? OR username = ?");
         $statement->bindValue(1, $this->xuid);
         $statement->bindValue(2, $this->username);
 
@@ -55,7 +55,7 @@ final class RetrieveQuery extends SQLiteQuery
         $this->setResult($result->fetchArray(SQLITE3_ASSOC));
 
         if ($this->getResult() === false) {
-            throw new AccountNotFoundException(
+            throw new RecordNotFoundException(
                 _message: "Account not found for xuid " . $this->xuid . " or username " . $this->username
             );
         }

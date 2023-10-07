@@ -10,8 +10,8 @@ error.amount.large: "&cThe amount you entered is too large."
 
 error.rich.no_records: "&cThere are no records to display."
 
-balance.info: "&aYour current balance is &e{amount}&a."
-balance.info.other: "&a{player}'s current balance is &e{amount}&a."
+balance.info: "&aYour current balance is &e{amount}&a. (#{position})"
+balance.info.other: "&a{player}'s current balance is &e{amount}&a. (#{position})"
 
 balance.add: "&aYou have added &e{amount}&a to {player}'s balance."
 balance.remove: "&aYou have remove &e{amount}&a from {player}'s balance."
@@ -19,7 +19,7 @@ balance.set: "&aYou have set {player}'s balance to &e{amount}&a."
 
 rich.header: "&aTop balances:"
 rich.entry: "&e{position}. &a{player} - &e{amount}"
-rich.footer: "&a===================="
+rich.footer: "&aYou are currently ranked &e#{position}&a."
 
 commands:
   balance:

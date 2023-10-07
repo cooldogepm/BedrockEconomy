@@ -38,31 +38,24 @@ use cooldogedev\BedrockEconomy\command\BalanceCommand;
 use cooldogedev\BedrockEconomy\command\PayCommand;
 use cooldogedev\BedrockEconomy\command\RichCommand;
 use cooldogedev\BedrockEconomy\currency\Currency;
-use cooldogedev\BedrockEconomy\database\exception\NoRecordsException;
+use cooldogedev\BedrockEconomy\database\cache\GlobalCache;
 use cooldogedev\BedrockEconomy\database\QueryManager;
-use cooldogedev\BedrockEconomy\database\util\Cache;
-use cooldogedev\BedrockEconomy\event\CacheInvalidateEvent;
 use cooldogedev\BedrockEconomy\language\LanguageManager;
 use cooldogedev\libSQL\ConnectionPool;
 use CortexPE\Commando\PacketHooker;
-use Generator;
 use JsonException;
 use pocketmine\plugin\PluginBase;
 use pocketmine\scheduler\ClosureTask;
 use pocketmine\utils\SingletonTrait;
 use pocketmine\utils\TextFormat;
 use RuntimeException;
-use SOFe\AwaitGenerator\Await;
 
 final class BedrockEconomy extends PluginBase
 {
-    use SingletonTrait {
-        reset as protected;
-        setInstance as protected;
-    }
-
     protected ConnectionPool $connector;
     protected Currency $currency;
+
+    use SingletonTrait;
 
     protected function checkConfig(): bool
     {
@@ -100,8 +93,8 @@ final class BedrockEconomy extends PluginBase
             throw new RuntimeException("Failed to generate a new config");
         }
 
-        BedrockEconomyAPI::init();
         BedrockEconomy::setInstance($this);
+        BedrockEconomyAPI::init();
         LanguageManager::init($this, $this->getConfig()->get("language"));
     }
 
@@ -118,6 +111,8 @@ final class BedrockEconomy extends PluginBase
             decimals: $this->getConfig()->getNested("currency.decimals")
         );
 
+        GlobalCache::init();
+
         QueryManager::init($this->currency->code, $this->getConfig()->getNested("database.provider") === "mysql");
         QueryManager::TABLE()->execute();
 
@@ -129,34 +124,8 @@ final class BedrockEconomy extends PluginBase
         }
 
         $this->getScheduler()->scheduleRepeatingTask(
-            task: new ClosureTask(fn() => Await::f2c(
-                function (): Generator {
-                    try {
-                        $newCache = yield from BedrockEconomyAPI::ASYNC()->bulk(
-                            list: array_map(static fn($player) => $player->getXuid(), $this->getServer()->getOnlinePlayers())
-                        );
-                    } catch (NoRecordsException) {
-                        $this->getLogger()->debug("No records found");
-                        return;
-                    }
-
-                    $newCache = array_filter($newCache, static fn($value) => Cache::exists($value["xuid"]));
-
-                    $event = new CacheInvalidateEvent($newCache, Cache::getAll());
-                    $event->call();
-
-                    if ($event->isCancelled()) {
-                        return;
-                    }
-
-                    foreach ($newCache as $value) {
-                        Cache::set($value["xuid"], $value["amount"] . $this->currency->decimals ? "." . $value["decimals"] : "");
-                    }
-
-                    $this->getLogger()->debug("Cache invalidated");
-                }
-            )),
-            period: $this->getConfig()->get("cache-invalidation") * 20
+            task: new ClosureTask(static fn() => GlobalCache::invalidate()),
+            period: $this->getConfig()->getNested("cache.invalidation") * 20
         );
     }
 

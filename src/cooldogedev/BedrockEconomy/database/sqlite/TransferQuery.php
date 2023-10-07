@@ -30,7 +30,7 @@ declare(strict_types=1);
 
 namespace cooldogedev\BedrockEconomy\database\sqlite;
 
-use cooldogedev\BedrockEconomy\database\exception\AccountNotFoundException;
+use cooldogedev\BedrockEconomy\database\exception\RecordNotFoundException;
 use cooldogedev\BedrockEconomy\database\exception\InsufficientFundsException;
 use cooldogedev\BedrockEconomy\database\helper\AccountHolder;
 use cooldogedev\BedrockEconomy\database\helper\TableHolder;
@@ -45,7 +45,7 @@ final class TransferQuery extends SQLiteQuery
     public function __construct(protected int $amount, protected int $decimals, protected string $targetUsername, protected string $targetXuid) {}
 
     /**
-     * @throws AccountNotFoundException
+     * @throws RecordNotFoundException
      * @throws InsufficientFundsException
      */
     public function onRun(SQLite3 $connection): void
@@ -61,7 +61,7 @@ final class TransferQuery extends SQLiteQuery
 
         if ($sourceResult->fetchArray(SQLITE3_ASSOC) === false) {
             $connection->exec("ROLLBACK");
-            throw new AccountNotFoundException(
+            throw new RecordNotFoundException(
                 _message: "Account not found for xuid " . $this->xuid . " or username " . $this->username
             );
         }
@@ -75,7 +75,7 @@ final class TransferQuery extends SQLiteQuery
 
         if ($targetResult->fetchArray(SQLITE3_ASSOC) === false) {
             $connection->exec("ROLLBACK");
-            throw new AccountNotFoundException(
+            throw new RecordNotFoundException(
                 _message: "Account not found for xuid " . $this->targetXuid . " or username " . $this->targetUsername
             );
         }
@@ -109,7 +109,7 @@ final class TransferQuery extends SQLiteQuery
 
         if ($connection->changes() === 0) {
             $connection->exec("ROLLBACK");
-            throw new AccountNotFoundException(
+            throw new RecordNotFoundException(
                 _message: "Account not found for xuid " . $this->targetXuid . " or username " . $this->targetUsername
             );
         }

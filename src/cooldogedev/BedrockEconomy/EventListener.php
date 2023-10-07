@@ -31,7 +31,8 @@ declare(strict_types=1);
 namespace cooldogedev\BedrockEconomy;
 
 use cooldogedev\BedrockEconomy\api\BedrockEconomyAPI;
-use cooldogedev\BedrockEconomy\database\util\Cache;
+use cooldogedev\BedrockEconomy\database\cache\CacheEntry;
+use cooldogedev\BedrockEconomy\database\cache\GlobalCache;
 use cooldogedev\libSQL\exception\SQLException;
 use Generator;
 use pocketmine\event\Listener;
@@ -63,7 +64,7 @@ final class EventListener implements Listener
             return;
         }
 
-        if (Cache::exists($player->getXuid())) {
+        if (GlobalCache::ONLINE()->exists($player->getName())) {
             return;
         }
 
@@ -82,35 +83,38 @@ final class EventListener implements Listener
         Await::f2c(
             function () use ($networkSession, $playerInfo): Generator {
                 try {
-                    $balance = yield from BedrockEconomyAPI::ASYNC()->get($playerInfo->getXuid(), $playerInfo->getUsername());
+                    $data = yield from BedrockEconomyAPI::ASYNC()->get($playerInfo->getXuid(), $playerInfo->getUsername());
                 } catch (SQLException) {
-                    $balance = null;
+                    $data = null;
                 }
 
-                if ($balance === null) {
+                if ($data === null) {
                     try {
                         yield from BedrockEconomyAPI::ASYNC()->insert($playerInfo->getXuid(), $playerInfo->getUsername(), $this->plugin->getCurrency()->defaultAmount, $this->plugin->getCurrency()->defaultDecimals);
 
-                        $balance = [
+                        $data = [
                             "amount" => $this->plugin->getCurrency()->defaultAmount,
-                            "decimals" => $this->plugin->getCurrency()->defaultDecimals
+                            "decimals" => $this->plugin->getCurrency()->defaultDecimals,
+                            "position" => 0,
                         ];
 
-                        $this->plugin->getLogger()->debug("Created account for " . $playerInfo->getUsername() . " with balance of " . $balance["amount"] . "." . $balance["decimals"]);
+                        $this->plugin->getLogger()->debug("Created account for " . $playerInfo->getUsername() . " with balance of " . $data["amount"] . "." . $data["decimals"]);
                     } catch (SQLException $exception) {
                         $networkSession->disconnect("An error occurred while creating your account. Please try again later.");
                         $this->plugin->getLogger()->error("Failed to create account for " . $playerInfo->getUsername() . ": " . $exception->getMessage());
                     }
                 }
 
-                if ($balance === null) {
+                if ($data === null) {
                     return;
                 }
 
-                $balance = $balance["amount"] . ($this->plugin->getCurrency()->decimals ? "." . $balance["decimals"] : "");
-
-                Cache::set($playerInfo->getXuid(), $balance);
-                $this->plugin->getLogger()->debug("Loaded account for " . $playerInfo->getUsername() . " with balance of " . $balance);
+                GlobalCache::ONLINE()->set($playerInfo->getUsername(), new CacheEntry(
+                    amount: $data["amount"],
+                    decimals: $data["decimals"],
+                    position: $data["position"],
+                ));
+                $this->plugin->getLogger()->debug("Loaded account for " . $playerInfo->getUsername() . " with balance of " . $data["amount"] . " and decimals of " . $data["decimals"]);
             }
         );
     }
@@ -118,6 +122,6 @@ final class EventListener implements Listener
     public function onPlayerQuit(PlayerQuitEvent $event): void
     {
         $player = $event->getPlayer();
-        Cache::delete($player->getXuid());
+        GlobalCache::ONLINE()->remove($player->getName());
     }
 }

@@ -30,7 +30,7 @@ declare(strict_types=1);
 
 namespace cooldogedev\BedrockEconomy\database\helper;
 
-use cooldogedev\BedrockEconomy\database\util\TableFormatter;
+use cooldogedev\BedrockEconomy\database\constant\TablePrefix;
 
 trait TableHolder
 {
@@ -38,6 +38,6 @@ trait TableHolder
 
     public function setTable(string $table): void
     {
-        $this->table = TableFormatter::fromCurrency($table);
+        $this->table = strtolower(TablePrefix::PREFIX . $table);;
     }
 }

@@ -31,7 +31,7 @@ declare(strict_types=1);
 namespace cooldogedev\BedrockEconomy\database\mysql;
 
 use cooldogedev\BedrockEconomy\database\constant\UpdateMode;
-use cooldogedev\BedrockEconomy\database\exception\AccountNotFoundException;
+use cooldogedev\BedrockEconomy\database\exception\RecordNotFoundException;
 use cooldogedev\BedrockEconomy\database\exception\InsufficientFundsException;
 use cooldogedev\BedrockEconomy\database\helper\AccountHolder;
 use cooldogedev\BedrockEconomy\database\helper\TableHolder;
@@ -47,7 +47,7 @@ final class UpdateQuery extends MySQLQuery
     public function __construct(protected int $mode, protected int $amount, protected int $decimals) {}
 
     /**
-     * @throws AccountNotFoundException
+     * @throws RecordNotFoundException
      * @throws InsufficientFundsException
      */
     public function onRun(mysqli $connection): void
@@ -63,7 +63,7 @@ final class UpdateQuery extends MySQLQuery
         $checkQuery->close();
 
         if ($checkResult->num_rows === 0) {
-            throw new AccountNotFoundException(
+            throw new RecordNotFoundException(
                 _message: "Account not found for xuid " . $this->xuid . " or username " . $this->username
             );
         }
@@ -99,7 +99,7 @@ final class UpdateQuery extends MySQLQuery
         }
 
         if ($updateResult->num_rows === 0) {
-            throw new AccountNotFoundException(
+            throw new RecordNotFoundException(
                 _message: "Account not found for xuid " . $this->xuid . " or username " . $this->username
             );
         }

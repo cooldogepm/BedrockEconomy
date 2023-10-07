@@ -38,9 +38,5 @@ final class CacheInvalidateEvent extends Event implements Cancellable
 {
     use CancellableTrait;
 
-    /**
-     * @param array<int, string> $old
-     * @param array<int, string> $new
-     */
-    public function __construct(protected readonly array $old, protected readonly array $new) {}
+    public function __construct(protected array $online, protected array $top) {}
 }

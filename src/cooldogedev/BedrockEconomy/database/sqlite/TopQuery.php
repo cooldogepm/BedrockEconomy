@@ -30,7 +30,7 @@ declare(strict_types=1);
 
 namespace cooldogedev\BedrockEconomy\database\sqlite;
 
-use cooldogedev\BedrockEconomy\database\exception\NoRecordsException;
+use cooldogedev\BedrockEconomy\database\exception\RecordNotFoundException;
 use cooldogedev\BedrockEconomy\database\helper\TableHolder;
 use cooldogedev\libSQL\query\SQLiteQuery;
 use SQLite3;
@@ -42,13 +42,13 @@ final class TopQuery extends SQLiteQuery
     public function __construct(protected int $limit, protected int $offset, protected bool $ascending) {}
 
     /**
-     * @throws NoRecordsException
+     * @throws RecordNotFoundException
      */
     public function onRun(SQLite3 $connection): void
     {
         $query = match ($this->ascending) {
-            true => "SELECT * FROM " . $this->table . " ORDER BY amount ASC LIMIT ? OFFSET ?",
-            false => "SELECT * FROM " . $this->table . " ORDER BY amount DESC LIMIT ? OFFSET ?"
+            true => "SELECT * FROM " . $this->table . " ORDER BY amount, decimals ASC LIMIT ? OFFSET ?",
+            false => "SELECT * FROM " . $this->table . " ORDER BY amount, decimals DESC LIMIT ? OFFSET ?"
         };
 
         $statement = $connection->prepare($query);
@@ -64,7 +64,7 @@ final class TopQuery extends SQLiteQuery
         }
 
         if (count($rows) === 0) {
-            throw new NoRecordsException(
+            throw new RecordNotFoundException(
                 _message: "No records found in table " . $this->table,
             );
         }

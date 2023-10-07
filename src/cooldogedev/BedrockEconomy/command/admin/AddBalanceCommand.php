@@ -33,7 +33,7 @@ namespace cooldogedev\BedrockEconomy\command\admin;
 use cooldogedev\BedrockEconomy\api\BedrockEconomyAPI;
 use cooldogedev\BedrockEconomy\command\constant\PermissionList;
 use cooldogedev\BedrockEconomy\currency\CurrencyFormatter;
-use cooldogedev\BedrockEconomy\database\exception\AccountNotFoundException;
+use cooldogedev\BedrockEconomy\database\exception\RecordNotFoundException;
 use cooldogedev\BedrockEconomy\language\KnownTranslations;
 use cooldogedev\BedrockEconomy\language\LanguageManager;
 use cooldogedev\BedrockEconomy\language\TranslationKeys;
@@ -104,7 +104,7 @@ final class AddBalanceCommand extends BaseCommand
                         TranslationKeys::PLAYER => $player,
                         TranslationKeys::AMOUNT => $this->getOwningPlugin()->getCurrency()->formatter->format($balance, $decimals),
                     ]));
-                } catch (AccountNotFoundException) {
+                } catch (RecordNotFoundException) {
                     $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::ERROR_ACCOUNT_NONEXISTENT));
                 } catch (SQLException) {
                     $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::ERROR_DATABASE));

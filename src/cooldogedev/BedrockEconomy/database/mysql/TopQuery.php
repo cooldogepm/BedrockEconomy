@@ -30,25 +30,25 @@ declare(strict_types=1);
 
 namespace cooldogedev\BedrockEconomy\database\mysql;
 
-use cooldogedev\BedrockEconomy\database\exception\NoRecordsException;
+use cooldogedev\BedrockEconomy\database\exception\RecordNotFoundException;
 use cooldogedev\BedrockEconomy\database\helper\TableHolder;
 use cooldogedev\libSQL\query\MySQLQuery;
 use mysqli;
 
-final class TopRetrieveQuery extends MySQLQuery
+final class TopQuery extends MySQLQuery
 {
     use TableHolder;
 
     public function __construct(protected int $limit, protected int $offset, protected bool $ascending) {}
 
     /**
-     * @throws NoRecordsException
+     * @throws RecordNotFoundException
      */
     public function onRun(mysqli $connection): void
     {
         $query = match ($this->ascending) {
-            true => "SELECT * FROM " . $this->table . " ORDER BY amount ASC LIMIT ? OFFSET ?",
-            false => "SELECT * FROM " . $this->table . " ORDER BY amount DESC LIMIT ? OFFSET ?"
+            true => "SELECT * FROM " . $this->table . " ORDER BY amount, decimals ASC LIMIT ? OFFSET ?",
+            false => "SELECT * FROM " . $this->table . " ORDER BY amount, decimals DESC LIMIT ? OFFSET ?"
         };
 
         $statement = $connection->prepare($query);
@@ -60,7 +60,7 @@ final class TopRetrieveQuery extends MySQLQuery
         $statement->close();
 
         if ($result->num_rows === 0) {
-            throw new NoRecordsException(
+            throw new RecordNotFoundException(
                 _message: "No records found in table " . $this->table,
             );
         }

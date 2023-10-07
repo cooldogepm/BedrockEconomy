@@ -28,8 +28,13 @@
 
 declare(strict_types=1);
 
-namespace cooldogedev\BedrockEconomy\database\exception;
+namespace cooldogedev\BedrockEconomy\database\cache;
 
-use cooldogedev\libSQL\exception\SQLException;
-
-final class NoRecordsException extends SQLException {}
+final class CacheEntry
+{
+    public function __construct(
+        public readonly int $amount,
+        public readonly int $decimals,
+        public readonly int $position,
+    ) {}
+}

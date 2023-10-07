@@ -30,7 +30,7 @@ declare(strict_types=1);
 
 namespace cooldogedev\BedrockEconomy\database\sqlite;
 
-use cooldogedev\BedrockEconomy\database\exception\NoRecordsException;
+use cooldogedev\BedrockEconomy\database\exception\RecordNotFoundException;
 use cooldogedev\BedrockEconomy\database\helper\TableHolder;
 use cooldogedev\libSQL\query\SQLiteQuery;
 use SQLite3;
@@ -47,14 +47,14 @@ final class BulkQuery extends SQLiteQuery
     }
 
     /**
-     * @throws NoRecordsException
+     * @throws RecordNotFoundException
      */
     public function onRun(SQLite3 $connection): void
     {
         $list = igbinary_unserialize($this->list);
         $params = implode(", ", array_fill(0, count($list), "?"));
 
-        $statement = $connection->prepare("SELECT * FROM " . $this->table . " WHERE xuid IN (" . $params . ")");
+        $statement = $connection->prepare("SELECT *, ROW_NUMBER() OVER (ORDER BY amount, decimals DESC) as position FROM " . $this->table . " WHERE xuid IN (" . $params . ")");
 
         for ($i = 0; $i < count($list); $i++) {
             $statement->bindValue($i + 1, $list[$i]);
@@ -69,7 +69,7 @@ final class BulkQuery extends SQLiteQuery
         }
 
         if (count($rows) === 0) {
-            throw new NoRecordsException(
+            throw new RecordNotFoundException(
                 _message: "No records found in table " . $this->table,
             );
         }

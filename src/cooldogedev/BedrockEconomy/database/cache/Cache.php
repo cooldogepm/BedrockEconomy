@@ -28,48 +28,43 @@
 
 declare(strict_types=1);
 
-namespace cooldogedev\BedrockEconomy\database\util;
+namespace cooldogedev\BedrockEconomy\database\cache;
 
 final class Cache
 {
-    protected static array $cache = [];
+    public function __construct(protected array $entries = []) {}
 
-    public static function getAll(): array
+    public function get(string $key): ?CacheEntry
     {
-        return Cache::$cache;
+        return $this->entries[$key] ?? null;
     }
 
-    public static function get(string $key): ?string
+    public function getAll(): array
     {
-        return Cache::$cache[$key] ?? null;
+        return $this->entries;
     }
 
-    public static function set(string $key, string $value): void
+    public function set(string $key, CacheEntry $entry): void
     {
-        Cache::$cache[$key] = $value;
+        $this->entries[$key] = $entry;
     }
 
-    public static function setAll(array $data): void
+    public function setAll(array $entries): void
     {
-        Cache::$cache = $data;
+        $this->entries = $entries;
     }
 
-    public static function delete(string $key): void
+    public function remove(string $key): void
     {
         if (!Cache::exists($key)) {
             return;
         }
 
-        unset(Cache::$cache[$key]);
+        unset($this->entries[$key]);
     }
 
-    public static function exists(string $key): bool
+    public function exists(string $key): bool
     {
-        return isset(Cache::$cache[$key]);
-    }
-
-    public static function clear(): void
-    {
-        Cache::$cache = [];
+        return isset($this->entries[$key]);
     }
 }

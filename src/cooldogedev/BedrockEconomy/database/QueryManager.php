@@ -34,14 +34,14 @@ use cooldogedev\BedrockEconomy\database\mysql\BulkQuery as MySQLBulkQuery;
 use cooldogedev\BedrockEconomy\database\mysql\InsertionQuery as MySQLInsertionQuery;
 use cooldogedev\BedrockEconomy\database\mysql\RetrieveQuery as MySQLRetrieveQuery;
 use cooldogedev\BedrockEconomy\database\mysql\TableQuery as MySQLTableQuery;
-use cooldogedev\BedrockEconomy\database\mysql\TopRetrieveQuery as MySQLTopRetrieveQuery;
+use cooldogedev\BedrockEconomy\database\mysql\TopQuery as MySQLTopQuery;
 use cooldogedev\BedrockEconomy\database\mysql\TransferQuery as MySQLTransferQuery;
 use cooldogedev\BedrockEconomy\database\mysql\UpdateQuery as MySQLUpdateQuery;
 use cooldogedev\BedrockEconomy\database\sqlite\BulkQuery as SQLiteBulkQuery;
 use cooldogedev\BedrockEconomy\database\sqlite\InsertionQuery as SQLiteInsertionQuery;
 use cooldogedev\BedrockEconomy\database\sqlite\RetrieveQuery as SQLiteRetrieveQuery;
 use cooldogedev\BedrockEconomy\database\sqlite\TableQuery as SQLiteTableQuery;
-use cooldogedev\BedrockEconomy\database\sqlite\TopQuery as SQLiteTopRetrieveQuery;
+use cooldogedev\BedrockEconomy\database\sqlite\TopQuery as SQLiteTopQuery;
 use cooldogedev\BedrockEconomy\database\sqlite\TransferQuery as SQLiteTransferQuery;
 use cooldogedev\BedrockEconomy\database\sqlite\UpdateQuery as SQLiteUpdateQuery;
 use cooldogedev\libSQL\query\SQLQuery;
@@ -95,7 +95,7 @@ final class QueryManager
 
     public static function TOP(int $limit, int $offset, bool $ascending): SQLQuery
     {
-        $query = QueryManager::$isMySQL ? new MySQLTopRetrieveQuery($limit, $offset, $ascending) : new SQLiteTopRetrieveQuery($limit, $offset, $ascending);
+        $query = QueryManager::$isMySQL ? new MySQLTopQuery($limit, $offset, $ascending) : new SQLiteTopQuery($limit, $offset, $ascending);
         $query->setTable(QueryManager::$table);
 
         return $query;

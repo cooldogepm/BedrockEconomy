@@ -33,8 +33,8 @@ namespace cooldogedev\BedrockEconomy\command;
 use cooldogedev\BedrockEconomy\api\BedrockEconomyAPI;
 use cooldogedev\BedrockEconomy\command\constant\PermissionList;
 use cooldogedev\BedrockEconomy\currency\CurrencyFormatter;
-use cooldogedev\BedrockEconomy\database\exception\AccountNotFoundException;
 use cooldogedev\BedrockEconomy\database\exception\InsufficientFundsException;
+use cooldogedev\BedrockEconomy\database\exception\RecordNotFoundException;
 use cooldogedev\BedrockEconomy\language\KnownTranslations;
 use cooldogedev\BedrockEconomy\language\LanguageManager;
 use cooldogedev\BedrockEconomy\language\TranslationKeys;
@@ -105,30 +105,30 @@ final class PayCommand extends BaseCommand
 
         Await::f2c(
             function () use ($sender, $player, $balance, $decimals): Generator {
-try {
-    yield from BedrockEconomyAPI::ASYNC()->transfer(
-        source: [
-            "username" => $sender->getName(),
-            "xuid" => $sender->getXuid(),
-        ],
-        target: [
-            "username" => $player,
-            "xuid" => $player,
-        ],
-        amount: $balance,
-        decimals: $decimals,
-    );
-    $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::BALANCE_PAY, [
-        TranslationKeys::PLAYER => $player,
-        TranslationKeys::AMOUNT => $this->getOwningPlugin()->getCurrency()->formatter->format($balance, $decimals),
-    ]));
-} catch (AccountNotFoundException) {
-    $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::ERROR_ACCOUNT_NONEXISTENT));
-} catch (InsufficientFundsException) {
-    $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::ERROR_ACCOUNT_INSUFFICIENT));
-} catch (SQLException) {
-    $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::ERROR_DATABASE));
-}
+                try {
+                    yield from BedrockEconomyAPI::ASYNC()->transfer(
+                        source: [
+                            "username" => $sender->getName(),
+                            "xuid" => $sender->getXuid(),
+                        ],
+                        target: [
+                            "username" => $player,
+                            "xuid" => $player,
+                        ],
+                        amount: $balance,
+                        decimals: $decimals,
+                    );
+                    $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::BALANCE_PAY, [
+                        TranslationKeys::PLAYER => $player,
+                        TranslationKeys::AMOUNT => $this->getOwningPlugin()->getCurrency()->formatter->format($balance, $decimals),
+                    ]));
+                } catch (RecordNotFoundException) {
+                    $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::ERROR_ACCOUNT_NONEXISTENT));
+                } catch (InsufficientFundsException) {
+                    $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::ERROR_ACCOUNT_INSUFFICIENT));
+                } catch (SQLException) {
+                    $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::ERROR_DATABASE));
+                }
             }
         );
     }
