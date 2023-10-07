@@ -32,6 +32,7 @@ namespace cooldogedev\BedrockEconomy\command;
 
 use cooldogedev\BedrockEconomy\api\BedrockEconomyAPI;
 use cooldogedev\BedrockEconomy\command\constant\PermissionList;
+use cooldogedev\BedrockEconomy\database\cache\GlobalCache;
 use cooldogedev\BedrockEconomy\database\constant\Search;
 use cooldogedev\BedrockEconomy\database\exception\RecordNotFoundException;
 use cooldogedev\BedrockEconomy\language\KnownTranslations;
@@ -76,6 +77,17 @@ final class BalanceCommand extends BaseCommand
         $player ??= $sender->getName();
 
         $isSelf = $player === $sender->getName();
+
+        $cacheEntry = GlobalCache::ONLINE()->get($player);
+
+        if ($cacheEntry !== null) {
+            $sender->sendMessage(LanguageManager::getTranslation($isSelf ? KnownTranslations::BALANCE_INFO : KnownTranslations::BALANCE_INFO_OTHER, [
+                TranslationKeys::PLAYER => $player,
+                TranslationKeys::AMOUNT => $this->getOwningPlugin()->getCurrency()->formatter->format($cacheEntry->amount, $cacheEntry->decimals),
+                TranslationKeys::POSITION => number_format($cacheEntry->position),
+            ]));
+            return;
+        }
 
         Await::f2c(
             function () use ($sender, $player, $isSelf): Generator {
