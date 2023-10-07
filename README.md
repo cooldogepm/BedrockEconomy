@@ -97,7 +97,7 @@ BedrockEconomyAPI::CLOSURE()->bulk(
     },
     onError: static function (SQLException $exception): void {
         if ($exception instanceof RecordNotFoundException) {
-            echo "Record not found";
+            echo "No records found";
             return;
         }
 
@@ -113,7 +113,7 @@ Await::f2c(
                 list: ["Doge", "123456789"], // You can use both username and xuid
             );
         } catch (RecordNotFoundException) {
-            echo "Account not found";
+            echo "No records found";
             return;
         } catch (SQLException) {
             echo "Database error";
