@@ -56,6 +56,13 @@ final class ClosureAPI extends BaseAPI
         QueryManager::INSERT($xuid, $username, $balance, $decimals)->execute($onSuccess, $onError);
     }
 
+    /**
+     * WARNING: This method should only be used if you know what you are doing.
+     * DO NOT use it for anything other than visual purposes such as leaderboards.
+     * It is used internally by the plugin to update the cache.
+     * It is recommended to use {@link GlobalCache::ONLINE()} instead.
+     * @internal
+     */
     public function get(string $xuid, string $username, Closure $onSuccess, Closure $onError): void
     {
         QueryManager::RETRIEVE($xuid, $username)->execute($onSuccess, $onError);

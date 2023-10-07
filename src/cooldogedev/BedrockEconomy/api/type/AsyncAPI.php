@@ -32,6 +32,7 @@ namespace cooldogedev\BedrockEconomy\api\type;
 
 use Closure;
 use cooldogedev\BedrockEconomy\api\BedrockEconomyAPI;
+use cooldogedev\BedrockEconomy\database\cache\GlobalCache;
 use Generator;
 use SOFe\AwaitGenerator\Await;
 
@@ -61,6 +62,13 @@ final class AsyncAPI extends BaseAPI
         );
     }
 
+    /**
+     * WARNING: This method should only be used if you know what you are doing.
+     * DO NOT use it for anything other than visual purposes such as leaderboards.
+     * It is used internally by the plugin to update the cache.
+     * It is recommended to use {@link GlobalCache::ONLINE()} instead.
+     * @internal
+     */
     public function get(string $xuid, string $username): Generator
     {
         return yield from Await::promise(
