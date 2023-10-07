@@ -80,7 +80,7 @@ final class BalanceCommand extends BaseCommand
 
         $cacheEntry = GlobalCache::ONLINE()->get($player);
 
-        if ($cacheEntry !== null) {
+        if ($cacheEntry !== null && $this->getOwningPlugin()->getConfig()->getNested("cache.balance-command")) {
             $sender->sendMessage(LanguageManager::getTranslation($isSelf ? KnownTranslations::BALANCE_INFO : KnownTranslations::BALANCE_INFO_OTHER, [
                 TranslationKeys::PLAYER => $player,
                 TranslationKeys::AMOUNT => $this->getOwningPlugin()->getCurrency()->formatter->format($cacheEntry->amount, $cacheEntry->decimals),

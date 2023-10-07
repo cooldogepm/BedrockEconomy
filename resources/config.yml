@@ -1,11 +1,12 @@
 ---
-config-version: 4.0.0
+config-version: 4.0.1
 
 language: en-US
 
 cache:
   invalidation: 300 # The cache invalidation time in seconds, set to 0 to disable. (Default: 5 minutes)
   rich-rows: 100 # The number of rows to fetch from the database for the rich command, set to 0 to fetch all. (Default: 100)
+  balance-command: true # Whether to cache the balance command or not. (Default: true)
 
 currency:
   name: United States Dollar
