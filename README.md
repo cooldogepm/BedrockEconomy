@@ -9,6 +9,7 @@ BedrockEconomy is an economy plugin made for PocketMine-MP focused on stability 
 - [Tools](#tools)
 - [Examples](#examples)
   - [Retrieving a Player's Balance](#retrieving-a-players-balance)
+  - [Retrieving Multiple Player Balances](#retrieving-multiple-player-balances)
   - [Adding Funds to a Player's Balance](#adding-funds-to-a-players-balance)
   - [Subtracting Funds from a Player's Balance](#subtracting-funds-from-a-players-balance)
   - [Transferring Funds Between Players](#transferring-funds-between-players)
@@ -78,6 +79,50 @@ Await::f2c(
         }
         
         echo "Balance: " . $result["amount"] . " Decimals: " . $result["decimals"] . " Position: " . $result["position"];
+    }
+);
+```
+
+### Retrieving Multiple Player Balances
+
+You can retrieve multiple player balances using the `bulk` method. Here's an example:
+
+```php
+BedrockEconomyAPI::CLOSURE()->bulk(
+    list: ["Doge", "123456789"], // You can use both username and xuid
+    onSuccess: static function (array $result): void {
+        foreach ($result as $data) {
+            echo "Player: " . $data["username"] . " Balance: " . $data["amount"] . " Decimals: " . $data["decimals"] . " Position: " . $data["position"];
+        }
+    },
+    onError: static function (SQLException $exception): void {
+        if ($exception instanceof RecordNotFoundException) {
+            echo "Record not found";
+            return;
+        }
+
+        echo $exception->getMessage();
+    }
+);
+
+// Using async-await
+Await::f2c(
+    function (): Generator {
+        try {
+            $result = yield from BedrockEconomyAPI::ASYNC()->bulk(
+                list: ["Doge", "123456789"], // You can use both username and xuid
+            );
+        } catch (RecordNotFoundException) {
+            echo "Account not found";
+            return;
+        } catch (SQLException) {
+            echo "Database error";
+            return;
+        }
+        
+        foreach ($result as $data) {
+            echo "Player: " . $data["username"] . " Balance: " . $data["amount"] . " Decimals: " . $data["decimals"] . " Position: " . $data["position"];
+        }
     }
 );
 ```
