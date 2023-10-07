@@ -32,11 +32,25 @@ namespace cooldogedev\BedrockEconomy\database\cache;
 
 final class Cache
 {
+    /**
+     * @param CacheEntry[] $entries
+     */
     public function __construct(protected array $entries = []) {}
 
     public function get(string $key): ?CacheEntry
     {
-        return $this->entries[$key] ?? null;
+        $entry = $this->entries[$key] ?? null;
+
+        if ($entry === null) {
+            foreach ($this->entries as $_key => $value) {
+                if (strtolower($_key) === strtolower($key)) {
+                    $entry = $value;
+                    break;
+                }
+            }
+        }
+
+        return $entry;
     }
 
     public function getAll(): array
