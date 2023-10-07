@@ -1,245 +1,234 @@
 # BedrockEconomy
 BedrockEconomy is an economy plugin made for PocketMine-MP focused on stability and simplicity.
 <br>
+## Table of Contents
+
+- [License](#license)
+- [Commands](#commands)
+- [Features](#features)
+- [Tools](#tools)
+- [Examples](#examples)
+  - [Retrieving a Player's Balance](#retrieving-a-players-balance)
+  - [Adding Funds to a Player's Balance](#adding-funds-to-a-players-balance)
+  - [Subtracting Funds from a Player's Balance](#subtracting-funds-from-a-players-balance)
+  - [Transferring Funds Between Players](#transferring-funds-between-players)
+
+## License
+
+This API is released under the MIT License. For more information, please refer to the [LICENSE](LICENSE) file.
 
 ## Commands
-| Name | Description | Usage | Permission |
-| ------- | ----------- | ----- | ---------- |
-| balance | Show your and others balance | `balance [player: string]` | `bedrockeconomy.command.balance` |
-| pay | Pay others with your balance | `pay <player: string> <amount: number>`  | `bedrockeconomy.command.pay` |
-| topbalance | View the top balances | `topbalance [page: number]` | `bedrockeconomy.command.topbalance` |
-| addbalance | Add points to others balance | `addbalance <player: string> <amount: number>`  | `bedrockeconomy.command.addbalance` |
-| removebalance | Remove points from others balance | `removebalance <player: string> <amount: number>`  | `bedrockeconomy.command.removebalance` |
-| setbalance | Set others balance | `setbalance <player: string> <balance: number>`  | `bedrockeconomy.command.setbalance` |
-| deleteaccount | Delete others account data | `deleteaccount <player: string>`  | `bedrockeconomy.command.deleteaccount` |
+| Name          | Description | Usage                                             | Permission                             |
+|---------------| ----------- |---------------------------------------------------|----------------------------------------|
+| balance       | Show your and others balance | `balance [player: string]`                        | `bedrockeconomy.command.balance`       |
+| pay           | Pay others with your balance | `pay <player: string> <amount: number>`           | `bedrockeconomy.command.pay`           |
+| rich          | View the top balances | `rich [page: number]`                             | `bedrockeconomy.command.rich`          |
+| addbalance    | Add points to others balance | `addbalance <player: string> <amount: number>`    | `bedrockeconomy.command.addbalance`    |
+| removebalance | Remove points from others balance | `removebalance <player: string> <amount: number>` | `bedrockeconomy.command.removebalance` |
+| setbalance    | Set others balance | `setbalance <player: string> <balance: number>`   | `bedrockeconomy.command.setbalance`    |
 
-## Legacy API
+## Features
+- [x] MySQL Database
+- [x] SQLite Database
+- [x] Async API
+- [x] Closure API
+- [x] Customizable
+- [x] Easy to use
+- [x] Lightweight
+- [x] Fast and efficient
+- [x] Cache system
 
-### Get the balance of a player
+## Examples
 
-```php
-BedrockEconomyAPI::legacy()->getPlayerBalance(
-    "Steve",
-    ClosureContext::create(
-        function (?int $balance): void {
-            var_dump($balance);
-        },
-    )
-);
-```
+### Retrieving a Player's Balance
 
-### Increment the balance of a player
-
-```php
-BedrockEconomyAPI::legacy()->addToPlayerBalance(
-    "Steve",
-    1000,
-    ClosureContext::create(
-        function (bool $wasUpdated): void {
-            var_dump($wasUpdated);
-        },
-    )
-);
-```
-
-### Decrement the balance of a player
+You can retrieve a player's balance using the `get` method. Here's an example:
 
 ```php
-BedrockEconomyAPI::legacy()->subtractFromPlayerBalance(
-    "Steve",
-    1000,
-    ClosureContext::create(
-        function (bool $wasUpdated): void {
-            var_dump($wasUpdated);
-        },
-    )
-);
-```
-
-### Update the balance of a player
-
-```php
-BedrockEconomyAPI::legacy()->setPlayerBalance(
-    "Steve",
-    1000,
-    ClosureContext::create(
-        function (bool $wasUpdated): void {
-            var_dump($wasUpdated);
-        },
-    )
-);
-```
-
-### Transfer money from one player to another
-
-```php
-BedrockEconomyAPI::legacy()->transferFromPlayerBalance(
-    "Steve", // Sender
-    "Alex",  // Receiver
-    1000,    // Amount
-    ClosureContext::create(
-        function (bool $successful): void {
-            var_dump($successful);
-        },
-    )
-);
-```
-
-### Check if a player has an account
-
-```php
-BedrockEconomyAPI::legacy()->isAccountExists(
-    "Steve",
-    ClosureContext::create(
-        function (bool $hasAccount): void {
-            var_dump($hasAccount);
-        },
-    )
-);
-```
-
-### Delete a player's account
-
-```php
-BedrockEconomyAPI::legacy()->deletePlayerAccount(
-    "Steve",
-    ClosureContext::create(
-        function (bool $operationSuccessful): void {
-            var_dump($operationSuccessful);
-        },
-    )
-);
-```
-
-### Get highest balances
-
-```php
-BedrockEconomyAPI::legacy()->getHighestBalances(
-    limit: 10,
-    context: ClosureContext::create(
-        function (?array $accounts) use ($sender, $offset): void {
-            if (!$accounts) {
-                var_dump("The table is empty.");
-                return;
-            }
-
-            foreach ($accounts as $account) {
-                var_dump($account["username"] . ": " . $account["balance"]);
-            }
+BedrockEconomyAPI::CLOSURE()->get(
+    xuid: "123456789",
+    username: "Doge",
+    onSuccess: static function (array $result): void {
+        echo "Balance: " . $result["amount"] . " Decimals: " . $result["decimals"] . " Position: " . $result["position"];
+    },
+    onError: static function (SQLException $exception): void {
+        if ($exception instanceof RecordNotFoundException) {
+            echo "Record not found";
+            return;
         }
-    ),
-    /**
-     * Offset is used to skip the first n * limited results.
-     * By default is set to 0 to retrieve the top n results starting from 0
-     */
-    offset: 1,
+
+        echo $exception->getMessage();
+    }
+);
+
+// Using async-await
+Await::f2c(
+    function (): Generator {
+        try {
+            $result = yield from BedrockEconomyAPI::ASYNC()->get(
+                xuid: "123456789",
+                username: "Doge",
+            );
+        } catch (RecordNotFoundException) {
+            echo "Account not found";
+            return;
+        } catch (SQLException) {
+            echo "Database error";
+            return;
+        }
+        
+        echo "Balance: " . $result["amount"] . " Decimals: " . $result["decimals"] . " Position: " . $result["position"];
+    }
 );
 ```
 
-### Addons
+### Adding Funds to a Player's Balance
+
+You can add funds to a player's balance using the `add` method. Here's an example:
 
 ```php
-/**
- * The name of the addon, must be unique.
- *
- * @return string
- */
-public function getName(): string
-````
+BedrockEconomyAPI::CLOSURE()->add(
+    xuid: "123456789",
+    username: "Doge",
+    amount: 55,
+    decimals: 25,
+    onSuccess: static function (): void {
+        echo 'Balance updated successfully.';
+    },
+    onError: static function (SQLException $exception): void {
+        if ($exception instanceof RecordNotFoundException) {
+            echo 'Account not found';
+            return;
+        }
 
-```php
-/**
- * The version of the addon.
- *
- * @return string
- */
-public function getVersion(): string
-````
+        echo 'An error occurred while updating the balance.';
+    }
+);
 
-```php
-/**
- * The minimum supported version of BedrockEconomy.
- * If the version is @link Addon::SUPPORTED_BEDROCK_VERSION_ALL, the addon will be enabled on all BedrockEconomy versions.
- *
- * @return string
- */
-public function getMinimumSupportedBedrockEconomyVersion(): string
-````
-
-```php
-/**
- * Called before a plugin is enabled, this should be only used for dependency checking.
- *
- * @return void
- */
-public function isLoadable(): void
-````
-
-```php
-/**
- * Returns whether the addon is enabled or not.
- *
- * @return void
- */
-public function isEnabled(): void
-````
-
-```php
-/**
- * Called when the plugin is enabled. Similar to @link PluginBase::onEnable()
- * Should be used for listeners registration and such logic.
- */
-public function onEnable(): bool
-````
-
-```php
-/**
- * Called when the addon is disabled. Similar to @link PluginBase::onDisable()
- */
-public function onDisable(): bool
-````
-
-### Events
-
-| Name | Description |
-| ------- | ----------- |
-| TransactionSubmitEvent | Called right before a transaction is submitted to the database |
-| TransactionProcessEvent | Called right after the transaction execution  |
-
-#### Cancel a payment if the sender's name is Steve
-
-```php
-/**
- * @param TransactionSubmitEvent $event
- * @param TransferTransaction $transaction
- */
-$transaction = $event->getTransaction();
-if($transaction->getSender() === "Steve"){
-    $event->cancel();
-}
+// Using async-await
+Await::f2c(
+    function () use ($player): Generator {
+        try {
+            yield from BedrockEconomyAPI::ASYNC()->add(
+                xuid: "123456789",
+                username: "Doge",
+                amount: 55,
+                decimals: 25,
+            );
+            echo 'Balance updated successfully.';
+        } catch (RecordNotFoundException) {
+            echo 'Account not found';
+        } catch (SQLException) {
+            echo 'An error occurred while updating the balance.';
+        }
+    }
+);
 ```
 
-#### Broadcast a message to all players if a payment is successful
+### Subtracting Funds from a Player's Balance
+
+You can subtract funds from a player's balance using the `subtract` method. Here's an example:
 
 ```php
-/**
- * @param TransactionProcessEvent $event
- */
-if($event->isSuccessful()){
-    Server::getInstance()->broadcastMessage("A payment was successful!");
-}
+BedrockEconomyAPI::CLOSURE()->subtract(
+    xuid: "123456789",
+    username: "Doge",
+    amount: 55,
+    decimals: 25,
+    onSuccess: static function (): void {
+        echo 'Balance updated successfully.';
+    },
+    onError: static function (SQLException $exception): void {
+        if ($exception instanceof RecordNotFoundException) {
+            echo 'Account not found';
+            return;
+        }
+
+        if ($exception instanceof InsufficientFundsException) {
+            echo 'Insufficient funds';
+            return;
+        }
+
+        echo 'An error occurred while updating the balance.';
+    }
+);
+
+// Using async-await
+Await::f2c(
+    function () use ($player): Generator {
+        try {
+            yield from BedrockEconomyAPI::ASYNC()->subtract(
+                xuid: "123456789",
+                username: "Doge",
+                amount: 55,
+                decimals: 25,
+            );
+            echo 'Balance updated successfully.';
+        } catch (RecordNotFoundException) {
+            echo 'Account not found';
+        } catch (InsufficientFundsException) {
+            echo 'Insufficient funds';
+        } catch (SQLException) {
+            echo 'An error occurred while updating the balance.';
+        }
+    }
+);
 ```
 
-## Scorehud integration
+### Transferring Funds Between Players
 
-BedrockEconomy will automatically integrate with the [Scorehud](https://github.com/Ifera/ScoreHud) if it is installed.
+You can transfer funds from one player to another using the `transfer` method. Here's an example:
 
-### Available Tags
+```php
+$sourcePlayer = ['xuid' => 'source_xuid', 'username' => 'source_username'];
+$targetPlayer = ['xuid' => 'target_xuid', 'username' => 'target_username'];
 
-- `{bedrockeconomy.balance}`
-- `{bedrockeconomy.balance_cap}`
-- `{bedrockeconomy.currency_symbol}`
-- `{bedrockeconomy.currency_name}`
+BedrockEconomyAPI::CLOSURE()->transfer(
+    source: $sourcePlayer,
+    target: $targetPlayer,
+    amount: 55,
+    decimals: 25,
+    onSuccess: static function (): void {
+        echo 'Balance transfer successful.';
+    },
+    onError: static function (SQLException $exception): void {
+        if ($exception instanceof RecordNotFoundException) {
+            echo 'Account not found';
+            return;
+        }
+        
+        if ($exception instanceof InsufficientFundsException) {
+            echo 'Insufficient funds';
+            return;
+        }
+
+        echo 'An error occurred during the balance transfer.';
+    }
+);
+
+// Using async-await
+Await::f2c(
+    function () use ($sourcePlayer, $targetPlayer): Generator {
+        try {
+            yield from BedrockEconomyAPI::ASYNC()->transfer(
+                source: $sourcePlayer,
+                target: $targetPlayer,
+                amount: 55,
+                decimals: 25,
+            );
+            echo 'Balance transfer successful.';
+        } catch (RecordNotFoundException) {
+            echo 'Account not found';
+        } catch (InsufficientFundsException) {
+            echo 'Insufficient funds';
+        } catch (SQLException) {
+            echo 'An error occurred during the balance transfer.';
+        }
+    }
+);
+```
+
+These examples demonstrate how to perform common operations using the BedrockEconomy API, such as retrieving player balances, adding and subtracting funds, and transferring funds between players.
 
 ## Tools
 
