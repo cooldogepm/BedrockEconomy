@@ -31,6 +31,7 @@ declare(strict_types=1);
 namespace cooldogedev\BedrockEconomy;
 
 use cooldogedev\BedrockEconomy\api\BedrockEconomyAPI;
+use cooldogedev\BedrockEconomy\api\util\ClosureContext;
 use cooldogedev\BedrockEconomy\command\admin\AddBalanceCommand;
 use cooldogedev\BedrockEconomy\command\admin\RemoveBalanceCommand;
 use cooldogedev\BedrockEconomy\command\admin\SetBalanceCommand;
@@ -106,6 +107,9 @@ final class BedrockEconomy extends PluginBase
         BedrockEconomyAPI::init();
         LanguageManager::init($this, $this->getConfig()->get("language"));
         MigrationRegistry::init();
+
+        class_alias(ClosureContext::class, \cooldogedev\libSQL\context\ClosureContext::class);
+        class_alias(ClosureContext::class, api\legacy\ClosureContext::class);
 
         if ($oldVersion !== $this->getDescription()->getVersion()) {
             $this->migrationInfo = [$oldVersion, $oldProvider];

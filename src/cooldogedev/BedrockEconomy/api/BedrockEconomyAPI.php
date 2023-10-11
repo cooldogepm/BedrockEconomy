@@ -32,16 +32,19 @@ namespace cooldogedev\BedrockEconomy\api;
 
 use cooldogedev\BedrockEconomy\api\type\AsyncAPI;
 use cooldogedev\BedrockEconomy\api\type\ClosureAPI;
+use cooldogedev\BedrockEconomy\api\type\LegacyAPI;
 
 final class BedrockEconomyAPI
 {
     protected static AsyncAPI $async;
     protected static ClosureAPI $closure;
+    protected static LegacyAPI $legacy;
 
     public static function init(): void
     {
         BedrockEconomyAPI::$async = new AsyncAPI();
         BedrockEconomyAPI::$closure = new ClosureAPI();
+        BedrockEconomyAPI::$legacy = new LegacyAPI();
     }
 
     public static function ASYNC(): AsyncAPI
@@ -52,5 +55,10 @@ final class BedrockEconomyAPI
     public static function CLOSURE(): ClosureAPI
     {
         return BedrockEconomyAPI::$closure;
+    }
+
+    public static function LEGACY(): LegacyAPI
+    {
+        return BedrockEconomyAPI::$legacy;
     }
 }
