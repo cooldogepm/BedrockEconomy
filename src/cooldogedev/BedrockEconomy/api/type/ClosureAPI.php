@@ -31,8 +31,13 @@ declare(strict_types=1);
 namespace cooldogedev\BedrockEconomy\api\type;
 
 use Closure;
+use cooldogedev\BedrockEconomy\api\util\ClosureWrapper;
 use cooldogedev\BedrockEconomy\database\constant\UpdateMode;
 use cooldogedev\BedrockEconomy\database\QueryManager;
+use cooldogedev\BedrockEconomy\event\transaction\AddTransactionEvent;
+use cooldogedev\BedrockEconomy\event\transaction\SetTransactionEvent;
+use cooldogedev\BedrockEconomy\event\transaction\SubtractTransactionEvent;
+use cooldogedev\BedrockEconomy\event\transaction\TransferTransactionEvent;
 
 final class ClosureAPI extends BaseAPI
 {
@@ -80,21 +85,33 @@ final class ClosureAPI extends BaseAPI
 
     public function transfer(array $source, array $target, int $amount, int $decimals, Closure $onSuccess, Closure $onError): void
     {
-        QueryManager::TRANSFER($source, $target, $amount, $decimals)->execute($onSuccess, $onError);
+        QueryManager::TRANSFER($source, $target, $amount, $decimals)->execute(
+            onSuccess: ClosureWrapper::combine($onSuccess, static fn() => (new TransferTransactionEvent($source, $target, $amount, $decimals))->call()),
+            onFail: $onError,
+        );
     }
 
     public function add(string $xuid, string $username, int $amount, int $decimals, Closure $onSuccess, Closure $onError): void
     {
-        QueryManager::UPDATE($xuid, $username, UpdateMode::ADD, $amount, $decimals)->execute($onSuccess, $onError);
+        QueryManager::UPDATE($xuid, $username, UpdateMode::ADD, $amount, $decimals)->execute(
+            onSuccess: ClosureWrapper::combine($onSuccess, static fn() => (new AddTransactionEvent($xuid, $username, $amount, $decimals))->call()),
+            onFail: $onError,
+        );
     }
 
     public function subtract(string $xuid, string $username, int $amount, int $decimals, Closure $onSuccess, Closure $onError): void
     {
-        QueryManager::UPDATE($xuid, $username, UpdateMode::SUBTRACT, $amount, $decimals)->execute($onSuccess, $onError);
+        QueryManager::UPDATE($xuid, $username, UpdateMode::SUBTRACT, $amount, $decimals)->execute(
+            onSuccess: ClosureWrapper::combine($onSuccess, static fn() => (new SubtractTransactionEvent($xuid, $username, $amount, $decimals))->call()),
+            onFail: $onError,
+        );
     }
 
     public function set(string $xuid, string $username, int $amount, int $decimals, Closure $onSuccess, Closure $onError): void
     {
-        QueryManager::UPDATE($xuid, $username, UpdateMode::SET, $amount, $decimals)->execute($onSuccess, $onError);
+        QueryManager::UPDATE($xuid, $username, UpdateMode::SET, $amount, $decimals)->execute(
+            onSuccess: ClosureWrapper::combine($onSuccess, static fn() => (new SetTransactionEvent($xuid, $username, $amount, $decimals))->call()),
+            onFail: $onError,
+        );
     }
 }
