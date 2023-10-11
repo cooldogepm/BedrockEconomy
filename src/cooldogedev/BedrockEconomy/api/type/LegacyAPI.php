@@ -9,7 +9,8 @@ use cooldogedev\BedrockEconomy\api\BedrockEconomyAPI;
 use cooldogedev\BedrockEconomy\database\constant\Search;
 
 /**
- * @deprecated
+ * @deprecated This API is deprecated and will be removed in the future.
+ * Use the new APIs instead. (Async, Closure) @see BedrockEconomyAPI
  */
 final class LegacyAPI extends BaseAPI
 {
