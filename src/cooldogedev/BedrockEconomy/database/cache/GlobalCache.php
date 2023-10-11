@@ -78,7 +78,6 @@ final class GlobalCache
 
                     $position++;
                 }
-
             }
         );
     }
