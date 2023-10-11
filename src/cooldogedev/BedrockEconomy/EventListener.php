@@ -109,6 +109,15 @@ final class EventListener implements Listener
                     return;
                 }
 
+                if ($data["xuid"] === $data["username"]) {
+                    $migrated = yield from BedrockEconomyAPI::ASYNC()->migrate($playerInfo->getXuid(), $playerInfo->getUsername(), $playerInfo->getXuid(), $playerInfo->getUsername());
+
+                    if (!$migrated) {
+                        $networkSession->disconnect("An error occurred while migrating your account. Please try again later.");
+                        $this->plugin->getLogger()->error("Failed to migrate account for " . $playerInfo->getUsername());
+                    }
+                }
+
                 GlobalCache::ONLINE()->set($playerInfo->getUsername(), new CacheEntry(
                     amount: $data["amount"],
                     decimals: $data["decimals"],

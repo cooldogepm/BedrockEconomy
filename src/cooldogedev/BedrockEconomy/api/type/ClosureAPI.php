@@ -56,6 +56,11 @@ final class ClosureAPI extends BaseAPI
         QueryManager::INSERT($xuid, $username, $balance, $decimals)->execute($onSuccess, $onError);
     }
 
+    public function migrate(string $xuid, string $username, string $newXuid, string $newUsername, Closure $onSuccess, Closure $onError): void
+    {
+        QueryManager::MIGRATE($xuid, $username, $newXuid, $newUsername)->execute($onSuccess, $onError);
+    }
+
     /**
      * WARNING: This method should only be used if you know what you are doing.
      * DO NOT use it for anything other than visual purposes such as leaderboards.

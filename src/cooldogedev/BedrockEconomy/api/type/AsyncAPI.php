@@ -62,6 +62,13 @@ final class AsyncAPI extends BaseAPI
         );
     }
 
+    public function migrate(string $xuid, string $username, string $newXuid, string $newUsername): Generator
+    {
+        return yield from Await::promise(
+            static fn (Closure $resolve, Closure $reject) => BedrockEconomyAPI::CLOSURE()->migrate($xuid, $username, $newXuid, $newUsername, $resolve, $reject)
+        );
+    }
+
     /**
      * WARNING: This method should only be used if you know what you are doing.
      * DO NOT use it for anything other than visual purposes such as leaderboards.

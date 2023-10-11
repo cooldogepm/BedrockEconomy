@@ -32,6 +32,7 @@ namespace cooldogedev\BedrockEconomy\database;
 
 use cooldogedev\BedrockEconomy\database\mysql\BulkQuery as MySQLBulkQuery;
 use cooldogedev\BedrockEconomy\database\mysql\InsertionQuery as MySQLInsertionQuery;
+use cooldogedev\BedrockEconomy\database\mysql\MigrationQuery as MySQLMigrationQuery;
 use cooldogedev\BedrockEconomy\database\mysql\RetrieveQuery as MySQLRetrieveQuery;
 use cooldogedev\BedrockEconomy\database\mysql\TableQuery as MySQLTableQuery;
 use cooldogedev\BedrockEconomy\database\mysql\TopQuery as MySQLTopQuery;
@@ -39,6 +40,7 @@ use cooldogedev\BedrockEconomy\database\mysql\TransferQuery as MySQLTransferQuer
 use cooldogedev\BedrockEconomy\database\mysql\UpdateQuery as MySQLUpdateQuery;
 use cooldogedev\BedrockEconomy\database\sqlite\BulkQuery as SQLiteBulkQuery;
 use cooldogedev\BedrockEconomy\database\sqlite\InsertionQuery as SQLiteInsertionQuery;
+use cooldogedev\BedrockEconomy\database\sqlite\MigrationQuery as SQLiteMigrationQuery;
 use cooldogedev\BedrockEconomy\database\sqlite\RetrieveQuery as SQLiteRetrieveQuery;
 use cooldogedev\BedrockEconomy\database\sqlite\TableQuery as SQLiteTableQuery;
 use cooldogedev\BedrockEconomy\database\sqlite\TopQuery as SQLiteTopQuery;
@@ -68,6 +70,16 @@ final class QueryManager
     public static function INSERT(string $xuid, string $username, int $amount, int $decimals): SQLQuery
     {
         $query = QueryManager::$isMySQL ? new MySQLInsertionQuery($amount, $decimals) : new SQLiteInsertionQuery($amount, $decimals);
+        $query->setTable(QueryManager::$table);
+        $query->setUsername($username);
+        $query->setXuid($xuid);
+
+        return $query;
+    }
+
+    public static function MIGRATE(string $xuid, string $username, string $newXuid, string $newUsername): SQLQuery
+    {
+        $query = QueryManager::$isMySQL ? new MySQLMigrationQuery($newXuid, $newUsername) : new SQLiteMigrationQuery($newXuid, $newUsername);
         $query->setTable(QueryManager::$table);
         $query->setUsername($username);
         $query->setXuid($xuid);

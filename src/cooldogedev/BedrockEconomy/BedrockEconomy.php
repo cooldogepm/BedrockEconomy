@@ -39,6 +39,7 @@ use cooldogedev\BedrockEconomy\command\PayCommand;
 use cooldogedev\BedrockEconomy\command\RichCommand;
 use cooldogedev\BedrockEconomy\currency\Currency;
 use cooldogedev\BedrockEconomy\database\cache\GlobalCache;
+use cooldogedev\BedrockEconomy\database\migration\MigrationRegistry;
 use cooldogedev\BedrockEconomy\database\QueryManager;
 use cooldogedev\BedrockEconomy\language\LanguageManager;
 use cooldogedev\libSQL\ConnectionPool;
@@ -55,6 +56,11 @@ final class BedrockEconomy extends PluginBase
     protected ConnectionPool $connector;
     protected Currency $currency;
 
+    /**
+     * @var array<int, array{string, string}>|null
+     */
+    protected ?array $migrationInfo;
+
     use SingletonTrait;
 
     protected function checkConfig(): bool
@@ -63,7 +69,7 @@ final class BedrockEconomy extends PluginBase
             return true;
         }
 
-        $this->getLogger()->warning("An outdated config was provided attempting to generate a new one...");
+        $this->getLogger()->warning("An outdated config was found, attempting to generate a new one...");
 
         if (!rename($this->getDataFolder() . "config.yml", $this->getDataFolder() . "config.old.yml")) {
             $this->getLogger()->critical("An unknown error occurred while attempting to generate the new config");
@@ -89,6 +95,9 @@ final class BedrockEconomy extends PluginBase
             $this->saveResource($resource->getFilename());
         }
 
+        $oldVersion = $this->getConfig()->get("config-version");
+        $oldProvider = $this->getConfig()->getNested("database.provider");
+
         if (!$this->checkConfig()) {
             throw new RuntimeException("Failed to generate a new config");
         }
@@ -96,6 +105,13 @@ final class BedrockEconomy extends PluginBase
         BedrockEconomy::setInstance($this);
         BedrockEconomyAPI::init();
         LanguageManager::init($this, $this->getConfig()->get("language"));
+        MigrationRegistry::init();
+
+        if ($oldVersion !== $this->getDescription()->getVersion()) {
+            $this->migrationInfo = [$oldVersion, $oldProvider];
+        } else {
+            $this->migrationInfo = null;
+        }
     }
 
     protected function onEnable(): void
@@ -115,6 +131,20 @@ final class BedrockEconomy extends PluginBase
 
         QueryManager::init($this->currency->code, $this->getConfig()->getNested("database.provider") === "mysql");
         QueryManager::TABLE()->execute();
+
+        if ($this->migrationInfo !== null) {
+            [$oldVersion, $oldProvider] = $this->migrationInfo;
+
+            $migration = MigrationRegistry::get($oldVersion);
+
+            if ($migration === null) {
+                $this->getLogger()->debug("No migration found for version " . $oldVersion);
+                return;
+            }
+
+            $migration->run($oldProvider);
+            $this->getLogger()->notice("Migrating data from version " . $oldVersion . " to " . $this->getDescription()->getVersion());
+        }
 
         $this->getServer()->getPluginManager()->registerEvents(new EventListener($this), $this);
         $this->registerCommands();
