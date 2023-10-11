@@ -83,6 +83,11 @@ final class PayCommand extends BaseCommand
             $player = $playerExact->getName();
         }
 
+        if (strtolower($sender->getName()) === strtolower($player)) {
+            $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::ERROR_PAY_SELF));
+            return;
+        }
+
         if (!is_numeric($amount)) {
             $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::ERROR_AMOUNT_INVALID));
             return;
@@ -101,7 +106,7 @@ final class PayCommand extends BaseCommand
         $amount = explode(".", (string)$amount);
 
         $balance = (int)$amount[0];
-        $decimals = (int)$amount[1] ?? 0;
+        $decimals = (int)($amount[1] ?? 0);
 
         Await::f2c(
             function () use ($sender, $player, $balance, $decimals): Generator {

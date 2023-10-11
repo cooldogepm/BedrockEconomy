@@ -43,6 +43,8 @@ final class KnownTranslations
 
     public const ERROR_RICH_NO_RECORDS = "error.rich.no_records";
 
+    public const ERROR_PAY_SELF = "error.pay.self";
+
     public const BALANCE_INFO = "balance.info";
     public const BALANCE_INFO_OTHER = "balance.info.other";
 

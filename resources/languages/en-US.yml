@@ -10,6 +10,8 @@ error.amount.large: "&cThe amount you entered is too large."
 
 error.rich.no_records: "&cThere are no records to display."
 
+error.pay.self: "&cYou cannot pay yourself."
+
 balance.info: "&aYour current balance is &e{amount}&a. (#{position})"
 balance.info.other: "&a{player}'s current balance is &e{amount}&a. (#{position})"
 
