@@ -37,6 +37,18 @@ final class Cache
      */
     public function __construct(protected array $entries = []) {}
 
+    public function sort(): void
+    {
+        uasort($this->entries, static fn (CacheEntry $a, CacheEntry $b) => $b->amount <=> $a->amount && $b->decimals <=> $a->decimals);
+
+        $i = 1;
+
+        foreach ($this->entries as $key => $entry) {
+            $this->entries[$key] = new CacheEntry($entry->amount, $entry->decimals, $i);
+            $i++;
+        }
+    }
+
     public function get(string $key): ?CacheEntry
     {
         $entry = $this->entries[$key] ?? null;

@@ -33,6 +33,10 @@ namespace cooldogedev\BedrockEconomy;
 use cooldogedev\BedrockEconomy\api\BedrockEconomyAPI;
 use cooldogedev\BedrockEconomy\database\cache\CacheEntry;
 use cooldogedev\BedrockEconomy\database\cache\GlobalCache;
+use cooldogedev\BedrockEconomy\event\transaction\AddTransactionEvent;
+use cooldogedev\BedrockEconomy\event\transaction\SetTransactionEvent;
+use cooldogedev\BedrockEconomy\event\transaction\SubtractTransactionEvent;
+use cooldogedev\BedrockEconomy\event\transaction\TransferTransactionEvent;
 use cooldogedev\libSQL\exception\SQLException;
 use Generator;
 use pocketmine\event\Listener;
@@ -132,5 +136,105 @@ final class EventListener implements Listener
     {
         $player = $event->getPlayer();
         GlobalCache::ONLINE()->remove($player->getName());
+    }
+
+    /**
+     * @priority LOWEST
+     */
+    public function onAddTransaction(AddTransactionEvent $event): void
+    {
+        $online = GlobalCache::ONLINE()->get($event->username);
+        $top = GlobalCache::TOP()->get($event->username);
+
+        if ($top !== null) {
+            GlobalCache::TOP()->set($event->username, new CacheEntry(
+                amount: $top->amount + $event->amount,
+                decimals: $top->decimals + $event->decimals,
+                position: $top->position,
+            ));
+
+            GlobalCache::TOP()->sort();
+        }
+
+        if ($online !== null) {
+            GlobalCache::ONLINE()->set($event->username, new CacheEntry(
+                amount: $online->amount + $event->amount,
+                decimals: $online->decimals + $event->decimals,
+                position: GlobalCache::TOP()->get($event->username)?->position ?? $online->position,
+            ));
+        }
+    }
+
+    /**
+     * @priority LOWEST
+     */
+    public function onSubtractTransaction(SubtractTransactionEvent $event): void
+    {
+        $online = GlobalCache::ONLINE()->get($event->username);
+        $top = GlobalCache::TOP()->get($event->username);
+
+        if ($top !== null) {
+            GlobalCache::TOP()->set($event->username, new CacheEntry(
+                amount: $top->amount - $event->amount,
+                decimals: $top->decimals - $event->decimals,
+                position: $top->position,
+            ));
+
+            GlobalCache::TOP()->sort();
+        }
+
+        if ($online !== null) {
+            GlobalCache::ONLINE()->set($event->username, new CacheEntry(
+                amount: $online->amount - $event->amount,
+                decimals: $online->decimals - $event->decimals,
+                position: GlobalCache::TOP()->get($event->username)?->position ?? $online->position,
+            ));
+        }
+    }
+
+    /**
+     * @priority LOWEST
+     */
+    public function onSetTransaction(SetTransactionEvent $event): void
+    {
+        $online = GlobalCache::ONLINE()->get($event->username);
+        $top = GlobalCache::TOP()->get($event->username);
+
+        if ($top !== null) {
+            GlobalCache::TOP()->set($event->username, new CacheEntry(
+                amount: $event->amount,
+                decimals: $event->decimals,
+                position: $top->position,
+            ));
+
+            GlobalCache::TOP()->sort();
+        }
+
+        if ($online !== null) {
+            GlobalCache::ONLINE()->set($event->username, new CacheEntry(
+                amount: $event->amount,
+                decimals: $event->decimals,
+                position: GlobalCache::TOP()->get($event->username)?->position ?? $online->position,
+            ));
+        }
+    }
+
+    /**
+     * @priority LOWEST
+     */
+    public function onTransferTransaction(TransferTransactionEvent $event): void
+    {
+        $this->onAddTransaction(new AddTransactionEvent(
+            xuid: $event->target["xuid"],
+            username: $event->target["username"],
+            amount: $event->amount,
+            decimals: $event->decimals,
+        ));
+        $this->onSubtractTransaction(new SubtractTransactionEvent(
+            xuid: $event->source["xuid"],
+            username: $event->source["username"],
+            amount: $event->amount,
+            decimals: $event->decimals,
+        ));
     }
 }
