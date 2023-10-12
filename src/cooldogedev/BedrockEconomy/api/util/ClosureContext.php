@@ -32,6 +32,9 @@ namespace cooldogedev\BedrockEconomy\api\util;
 
 use Closure;
 
+/**
+ * @deprecated
+ */
 final class ClosureContext
 {
     public static function create(... $closures): Closure
