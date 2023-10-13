@@ -1,174 +1,151 @@
 <?php
 
 /**
- *  Copyright (c) 2022 cooldogedev
+ * MIT License
  *
- *  Permission is hereby granted, free of charge, to any person obtaining a copy
- *  of this software and associated documentation files (the "Software"), to deal
- *  in the Software without restriction, including without limitation the rights
- *  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- *  copies of the Software, and to permit persons to whom the Software is
- *  furnished to do so, subject to the following conditions:
+ * Copyright (c) 2021-2023 cooldogedev
  *
- *  The above copyright notice and this permission notice shall be included in all
- *  copies or substantial portions of the Software.
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
  *
- *  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- *  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- *  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- *  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- *  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- *  SOFTWARE.
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ *
+ * @auto-license
  */
 
 declare(strict_types=1);
 
 namespace cooldogedev\BedrockEconomy\command;
 
-use Closure;
 use cooldogedev\BedrockEconomy\api\BedrockEconomyAPI;
-use cooldogedev\BedrockEconomy\api\legacy\ClosureContext;
-use cooldogedev\BedrockEconomy\BedrockEconomy;
-use cooldogedev\BedrockEconomy\language\KnownTranslations;
+use cooldogedev\BedrockEconomy\command\constant\PermissionList;
+use cooldogedev\BedrockEconomy\currency\CurrencyFormatter;
+use cooldogedev\BedrockEconomy\database\exception\InsufficientFundsException;
+use cooldogedev\BedrockEconomy\database\exception\RecordNotFoundException;
+use cooldogedev\BedrockEconomy\language\KnownMessages;
 use cooldogedev\BedrockEconomy\language\LanguageManager;
 use cooldogedev\BedrockEconomy\language\TranslationKeys;
-use cooldogedev\BedrockEconomy\permission\BedrockEconomyPermissions;
-use cooldogedev\BedrockEconomy\query\ErrorCodes;
+use cooldogedev\libSQL\exception\SQLException;
+use CortexPE\Commando\args\FloatArgument;
 use CortexPE\Commando\args\IntegerArgument;
 use CortexPE\Commando\args\RawStringArgument;
 use CortexPE\Commando\BaseCommand;
-use Exception;
+use CortexPE\Commando\constraint\InGameRequiredConstraint;
+use Generator;
 use pocketmine\command\CommandSender;
 use pocketmine\player\Player;
-use pocketmine\plugin\Plugin;
+use SOFe\AwaitGenerator\Await;
 
 final class PayCommand extends BaseCommand
 {
-    protected const ARGUMENT_RECEIVER = "receiver";
+    protected const ARGUMENT_TARGET = "target";
     protected const ARGUMENT_AMOUNT = "amount";
 
+    protected function prepare(): void
+    {
+        $this->addConstraint(new InGameRequiredConstraint($this));
+
+        $this->setPermission(PermissionList::COMMAND_PAY_PERMISSION);
+
+        $this->registerArgument(0, new RawStringArgument(PayCommand::ARGUMENT_TARGET));
+
+        if ($this->getOwningPlugin()->getCurrency()->decimals) {
+            $this->registerArgument(1, new FloatArgument(PayCommand::ARGUMENT_AMOUNT));
+        } else {
+            $this->registerArgument(1, new IntegerArgument(PayCommand::ARGUMENT_AMOUNT));
+        }
+    }
+
+    /**
+     * @param Player $sender
+     */
     public function onRun(CommandSender $sender, string $aliasUsed, array $args): void
     {
-        if (!$sender instanceof Player) {
-            $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::COMMAND_PLAYER_ONLY));
-            return;
-        }
-
-        $receiver = $args[PayCommand::ARGUMENT_RECEIVER];
+        $player = $args[PayCommand::ARGUMENT_TARGET];
         $amount = $args[PayCommand::ARGUMENT_AMOUNT];
 
-        $onlinePlayer = $this->getOwningPlugin()->getServer()->getPlayerByPrefix($receiver);
+        $playerExact = $this->getOwningPlugin()->getServer()->getPlayerExact($player);
 
-        if ($onlinePlayer !== null) {
-            $receiver = $onlinePlayer->getName();
-            $onlinePlayer = null;
+        if ($playerExact !== null) {
+            $player = $playerExact->getName();
         }
 
-        if (strtolower($receiver) === strtolower($sender->getName())) {
-            $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::PAYMENT_SEND_SELF));
+        if (strtolower($sender->getName()) === strtolower($player)) {
+            $sender->sendMessage(LanguageManager::getTranslation(KnownMessages::ERROR_PAY_SELF));
             return;
         }
 
         if (!is_numeric($amount)) {
-            $sender->sendMessage($this->getUsage());
+            $sender->sendMessage(LanguageManager::getTranslation(KnownMessages::ERROR_AMOUNT_INVALID));
             return;
         }
 
-        $amount = (int)floor($amount);
-
-        if ($amount < $this->getOwningPlugin()->getCurrencyManager()->getMinimumPayment()) {
-            $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::PAYMENT_SEND_INSUFFICIENT, [
-                    TranslationKeys::AMOUNT => $amount,
-                    TranslationKeys::LIMIT => $this->getOwningPlugin()->getCurrencyManager()->getMinimumPayment(),
-                    TranslationKeys::CURRENCY_NAME => $this->getOwningPlugin()->getCurrencyManager()->getName(),
-                    TranslationKeys::CURRENCY_SYMBOL => $this->getOwningPlugin()->getCurrencyManager()->getSymbol()
-                ]
-            ));
+        if ($amount <= 0) {
+            $sender->sendMessage(LanguageManager::getTranslation(KnownMessages::ERROR_AMOUNT_SMALL));
             return;
         }
 
-        if ($amount > $this->getOwningPlugin()->getCurrencyManager()->getMaximumPayment()) {
-            $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::PAYMENT_SEND_EXCEED_LIMIT, [
-                    TranslationKeys::AMOUNT => $amount,
-                    TranslationKeys::LIMIT => $this->getOwningPlugin()->getCurrencyManager()->getMaximumPayment(),
-                    TranslationKeys::CURRENCY_NAME => $this->getOwningPlugin()->getCurrencyManager()->getName(),
-                    TranslationKeys::CURRENCY_SYMBOL => $this->getOwningPlugin()->getCurrencyManager()->getSymbol()
-                ]
-            ));
+        if ($amount > CurrencyFormatter::INT63_MAX) {
+            $sender->sendMessage(LanguageManager::getTranslation(KnownMessages::ERROR_AMOUNT_LARGE));
             return;
         }
 
-        BedrockEconomyAPI::legacy()->transferFromPlayerBalance($sender->getName(), $receiver, $amount, ClosureContext::create(
-            function (bool $success, Closure $_, ?string $error) use ($sender, $receiver, $amount) {
-                if ($success) {
-                    $receiverPlayer = $this->getOwningPlugin()->getServer()->getPlayerByPrefix($receiver);
+        $amount = explode(".", (string)$amount);
 
-                    $receiverPlayer?->sendMessage(LanguageManager::getTranslation(KnownTranslations::PAYMENT_RECEIVE, [
-                            TranslationKeys::AMOUNT => $amount,
-                            TranslationKeys::PAYER => $sender->getName(),
-                            TranslationKeys::CURRENCY_NAME => $this->getOwningPlugin()->getCurrencyManager()->getName(),
-                            TranslationKeys::CURRENCY_SYMBOL => $this->getOwningPlugin()->getCurrencyManager()->getSymbol()
-                        ]
-                    ));
+        $balance = (int)$amount[0];
+        $decimals = (int)($amount[1] ?? 0);
+
+        Await::f2c(
+            function () use ($sender, $player, $balance, $decimals): Generator {
+                try {
+                    yield from BedrockEconomyAPI::ASYNC()->transfer(
+                        source: [
+                            "username" => $sender->getName(),
+                            "xuid" => $sender->getXuid(),
+                        ],
+                        target: [
+                            "username" => $player,
+                            "xuid" => $player,
+                        ],
+                        amount: $balance,
+                        decimals: $decimals,
+                    );
+                    $sender->sendMessage(LanguageManager::getTranslation(KnownMessages::BALANCE_PAY, [
+                        TranslationKeys::PLAYER => $player,
+                        TranslationKeys::AMOUNT => $this->getOwningPlugin()->getCurrency()->formatter->format($balance, $decimals),
+                    ]));
+
+                    $target = $this->getOwningPlugin()->getServer()->getPlayerExact($player);
+
+                    if ($target === null) {
+                        return;
+                    }
+
+                    $target->sendMessage(LanguageManager::getTranslation(KnownMessages::BALANCE_PAY_RECEIVE, [
+                        TranslationKeys::PLAYER => $sender->getName(),
+                        TranslationKeys::AMOUNT => $this->getOwningPlugin()->getCurrency()->formatter->format($balance, $decimals),
+                    ]));
+                } catch (RecordNotFoundException) {
+                    $sender->sendMessage(LanguageManager::getTranslation(KnownMessages::ERROR_ACCOUNT_NONEXISTENT));
+                } catch (InsufficientFundsException) {
+                    $sender->sendMessage(LanguageManager::getTranslation(KnownMessages::ERROR_ACCOUNT_INSUFFICIENT));
+                } catch (SQLException) {
+                    $sender->sendMessage(LanguageManager::getTranslation(KnownMessages::ERROR_DATABASE));
                 }
-
-                if ($sender instanceof Player && !$sender->isConnected()) {
-                    return;
-                }
-
-                if ($error !== null) {
-
-                    $causer = ltrim(strstr($error, ':'), ':');
-                    $error = substr($error, 0, strpos($error, ":"));
-
-                    $translation = match ($error) {
-                        ErrorCodes::ERROR_CODE_ACCOUNT_NOT_FOUND => KnownTranslations::PLAYER_NOT_FOUND,
-                        ErrorCodes::ERROR_CODE_BALANCE_INSUFFICIENT => KnownTranslations::BALANCE_INSUFFICIENT,
-                        ErrorCodes::ERROR_CODE_BALANCE_CAP_EXCEEDED => KnownTranslations::BALANCE_CAP,
-                        ErrorCodes::ERROR_CODE_NO_CHANGES_MADE, ErrorCodes::ERROR_CODE_NEW_BALANCE_EXCEEDS_CAP => KnownTranslations::UPDATE_ERROR,
-                    };
-
-                    $sender->sendMessage(LanguageManager::getTranslation($translation, [
-                            TranslationKeys::PAYER => $sender->getName(),
-                            TranslationKeys::RECEIVER => $receiver,
-
-                            TranslationKeys::PLAYER => $causer,
-                            TranslationKeys::AMOUNT => number_format($amount, 0, ".", $this->getOwningPlugin()->getCurrencyManager()->getNumberSeparator()),
-                            TranslationKeys::CURRENCY_NAME => $this->getOwningPlugin()->getCurrencyManager()->getName(),
-                            TranslationKeys::CURRENCY_SYMBOL => $this->getOwningPlugin()->getCurrencyManager()->getSymbol(),
-                            TranslationKeys::LIMIT => $this->getOwningPlugin()->getCurrencyManager()->getBalanceCap() ?? "N/A",
-                        ]
-                    ));
-                    return;
-                }
-
-                $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::PAYMENT_SEND, [
-                        TranslationKeys::AMOUNT => number_format($amount, 0, ".", $this->getOwningPlugin()->getCurrencyManager()->getNumberSeparator()),
-                        TranslationKeys::RECEIVER => $receiver,
-                        TranslationKeys::CURRENCY_NAME => $this->getOwningPlugin()->getCurrencyManager()->getName(),
-                        TranslationKeys::CURRENCY_SYMBOL => $this->getOwningPlugin()->getCurrencyManager()->getSymbol()
-                    ]
-                ));
             }
-        ));
-    }
-
-    /**
-     * @return BedrockEconomy
-     */
-    public function getOwningPlugin(): Plugin
-    {
-        return parent::getOwningPlugin();
-    }
-
-    protected function prepare(): void
-    {
-        $this->setPermission(BedrockEconomyPermissions::COMMAND_PAY_PERMISSION);
-        try {
-            $this->registerArgument(0, new RawStringArgument(PayCommand::ARGUMENT_RECEIVER));
-            $this->registerArgument(1, new IntegerArgument(PayCommand::ARGUMENT_AMOUNT));
-        } catch (Exception) {
-        }
+        );
     }
 }

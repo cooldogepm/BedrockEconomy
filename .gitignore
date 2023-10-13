@@ -4,7 +4,8 @@
 !.idea/fileTemplates/
 nbproject/*
 # Virions
+src/cooldogedev/libSQL
 src/CortexPE
 src/muqsit
-src/cooldogedev/libSQL
+src/SOFe
 /vendor

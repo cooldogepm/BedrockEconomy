@@ -1,139 +1,169 @@
 <?php
 
 /**
- *  Copyright (c) 2022 cooldogedev
+ * MIT License
  *
- *  Permission is hereby granted, free of charge, to any person obtaining a copy
- *  of this software and associated documentation files (the "Software"), to deal
- *  in the Software without restriction, including without limitation the rights
- *  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- *  copies of the Software, and to permit persons to whom the Software is
- *  furnished to do so, subject to the following conditions:
+ * Copyright (c) 2021-2023 cooldogedev
  *
- *  The above copyright notice and this permission notice shall be included in all
- *  copies or substantial portions of the Software.
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
  *
- *  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- *  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- *  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- *  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- *  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- *  SOFTWARE.
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ *
+ * @auto-license
  */
 
 declare(strict_types=1);
 
 namespace cooldogedev\BedrockEconomy;
 
-use cooldogedev\BedrockEconomy\account\AccountManager;
-use cooldogedev\BedrockEconomy\addon\AddonManager;
 use cooldogedev\BedrockEconomy\api\BedrockEconomyAPI;
-use cooldogedev\BedrockEconomy\api\version\LegacyBEAPI;
+use cooldogedev\BedrockEconomy\api\util\ClosureContext;
 use cooldogedev\BedrockEconomy\command\admin\AddBalanceCommand;
-use cooldogedev\BedrockEconomy\command\admin\DeleteAccountCommand;
 use cooldogedev\BedrockEconomy\command\admin\RemoveBalanceCommand;
 use cooldogedev\BedrockEconomy\command\admin\SetBalanceCommand;
 use cooldogedev\BedrockEconomy\command\BalanceCommand;
 use cooldogedev\BedrockEconomy\command\PayCommand;
-use cooldogedev\BedrockEconomy\command\TopBalanceCommand;
-use cooldogedev\BedrockEconomy\config\ConfigManager;
-use cooldogedev\BedrockEconomy\currency\CurrencyManager;
+use cooldogedev\BedrockEconomy\command\RichCommand;
+use cooldogedev\BedrockEconomy\currency\Currency;
+use cooldogedev\BedrockEconomy\database\cache\GlobalCache;
+use cooldogedev\BedrockEconomy\database\migration\MigrationRegistry;
+use cooldogedev\BedrockEconomy\database\QueryManager;
 use cooldogedev\BedrockEconomy\language\LanguageManager;
-use cooldogedev\BedrockEconomy\listener\PlayerListener;
-use cooldogedev\BedrockEconomy\query\QueryManager;
-use cooldogedev\BedrockEconomy\transaction\TransactionManager;
 use cooldogedev\libSQL\ConnectionPool;
 use CortexPE\Commando\PacketHooker;
+use JsonException;
 use pocketmine\plugin\PluginBase;
+use pocketmine\scheduler\ClosureTask;
 use pocketmine\utils\SingletonTrait;
 use pocketmine\utils\TextFormat;
+use RuntimeException;
 
 final class BedrockEconomy extends PluginBase
 {
-    use SingletonTrait {
-        getInstance as protected _getInstance;
-        setInstance as protected;
-    }
-
-    protected ConfigManager $configManager;
-    protected CurrencyManager $currencyManager;
     protected ConnectionPool $connector;
-    protected AccountManager $accountManager;
-    protected TransactionManager $transactionManager;
-    protected AddonManager $addonManager;
-
-    public static function getInstance(): BedrockEconomy
-    {
-        return BedrockEconomy::_getInstance();
-    }
-
-    public function getAccountManager(): AccountManager
-    {
-        return $this->accountManager;
-    }
+    protected Currency $currency;
 
     /**
-     * @return LegacyBEAPI
-     * @link BedrockEconomyAPI::beta() for the new API
-     *
-     * @deprecated used only for backwards compatibility.
+     * @var array<int, array{string, string}>|null
      */
-    public function getAPI(): LegacyBEAPI
-    {
-        return BedrockEconomyAPI::legacy();
-    }
+    protected ?array $migrationInfo;
 
-    public function getTransactionManager(): TransactionManager
+    use SingletonTrait;
+
+    protected function checkConfig(): bool
     {
-        return $this->transactionManager;
+        if ($this->getDescription()->getVersion() === $this->getConfig()->get("config-version")) {
+            return true;
+        }
+
+        $this->getLogger()->warning("An outdated config was found, attempting to generate a new one...");
+
+        if (!rename($this->getDataFolder() . "config.yml", $this->getDataFolder() . "config.old.yml")) {
+            $this->getLogger()->critical("An unknown error occurred while attempting to generate the new config");
+            return false;
+        }
+
+        $this->reloadConfig();
+
+        try {
+            $this->getConfig()->set("config-version", $this->getDescription()->getVersion());
+            $this->getConfig()->save();
+        } catch (JsonException $e) {
+            $this->getLogger()->critical("An error occurred while attempting to generate the new config, " . $e->getMessage());
+            return false;
+        }
+
+        return true;
     }
 
     protected function onLoad(): void
     {
-        class_alias(ClosureContext::class, \cooldogedev\libSQL\context\ClosureContext::class);
-
         foreach ($this->getResources() as $resource) {
             $this->saveResource($resource->getFilename());
         }
-        LanguageManager::init($this, $this->getConfig()->get("language"));
+
+        $oldVersion = $this->getConfig()->get("config-version");
+        $oldProvider = $this->getConfig()->getNested("database.provider");
+
+        if (!$this->checkConfig()) {
+            throw new RuntimeException("Failed to generate a new config");
+        }
+
         BedrockEconomy::setInstance($this);
+        BedrockEconomyAPI::init();
+        LanguageManager::init($this, $this->getConfig()->get("language"));
+        MigrationRegistry::init();
+
+        class_alias(ClosureContext::class, \cooldogedev\libSQL\context\ClosureContext::class);
+        class_alias(ClosureContext::class, api\legacy\ClosureContext::class);
+
+        if ($oldVersion !== $this->getDescription()->getVersion()) {
+            $this->migrationInfo = [$oldVersion, $oldProvider];
+        } else {
+            $this->migrationInfo = null;
+        }
     }
 
     protected function onEnable(): void
     {
-        $this->configManager = new ConfigManager($this);
-        $this->currencyManager = new CurrencyManager($this);
-        $this->connector = new ConnectionPool($this, $this->getConfigManager()->getDatabaseConfig());
-        $this->transactionManager = new TransactionManager($this);
-        $this->accountManager = new AccountManager($this);
-        $this->addonManager = new AddonManager($this);
+        $this->connector = new ConnectionPool($this, $this->getConfig()->get("database"));
+        $this->currency = new Currency(
+            name: $this->getConfig()->getNested("currency.name"),
+            code: $this->getConfig()->getNested("currency.code"),
+            symbol: $this->getConfig()->getNested("currency.symbol"),
+            format: $this->getConfig()->getNested("currency.formatter"),
+            defaultAmount: $this->getConfig()->getNested("currency.default.amount"),
+            defaultDecimals: $this->getConfig()->getNested("currency.default.decimals"),
+            decimals: $this->getConfig()->getNested("currency.decimals")
+        );
 
-        QueryManager::setIsMySQL($this->getConfigManager()->getDatabaseConfig()["provider"] === "mysql");
+        GlobalCache::init();
 
-        $this->getConnector()->submit(QueryManager::getTableCreationQuery($this->getCurrencyManager()->getDefaultBalance()));
+        QueryManager::init($this->currency->code, $this->getConfig()->getNested("database.provider") === "mysql");
+        QueryManager::TABLE()->execute();
 
-        $this->getServer()->getPluginManager()->registerEvents(new PlayerListener($this), $this);
+        if ($this->migrationInfo !== null) {
+            [$oldVersion, $oldProvider] = $this->migrationInfo;
 
-        $this->initializeCommands();
+            $migration = MigrationRegistry::get($oldVersion);
+
+            if ($migration === null) {
+                $this->getLogger()->debug("No migration found for version " . $oldVersion);
+                return;
+            }
+
+            $migration->run($oldProvider);
+            $this->getLogger()->notice("Migrating data from version " . $oldVersion . " to " . $this->getDescription()->getVersion());
+        }
+
+        $this->getServer()->getPluginManager()->registerEvents(new EventListener($this), $this);
+        $this->registerCommands();
+
+        if ($this->getConfig()->get("cache-invalidation") === 0) {
+            return;
+        }
+
+        $this->getScheduler()->scheduleRepeatingTask(
+            task: new ClosureTask(static fn() => GlobalCache::invalidate()),
+            period: $this->getConfig()->getNested("cache.invalidation") * 20
+        );
     }
 
-    public function getConfigManager(): ConfigManager
-    {
-        return $this->configManager;
-    }
-
-    public function getConnector(): ConnectionPool
-    {
-        return $this->connector;
-    }
-
-    public function getCurrencyManager(): CurrencyManager
-    {
-        return $this->currencyManager;
-    }
-
-    protected function initializeCommands(): void
+    protected function registerCommands(): void
     {
         if (!PacketHooker::isRegistered()) {
             PacketHooker::register($this);
@@ -146,11 +176,10 @@ final class BedrockEconomy extends PluginBase
         $classMap = [
             "balance" => BalanceCommand::class,
             "pay" => PayCommand::class,
-            "top-balance" => TopBalanceCommand::class,
+            "rich" => RichCommand::class,
             "add-balance" => AddBalanceCommand::class,
             "remove-balance" => RemoveBalanceCommand::class,
             "set-balance" => SetBalanceCommand::class,
-            "delete-account" => DeleteAccountCommand::class
         ];
 
         foreach ($commandsData as $key => $commandData) {
@@ -169,15 +198,8 @@ final class BedrockEconomy extends PluginBase
         $this->getServer()->getCommandMap()->registerAll("bedrockeconomy", $commands);
     }
 
-    protected function onDisable(): void
+    public function getCurrency(): Currency
     {
-        foreach ($this->getAddonManager()->getAddons() as $addon) {
-            $addon->setEnabled(false);
-        }
-    }
-
-    public function getAddonManager(): AddonManager
-    {
-        return $this->addonManager;
+        return $this->currency;
     }
 }
