@@ -16,7 +16,7 @@ projects:
         version: ^3.6.1
     lint:
       phpstan: false
-#      syntaxError: false
+      syntaxError: false
 ...
 
 
