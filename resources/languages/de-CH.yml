@@ -1,0 +1,60 @@
+---
+error.database: "&cAn unknown error occurred while processing your request. Please try again later."
+
+error.account.nonexistent: "&cIsch ned gfonde worde."
+error.account.insufficient: "&cDu hesch ned gnueg geld."
+
+error.amount.invalid: "&cThe amount you entered is invalid."
+error.amount.small: "&cDini zahlig isch unterem Betrag&c."
+error.amount.large: "&cDu hesch s zaligsmittel überschritten."
+
+error.rich.no_records: "&cDu richsti Spiler sind ned ufglistet worde."
+
+error.pay.self: "&cDu chasch der ned säuber geld geh."
+
+balance.info: "&aDin Konto stand isch uf &f{amount}&a. (#{position})"
+balance.info.other: "&a{player}'s Kontostand isch uf &f{amount}&a. (#{position})"
+
+balance.pay: "&aDu hesch &f{amount} &aa {player}zaut."
+balance.pay.receive: "&aDu hesch &f{amount} &avo {player} erhaute."
+
+balance.add: "&aDu hesch {amount} zum konto vo &f{player}&a hinzuegfügt."
+balance.remove: "&aDu hesch &f{amount} &avom Konto vo {player} wäggno."
+balance.set: "&aDu hesch de Kontostand von &f{player} &auf {amount} gesetzt."
+
+rich.header: "&6Die richste spiler"
+rich.entry: "&e{position}. &a{player} - &e{amount}"
+rich.footer: "&aYou are currently ranked &e#{position}&a."
+
+commands:
+  balance:
+    name: balance
+    description: Zeigt din Kontostand a
+    usage: "&cBenutzung [player: string]"
+    aliases: [ ]
+  pay:
+    name: pay
+    description: Bezau anderi
+    usage: "&cUsage /pay <player: string> <amount: number>"
+    aliases: [ ]
+  rich:
+    name: rich
+    description: D richsti spiler a luege
+    usage: "&cUsage /rich [page: number]"
+    aliases: [ ]
+  add-balance:
+    name: addbalance
+    description: Gib geld a nem spiler mit Admin rechte
+    usage: "&cUsage /addbalance <player: string> <amount: number>"
+    aliases: [ ]
+  remove-balance:
+    name: removebalance
+    description: Nimms gäld vo andere weg
+    usage: "&cUsage /removebalance <player: string> <amount: number>"
+    aliases: [ ]
+  set-balance:
+    name: setbalance
+    description: Setze dä Kontostand vo anderne
+    usage: "&cUsage /setbalance <player: string> <amount: number>"
+    aliases: [ ]
+...
