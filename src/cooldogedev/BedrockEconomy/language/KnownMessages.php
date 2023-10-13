@@ -30,7 +30,7 @@ declare(strict_types=1);
 
 namespace cooldogedev\BedrockEconomy\language;
 
-final class KnownTranslations
+final class KnownMessages
 {
     public const ERROR_DATABASE = "error.database";
 
@@ -49,6 +49,8 @@ final class KnownTranslations
     public const BALANCE_INFO_OTHER = "balance.info.other";
 
     public const BALANCE_PAY = "balance.pay";
+    public const BALANCE_PAY_RECEIVE = "balance.pay.receive";
+
     public const BALANCE_ADD = "balance.add";
     public const BALANCE_REMOVE = "balance.remove";
     public const BALANCE_SET = "balance.set";

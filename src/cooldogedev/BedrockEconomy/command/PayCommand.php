@@ -35,7 +35,7 @@ use cooldogedev\BedrockEconomy\command\constant\PermissionList;
 use cooldogedev\BedrockEconomy\currency\CurrencyFormatter;
 use cooldogedev\BedrockEconomy\database\exception\InsufficientFundsException;
 use cooldogedev\BedrockEconomy\database\exception\RecordNotFoundException;
-use cooldogedev\BedrockEconomy\language\KnownTranslations;
+use cooldogedev\BedrockEconomy\language\KnownMessages;
 use cooldogedev\BedrockEconomy\language\LanguageManager;
 use cooldogedev\BedrockEconomy\language\TranslationKeys;
 use cooldogedev\libSQL\exception\SQLException;
@@ -84,22 +84,22 @@ final class PayCommand extends BaseCommand
         }
 
         if (strtolower($sender->getName()) === strtolower($player)) {
-            $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::ERROR_PAY_SELF));
+            $sender->sendMessage(LanguageManager::getTranslation(KnownMessages::ERROR_PAY_SELF));
             return;
         }
 
         if (!is_numeric($amount)) {
-            $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::ERROR_AMOUNT_INVALID));
+            $sender->sendMessage(LanguageManager::getTranslation(KnownMessages::ERROR_AMOUNT_INVALID));
             return;
         }
 
         if ($amount <= 0) {
-            $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::ERROR_AMOUNT_SMALL));
+            $sender->sendMessage(LanguageManager::getTranslation(KnownMessages::ERROR_AMOUNT_SMALL));
             return;
         }
 
         if ($amount > CurrencyFormatter::INT63_MAX) {
-            $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::ERROR_AMOUNT_LARGE));
+            $sender->sendMessage(LanguageManager::getTranslation(KnownMessages::ERROR_AMOUNT_LARGE));
             return;
         }
 
@@ -123,16 +123,27 @@ final class PayCommand extends BaseCommand
                         amount: $balance,
                         decimals: $decimals,
                     );
-                    $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::BALANCE_PAY, [
+                    $sender->sendMessage(LanguageManager::getTranslation(KnownMessages::BALANCE_PAY, [
                         TranslationKeys::PLAYER => $player,
                         TranslationKeys::AMOUNT => $this->getOwningPlugin()->getCurrency()->formatter->format($balance, $decimals),
                     ]));
+
+                    $target = $this->getOwningPlugin()->getServer()->getPlayerExact($player);
+
+                    if ($target === null) {
+                        return;
+                    }
+
+                    $target->sendMessage(LanguageManager::getTranslation(KnownMessages::BALANCE_PAY_RECEIVE, [
+                        TranslationKeys::PLAYER => $sender->getName(),
+                        TranslationKeys::AMOUNT => $this->getOwningPlugin()->getCurrency()->formatter->format($balance, $decimals),
+                    ]));
                 } catch (RecordNotFoundException) {
-                    $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::ERROR_ACCOUNT_NONEXISTENT));
+                    $sender->sendMessage(LanguageManager::getTranslation(KnownMessages::ERROR_ACCOUNT_NONEXISTENT));
                 } catch (InsufficientFundsException) {
-                    $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::ERROR_ACCOUNT_INSUFFICIENT));
+                    $sender->sendMessage(LanguageManager::getTranslation(KnownMessages::ERROR_ACCOUNT_INSUFFICIENT));
                 } catch (SQLException) {
-                    $sender->sendMessage(LanguageManager::getTranslation(KnownTranslations::ERROR_DATABASE));
+                    $sender->sendMessage(LanguageManager::getTranslation(KnownMessages::ERROR_DATABASE));
                 }
             }
         );
