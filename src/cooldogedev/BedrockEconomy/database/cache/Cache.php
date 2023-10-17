@@ -82,7 +82,7 @@ final class Cache
 
     public function remove(string $key): void
     {
-        if (!Cache::exists($key)) {
+        if (!$this->exists($key)) {
             return;
         }
 
