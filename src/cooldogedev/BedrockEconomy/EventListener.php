@@ -33,6 +33,7 @@ namespace cooldogedev\BedrockEconomy;
 use cooldogedev\BedrockEconomy\api\BedrockEconomyAPI;
 use cooldogedev\BedrockEconomy\database\cache\CacheEntry;
 use cooldogedev\BedrockEconomy\database\cache\GlobalCache;
+use cooldogedev\BedrockEconomy\database\exception\RecordAlreadyExistsException;
 use cooldogedev\BedrockEconomy\event\transaction\AddTransactionEvent;
 use cooldogedev\BedrockEconomy\event\transaction\SetTransactionEvent;
 use cooldogedev\BedrockEconomy\event\transaction\SubtractTransactionEvent;
@@ -105,6 +106,9 @@ final class EventListener implements Listener
                         ];
 
                         $this->plugin->getLogger()->debug("Created account for " . $playerInfo->getUsername() . " with balance of " . $data["amount"] . "." . $data["decimals"]);
+                    } catch (RecordAlreadyExistsException) {
+                        $this->plugin->getLogger()->debug("Account already exists for " . $playerInfo->getUsername() . ". Loading...");
+                        $data = yield from BedrockEconomyAPI::ASYNC()->get($playerInfo->getXuid(), $playerInfo->getUsername());
                     } catch (SQLException $exception) {
                         $networkSession->disconnect("An error occurred while creating your account. Please try again later.");
                         $this->plugin->getLogger()->error("Failed to create account for " . $playerInfo->getUsername() . ": " . $exception->getMessage());

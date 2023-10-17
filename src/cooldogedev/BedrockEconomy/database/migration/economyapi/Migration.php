@@ -33,7 +33,9 @@ namespace cooldogedev\BedrockEconomy\database\migration\economyapi;
 use cooldogedev\BedrockEconomy\api\BedrockEconomyAPI;
 use cooldogedev\BedrockEconomy\BedrockEconomy;
 use cooldogedev\BedrockEconomy\database\constant\MigrationVersion;
+use cooldogedev\BedrockEconomy\database\exception\RecordAlreadyExistsException;
 use cooldogedev\BedrockEconomy\database\migration\IMigration;
+use cooldogedev\libSQL\exception\SQLException;
 use Generator;
 use SOFe\AwaitGenerator\Await;
 
@@ -66,12 +68,14 @@ final class Migration implements IMigration
             function () use ($economyAPI): Generator {
                 foreach ($economyAPI->getAllMoney() as $username => $money) {
                     $money = explode(".", (string)$money);
-                    $amount = $money[0] ?? 0;
-                    $decimals = $money[1] ?? 0;
+                    $amount = (int)($money[0] ?? 0);
+                    $decimals = (int)($money[1] ?? 0);
 
-                    $success = yield from BedrockEconomyAPI::ASYNC()->insert($username, $username, $amount, $decimals);
-
-                    if (!$success) {
+                    try {
+                        yield from BedrockEconomyAPI::ASYNC()->insert($username, $username, $amount, $decimals);
+                    } catch (RecordAlreadyExistsException) {
+                        BedrockEconomy::getInstance()->getLogger()->warning("Attempted to migrate data for player " . $username . " but they already exist. (" . $this->getName() . ")");
+                    } catch (SQLException) {
                         BedrockEconomy::getInstance()->getLogger()->warning("Failed to migrate data for player " . $username . ". (" . $this->getName() . ")");
                     }
                 }

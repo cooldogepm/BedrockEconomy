@@ -30,6 +30,7 @@ declare(strict_types=1);
 
 namespace cooldogedev\BedrockEconomy\database\mysql;
 
+use cooldogedev\BedrockEconomy\database\exception\RecordAlreadyExistsException;
 use cooldogedev\BedrockEconomy\database\helper\AccountHolder;
 use cooldogedev\BedrockEconomy\database\helper\TableHolder;
 use cooldogedev\libSQL\query\MySQLQuery;
@@ -42,14 +43,48 @@ final class InsertionQuery extends MySQLQuery
 
     public function __construct(protected int $amount, protected int $decimals) {}
 
+    /**
+     * @throws RecordAlreadyExistsException
+     */
     public function onRun(mysqli $connection): void
     {
-        $statement = $connection->prepare("INSERT IF NOT EXISTS INTO " . $this->table . " (xuid, username, amount, decimals) VALUES (?, ?, ?, ?)");
-        $statement->bind_param("ssii", $this->xuid, $this->username, $this->amount, $this->decimals);
-        $statement->execute();
+        // start transaction
+        $connection->begin_transaction();
 
-        $this->setResult($statement->affected_rows > 0);
+        // check if account exists
+        $checkQuery = $connection->prepare("SELECT * FROM " . $this->table . " WHERE xuid = ? OR username = ?");
+        $checkQuery->bind_param("ss", $this->xuid, $this->username);
+        $checkQuery->execute();
 
-        $statement->close();
+        $checkResult = $checkQuery->get_result();
+        $checkQuery->close();
+
+        if ($checkResult->num_rows > 0) {
+            throw new RecordAlreadyExistsException(
+                _message: "Account already exists for xuid " . $this->xuid . " or username " . $this->username
+            );
+        }
+
+        // insert account
+        $insertionQuery = $connection->prepare("INSERT IF NOT EXISTS INTO " . $this->table . " (xuid, username, amount, decimals) VALUES (?, ?, ?, ?)");
+        $insertionQuery->bind_param("ssii", $this->xuid, $this->username, $this->amount, $this->decimals);
+        $insertionQuery->execute();
+
+        $insertionResult = $insertionQuery->get_result();
+        $insertionQuery->close();
+
+        if ($insertionResult->num_rows === 0) {
+            $connection->rollback();
+            throw new RecordAlreadyExistsException(
+                _message: "Account already exists for xuid " . $this->xuid . " or username " . $this->username
+            );
+        }
+
+        $connection->commit();
+
+        $checkResult->free();
+        $insertionResult->free();
+
+        $this->setResult(true);
     }
 }

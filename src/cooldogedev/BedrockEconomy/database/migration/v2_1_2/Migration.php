@@ -32,7 +32,9 @@ namespace cooldogedev\BedrockEconomy\database\migration\v2_1_2;
 
 use cooldogedev\BedrockEconomy\api\BedrockEconomyAPI;
 use cooldogedev\BedrockEconomy\BedrockEconomy;
+use cooldogedev\BedrockEconomy\database\exception\RecordAlreadyExistsException;
 use cooldogedev\BedrockEconomy\database\migration\IMigration;
+use cooldogedev\libSQL\exception\SQLException;
 use Generator;
 use SOFe\AwaitGenerator\Await;
 
@@ -60,9 +62,11 @@ final class Migration implements IMigration
             onSuccess: fn(array $records) => Await::f2c(
                 function () use ($records): Generator {
                     foreach ($records as $record) {
-                        $success = yield from BedrockEconomyAPI::ASYNC()->insert($record["username"], $record["username"], (int) $record["balance"], 0);
-
-                        if (!$success) {
+                        try {
+                            yield from BedrockEconomyAPI::ASYNC()->insert($record["username"], $record["username"], (int)$record["balance"], 0);
+                        } catch (RecordAlreadyExistsException) {
+                            BedrockEconomy::getInstance()->getLogger()->warning("Attempted to migrate data for player " . $record["username"] . " but they already exist. (" . $this->getName() . ")");
+                        } catch (SQLException) {
                             BedrockEconomy::getInstance()->getLogger()->warning("Failed to migrate data for player " . $record["username"] . ". (" . $this->getName() . ")");
                         }
                     }

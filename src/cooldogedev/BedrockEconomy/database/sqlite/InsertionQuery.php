@@ -30,6 +30,7 @@ declare(strict_types=1);
 
 namespace cooldogedev\BedrockEconomy\database\sqlite;
 
+use cooldogedev\BedrockEconomy\database\exception\RecordAlreadyExistsException;
 use cooldogedev\BedrockEconomy\database\helper\AccountHolder;
 use cooldogedev\BedrockEconomy\database\helper\TableHolder;
 use cooldogedev\libSQL\query\SQLiteQuery;
@@ -42,17 +43,45 @@ final class InsertionQuery extends SQLiteQuery
 
     public function __construct(protected int $amount, protected int $decimals) {}
 
+    /**
+     * @throws RecordAlreadyExistsException
+     */
     public function onRun(SQLite3 $connection): void
     {
-        $statement = $connection->prepare("INSERT OR IGNORE INTO " . $this->table . " (xuid, username, amount, decimals) VALUES (?, ?, ?, ?)");
-        $statement->bindValue(1, $this->xuid);
-        $statement->bindValue(2, $this->username);
-        $statement->bindValue(3, $this->amount, SQLITE3_INTEGER);
-        $statement->bindValue(4, $this->decimals, SQLITE3_INTEGER);
-        $statement->execute();
+        $connection->exec("BEGIN TRANSACTION");
 
-        $this->setResult($connection->changes() > 0);
+        // check if account exists
+        $checkQuery = $connection->prepare("SELECT * FROM " . $this->table . " WHERE xuid = ? OR username = ?");
+        $checkQuery->bindValue(1, $this->xuid);
+        $checkQuery->bindValue(2, $this->username);
+        $checkResult = $checkQuery->execute();
 
-        $statement->close();
+        if ($checkResult->fetchArray(SQLITE3_ASSOC) !== false) {
+            throw new RecordAlreadyExistsException(
+                _message: "Account already exists for xuid " . $this->xuid . " or username " . $this->username
+            );
+        }
+
+        $insertionQuery = $connection->prepare("INSERT OR IGNORE INTO " . $this->table . " (xuid, username, amount, decimals) VALUES (?, ?, ?, ?)");
+        $insertionQuery->bindValue(1, $this->xuid);
+        $insertionQuery->bindValue(2, $this->username);
+        $insertionQuery->bindValue(3, $this->amount, SQLITE3_INTEGER);
+        $insertionQuery->bindValue(4, $this->decimals, SQLITE3_INTEGER);
+        $insertionQuery->execute();
+
+        if ($connection->changes() === 0) {
+            throw new RecordAlreadyExistsException(
+                _message: "Account already exists for xuid " . $this->xuid . " or username " . $this->username
+            );
+        }
+
+        $connection->exec("COMMIT");
+
+        $checkResult->finalize();
+
+        $checkQuery->close();
+        $insertionQuery->close();
+
+        $this->setResult(true);
     }
 }
