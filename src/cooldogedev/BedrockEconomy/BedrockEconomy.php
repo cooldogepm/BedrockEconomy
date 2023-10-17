@@ -137,7 +137,9 @@ final class BedrockEconomy extends PluginBase
                 function (): void {
                     [$oldVersion, $oldProvider] = $this->migrationInfo;
 
-                    foreach (MigrationRegistry::get($oldVersion) as $migration) {
+                    foreach (MigrationRegistry::get($oldVersion) as $migrationClass) {
+                        $migration = new $migrationClass($this);
+
                         if ($migration->run($oldProvider)) {
                             $this->getLogger()->debug($migration->getName() . " migration ran successfully");
                         } else {

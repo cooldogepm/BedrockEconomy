@@ -31,26 +31,25 @@ declare(strict_types=1);
 namespace cooldogedev\BedrockEconomy\database\migration\v2_1_2;
 
 use cooldogedev\BedrockEconomy\api\BedrockEconomyAPI;
-use cooldogedev\BedrockEconomy\BedrockEconomy;
 use cooldogedev\BedrockEconomy\database\exception\RecordAlreadyExistsException;
-use cooldogedev\BedrockEconomy\database\migration\IMigration;
+use cooldogedev\BedrockEconomy\database\migration\BaseMigration;
 use cooldogedev\libSQL\exception\SQLException;
 use Generator;
 use SOFe\AwaitGenerator\Await;
 
-final class Migration implements IMigration
+final class Migration extends BaseMigration
 {
-    public function getName(): string
+    public static function getName(): string
     {
         return "<=2.1.2";
     }
 
-    public function getMin(): string
+    public static function getMin(): string
     {
         return "0.0.1";
     }
 
-    public function getMax(): string
+    public static function getMax(): string
     {
         return "2.1.2";
     }
@@ -64,16 +63,17 @@ final class Migration implements IMigration
                     foreach ($records as $record) {
                         try {
                             yield from BedrockEconomyAPI::ASYNC()->insert($record["username"], $record["username"], (int)$record["balance"], 0);
+                            $this->logger->info("Migrated data for player " . $record["username"]);
                         } catch (RecordAlreadyExistsException) {
-                            BedrockEconomy::getInstance()->getLogger()->warning("Attempted to migrate data for player " . $record["username"] . " but they already exist. (" . $this->getName() . ")");
+                            $this->logger->warning("Attempted to migrate data for player " . $record["username"] . " but they already exist");
                         } catch (SQLException) {
-                            BedrockEconomy::getInstance()->getLogger()->warning("Failed to migrate data for player " . $record["username"] . ". (" . $this->getName() . ")");
+                            $this->logger->warning("Failed to migrate data for player " . $record["username"]);
                         }
                     }
                 }
             ),
             onFail: function (): void {
-                BedrockEconomy::getInstance()->getLogger()->warning("Failed to migrate data from old database. (" . $this->getName() . ")");
+                $this->logger->warning("Failed to migrate data from old database");
             }
         );
 

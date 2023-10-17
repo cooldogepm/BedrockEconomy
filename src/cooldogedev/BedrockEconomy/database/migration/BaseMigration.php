@@ -30,11 +30,21 @@ declare(strict_types=1);
 
 namespace cooldogedev\BedrockEconomy\database\migration;
 
-interface IMigration
-{
-    public function getName(): string;
-    public function getMin(): string;
-    public function getMax(): string;
+use cooldogedev\BedrockEconomy\BedrockEconomy;
+use PrefixedLogger;
 
-    public function run(string $mode): bool;
+abstract class BaseMigration
+{
+    protected readonly PrefixedLogger $logger;
+
+    final public function __construct(protected readonly BedrockEconomy $plugin)
+    {
+        $this->logger = new PrefixedLogger($this->plugin->getLogger(), "Migration:" . $this->getName());
+    }
+
+    abstract static public function getName(): string;
+    abstract static public function getMin(): string;
+    abstract static public function getMax(): string;
+
+    abstract public function run(string $mode): bool;
 }

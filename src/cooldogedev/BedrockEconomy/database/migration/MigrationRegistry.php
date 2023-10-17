@@ -36,24 +36,27 @@ use cooldogedev\BedrockEconomy\database\migration\v2_1_2\Migration as v2_1_2;
 
 final class MigrationRegistry
 {
-    /**
-     * @var array<int, IMigration>
-     */
     protected static array $migrations = [];
 
     public static function init(): void
     {
-        MigrationRegistry::register(new EconomyAPI());
-        MigrationRegistry::register(new v2_1_2());
+        MigrationRegistry::register(EconomyAPI::class);
+        MigrationRegistry::register(v2_1_2::class);
     }
 
+    /**
+     * @return array<class-string<BaseMigration>>
+     */
     public static function get(string $version): array
     {
         $migrations = [];
 
+        /**
+         * @var class-string<BaseMigration> $migration
+         */
         foreach (MigrationRegistry::$migrations as $migration) {
-            $min = $migration->getMin();
-            $max = $migration->getMax();
+            $min = $migration::getMin();
+            $max = $migration::getMax();
 
             if ($min !== MigrationVersion::VERSION_ANY && !version_compare($version, $min, ">=")) {
                 continue;
@@ -69,7 +72,7 @@ final class MigrationRegistry
         return $migrations;
     }
 
-    protected static function register(IMigration $migration): void
+    protected static function register(string $migration): void
     {
         MigrationRegistry::$migrations[] = $migration;
     }
