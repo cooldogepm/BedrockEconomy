@@ -81,7 +81,7 @@ final class SetBalanceCommand extends BaseCommand
             return;
         }
 
-        if ($amount <= 0) {
+        if ($amount < 0) {
             $sender->sendMessage(LanguageManager::getTranslation(KnownMessages::ERROR_AMOUNT_SMALL));
             return;
         }
