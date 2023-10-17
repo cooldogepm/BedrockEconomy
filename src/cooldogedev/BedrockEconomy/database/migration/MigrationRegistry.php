@@ -31,6 +31,7 @@ declare(strict_types=1);
 namespace cooldogedev\BedrockEconomy\database\migration;
 
 use cooldogedev\BedrockEconomy\database\constant\MigrationVersion;
+use cooldogedev\BedrockEconomy\database\migration\economyapi\Migration as EconomyAPI;
 use cooldogedev\BedrockEconomy\database\migration\v2_1_2\Migration as v2_1_2;
 
 final class MigrationRegistry
@@ -42,11 +43,14 @@ final class MigrationRegistry
 
     public static function init(): void
     {
+        MigrationRegistry::register(new EconomyAPI());
         MigrationRegistry::register(new v2_1_2());
     }
 
-    public static function get(string $version): ?IMigration
+    public static function get(string $version): array
     {
+        $migrations = [];
+
         foreach (MigrationRegistry::$migrations as $migration) {
             $min = $migration->getMin();
             $max = $migration->getMax();
@@ -59,10 +63,10 @@ final class MigrationRegistry
                 continue;
             }
 
-            return $migration;
+            $migrations[] = $migration;
         }
 
-        return null;
+        return $migrations;
     }
 
     protected static function register(IMigration $migration): void

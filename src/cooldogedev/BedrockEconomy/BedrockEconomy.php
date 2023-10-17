@@ -111,11 +111,7 @@ final class BedrockEconomy extends PluginBase
         class_alias(ClosureContext::class, \cooldogedev\libSQL\context\ClosureContext::class);
         class_alias(ClosureContext::class, api\legacy\ClosureContext::class);
 
-        if ($oldVersion !== $this->getDescription()->getVersion()) {
-            $this->migrationInfo = [$oldVersion, $oldProvider];
-        } else {
-            $this->migrationInfo = null;
-        }
+        $this->migrationInfo = [$oldVersion, $oldProvider];
     }
 
     protected function onEnable(): void
@@ -136,20 +132,22 @@ final class BedrockEconomy extends PluginBase
         QueryManager::init($this->currency->code, $this->getConfig()->getNested("database.provider") === "mysql");
         QueryManager::TABLE()->execute();
 
-        if ($this->migrationInfo !== null) {
-            [$oldVersion, $oldProvider] = $this->migrationInfo;
+        $this->getScheduler()->scheduleDelayedTask(
+            task: new ClosureTask(
+                function (): void {
+                    [$oldVersion, $oldProvider] = $this->migrationInfo;
 
-            $migration = MigrationRegistry::get($oldVersion);
-
-            if ($migration === null) {
-                $this->getLogger()->debug("No migration found for version " . $oldVersion);
-                return;
-            }
-
-            if ($migration->run($oldProvider)) {
-                $this->getLogger()->notice("Migrating data from version " . $oldVersion . " to " . $this->getDescription()->getVersion());
-            }
-        }
+                    foreach (MigrationRegistry::get($oldVersion) as $migration) {
+                        if ($migration->run($oldProvider)) {
+                            $this->getLogger()->debug($migration->getName() . " migration ran successfully");
+                        } else {
+                            $this->getLogger()->debug($migration->getName() . " migration failed to run");
+                        }
+                    }
+                }
+            ),
+            delay: 0
+        );
 
         $this->getServer()->getPluginManager()->registerEvents(new EventListener($this), $this);
         $this->registerCommands();
