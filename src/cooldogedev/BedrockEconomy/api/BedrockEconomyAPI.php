@@ -60,12 +60,18 @@ final class BedrockEconomyAPI
         return BedrockEconomyAPI::$closure;
     }
 
-    public static function LEGACY(): LegacyAPI
+    /**
+     * @deprecated
+     */
+    public static function legacy(): LegacyAPI
     {
         return BedrockEconomyAPI::$legacy;
     }
 
-    public static function BETA(): BetaAPI
+    /**
+     * @deprecated
+     */
+    public static function beta(): BetaAPI
     {
         return BedrockEconomyAPI::$beta;
     }
