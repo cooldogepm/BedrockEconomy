@@ -97,6 +97,8 @@ final class EventListener implements Listener
                         yield from BedrockEconomyAPI::ASYNC()->insert($playerInfo->getXuid(), $playerInfo->getUsername(), $this->plugin->getCurrency()->defaultAmount, $this->plugin->getCurrency()->defaultDecimals);
 
                         $data = [
+                            "xuid" => $playerInfo->getXuid(),
+                            "username" => $playerInfo->getUsername(),
                             "amount" => $this->plugin->getCurrency()->defaultAmount,
                             "decimals" => $this->plugin->getCurrency()->defaultDecimals,
                             "position" => 0,
