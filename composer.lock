@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "a940f3a312245aa4770e859ba592efc3",
+    "content-hash": "98b39457c9627654787f3b81891fb0b2",
     "packages": [
         {
             "name": "adhocore/json-comment",
@@ -122,16 +122,16 @@
         },
         {
             "name": "cooldogedev/libsql",
-            "version": "dev-pm5",
+            "version": "v0.2.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/cooldogepm/libSQL.git",
-                "reference": "5696fd1eb260a057e2be187ce2fd26f7939b9239"
+                "reference": "98410050d1c24ccabc6294da10d45ef137057995"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/cooldogepm/libSQL/zipball/5696fd1eb260a057e2be187ce2fd26f7939b9239",
-                "reference": "5696fd1eb260a057e2be187ce2fd26f7939b9239",
+                "url": "https://api.github.com/repos/cooldogepm/libSQL/zipball/98410050d1c24ccabc6294da10d45ef137057995",
+                "reference": "98410050d1c24ccabc6294da10d45ef137057995",
                 "shasum": ""
             },
             "require": {
@@ -140,7 +140,6 @@
                 "ext-pmmpthread": "*",
                 "ext-sqlite3": "*"
             },
-            "default-branch": true,
             "type": "library",
             "extra": {
                 "virion": {
@@ -159,10 +158,10 @@
             ],
             "description": "A minimalistic implementation of asynchronous SQL",
             "support": {
-                "source": "https://github.com/cooldogepm/libSQL/tree/pm5",
+                "source": "https://github.com/cooldogepm/libSQL/tree/v0.2.4",
                 "issues": "https://github.com/cooldogepm/libSQL/issues"
             },
-            "time": "2023-08-24T23:45:15+00:00"
+            "time": "2023-10-17T18:00:03+00:00"
         },
         {
             "name": "cortexpe/commando",
@@ -3401,7 +3400,6 @@
     "aliases": [],
     "minimum-stability": "stable",
     "stability-flags": {
-        "cooldogedev/libsql": 20,
         "cortexpe/commando": 20
     },
     "prefer-stable": false,
