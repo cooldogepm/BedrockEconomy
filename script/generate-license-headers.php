@@ -2,14 +2,17 @@
 
 declare(strict_types=1);
 
+const EOL = "\n";
+
 function main(): void
 {
     $license = file_get_contents(__DIR__ . "/../LICENSE");
+    $license = str_replace("\r\n", "\n", $license);
 
-    $commentedLicense = "/**" . PHP_EOL;
-    $commentedLicense .= implode(PHP_EOL, array_map(fn ($line) => " *" . (trim($line) === "" ? "" : " " . $line), explode(PHP_EOL, $license)));
-    $commentedLicense .= PHP_EOL . " * @auto-license";
-    $commentedLicense .= PHP_EOL . " */";
+    $commentedLicense = "/**" . EOL;
+    $commentedLicense .= implode(EOL, array_map(fn ($line) => " *" . (trim($line) === "" ? "" : " " . $line), explode(EOL, $license)));
+    $commentedLicense .= EOL . " * @auto-license";
+    $commentedLicense .= EOL . " */";
 
     $files = new RecursiveIteratorIterator(
         new RecursiveDirectoryIterator(__DIR__ . "/../src")
@@ -35,7 +38,7 @@ function main(): void
             continue;
         }
 
-        $content = str_replace("<?php", "<?php" . PHP_EOL . PHP_EOL . trim($commentedLicense), $content);
+        $content = str_replace("<?php", "<?php" . EOL . EOL . trim($commentedLicense), $content);
 
         file_put_contents($filename, $content);
     }
