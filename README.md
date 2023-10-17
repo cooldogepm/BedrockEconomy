@@ -3,20 +3,16 @@ BedrockEconomy is an economy plugin made for PocketMine-MP focused on stability 
 <br>
 ## Table of Contents
 
-- [License](#license)
 - [Commands](#commands)
 - [Features](#features)
-- [Tools](#tools)
 - [Examples](#examples)
   - [Retrieving a Player's Balance](#retrieving-a-players-balance)
   - [Retrieving Multiple Player Balances](#retrieving-multiple-player-balances)
   - [Adding Funds to a Player's Balance](#adding-funds-to-a-players-balance)
   - [Subtracting Funds from a Player's Balance](#subtracting-funds-from-a-players-balance)
   - [Transferring Funds Between Players](#transferring-funds-between-players)
-
-## License
-
-This API is released under the MIT License. For more information, please refer to the [LICENSE](LICENSE) file.
+- [Tools](#tools)
+- [License](#license)
 
 ## Commands
 | Name          | Description | Usage                                             | Permission                             |
@@ -277,4 +273,9 @@ These examples demonstrate how to perform common operations using the BedrockEco
 
 ## Tools
 
-* [Migration from EconomyAPI](https://github.com/cooldogedev/EconAPIToBE)
+* [BedrockEconomyHistory](https://github.com/cooldogepm/BedrockEconomyHistory)
+* [BedrockEconomyScore](https://github.com/cooldogepm/BedrockEconomyScore)
+
+## License
+
+This project is released under the MIT License. For more information, please refer to the [LICENSE](LICENSE) file.
