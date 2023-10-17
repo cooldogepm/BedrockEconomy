@@ -28,45 +28,9 @@
 
 declare(strict_types=1);
 
-namespace cooldogedev\BedrockEconomy\database\migration;
+namespace cooldogedev\BedrockEconomy\database\constant;
 
-use cooldogedev\BedrockEconomy\database\constant\MigrationVersion;
-use cooldogedev\BedrockEconomy\database\migration\v2_1_2\Migration as v2_1_2;
-
-final class MigrationRegistry
+interface MigrationVersion
 {
-    /**
-     * @var array<int, IMigration>
-     */
-    protected static array $migrations = [];
-
-    public static function init(): void
-    {
-        MigrationRegistry::register(new v2_1_2());
-    }
-
-    public static function get(string $version): ?IMigration
-    {
-        foreach (MigrationRegistry::$migrations as $migration) {
-            $min = $migration->getMin();
-            $max = $migration->getMax();
-
-            if ($min !== MigrationVersion::VERSION_ANY && !version_compare($version, $min, ">=")) {
-                continue;
-            }
-
-            if ($max !== MigrationVersion::VERSION_ANY && !version_compare($version, $max, "<=")) {
-                continue;
-            }
-
-            return $migration;
-        }
-
-        return null;
-    }
-
-    protected static function register(IMigration $migration): void
-    {
-        MigrationRegistry::$migrations[] = $migration;
-    }
+    public const VERSION_ANY = "any";
 }

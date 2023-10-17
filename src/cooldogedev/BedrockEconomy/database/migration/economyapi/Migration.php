@@ -32,6 +32,7 @@ namespace cooldogedev\BedrockEconomy\database\migration\economyapi;
 
 use cooldogedev\BedrockEconomy\api\BedrockEconomyAPI;
 use cooldogedev\BedrockEconomy\BedrockEconomy;
+use cooldogedev\BedrockEconomy\database\constant\MigrationVersion;
 use cooldogedev\BedrockEconomy\database\migration\IMigration;
 use Generator;
 use SOFe\AwaitGenerator\Await;
@@ -45,12 +46,12 @@ final class Migration implements IMigration
 
     public function getMin(): string
     {
-        return "0.0.1";
+        return MigrationVersion::VERSION_ANY;
     }
 
     public function getMax(): string
     {
-        return "0.0.1";
+        return MigrationVersion::VERSION_ANY;
     }
 
     public function run(string $mode): bool
