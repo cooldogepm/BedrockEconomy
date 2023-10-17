@@ -53,7 +53,7 @@ final class Migration implements IMigration
         return "2.1.2";
     }
 
-    public function run(string $mode): void
+    public function run(string $mode): bool
     {
         $query = $mode === "mysql" ? new MySQLHandler() : new SQLiteHandler();
         $query->execute(
@@ -72,5 +72,7 @@ final class Migration implements IMigration
                 BedrockEconomy::getInstance()->getLogger()->warning("Failed to migrate data from old database. (" . $this->getName() . ")");
             }
         );
+
+        return true;
     }
 }

@@ -36,5 +36,5 @@ interface IMigration
     public function getMin(): string;
     public function getMax(): string;
 
-    public function run(string $mode): void;
+    public function run(string $mode): bool;
 }

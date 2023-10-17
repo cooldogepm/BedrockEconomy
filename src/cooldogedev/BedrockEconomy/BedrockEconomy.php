@@ -146,8 +146,9 @@ final class BedrockEconomy extends PluginBase
                 return;
             }
 
-            $migration->run($oldProvider);
-            $this->getLogger()->notice("Migrating data from version " . $oldVersion . " to " . $this->getDescription()->getVersion());
+            if ($migration->run($oldProvider)) {
+                $this->getLogger()->notice("Migrating data from version " . $oldVersion . " to " . $this->getDescription()->getVersion());
+            }
         }
 
         $this->getServer()->getPluginManager()->registerEvents(new EventListener($this), $this);
