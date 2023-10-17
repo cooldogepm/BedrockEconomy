@@ -6,6 +6,7 @@ author: cooldogedev
 main: cooldogedev\BedrockEconomy\BedrockEconomy
 description: An economy plugin focused on stability and simplicity
 website: "https://github.com/cooldogepm/BedrockEconomy"
+load: STARTUP
 permissions:
   bedrockeconomy.command.balance:
     description: Allows users to view their balance
