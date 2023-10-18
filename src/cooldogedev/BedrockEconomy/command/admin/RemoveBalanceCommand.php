@@ -115,4 +115,9 @@ final class RemoveBalanceCommand extends BaseCommand
             }
         );
     }
+
+    public function getPermission(): string
+    {
+        return PermissionList::COMMAND_REMOVE_BALANCE_PERMISSION;
+    }
 }

@@ -106,4 +106,9 @@ final class BalanceCommand extends BaseCommand
             }
         );
     }
+
+    public function getPermission(): string
+    {
+        return PermissionList::COMMAND_BALANCE_PERMISSION;
+    }
 }

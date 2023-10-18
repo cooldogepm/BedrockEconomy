@@ -88,4 +88,9 @@ final class RichCommand extends BaseCommand
             TranslationKeys::POSITION => GlobalCache::ONLINE()->get($sender->getName())->position ?? "N/A",
         ]));
     }
+
+    public function getPermission(): string
+    {
+        return PermissionList::COMMAND_RICH_PERMISSION;
+    }
 }

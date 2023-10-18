@@ -148,4 +148,9 @@ final class PayCommand extends BaseCommand
             }
         );
     }
+
+    public function getPermission(): string
+    {
+        return PermissionList::COMMAND_PAY_PERMISSION;
+    }
 }
