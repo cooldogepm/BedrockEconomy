@@ -39,7 +39,7 @@ final class Cache
 
     public function sort(): void
     {
-        uasort($this->entries, static fn (CacheEntry $a, CacheEntry $b) => $b->amount <=> $a->amount && $b->decimals <=> $a->decimals);
+        uasort($this->entries, static fn (CacheEntry $a, CacheEntry $b) => [$b->amount, $b->decimals] <=> [$a->amount, $a->decimals]);
 
         $i = 1;
 
