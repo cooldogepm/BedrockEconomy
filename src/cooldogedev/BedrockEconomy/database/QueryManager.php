@@ -115,7 +115,7 @@ final class QueryManager
 
     public static function TRANSFER(array $source, array $target, int $amount, int $decimals): SQLQuery
     {
-        $query = QueryManager::$isMySQL ? new MySQLTransferQuery($amount, $decimals, ... $target) : new SQLiteTransferQuery($amount, $decimals, ... $target);
+        $query = QueryManager::$isMySQL ? new MySQLTransferQuery($amount, $decimals, $target["username"], $target["xuid"]) : new SQLiteTransferQuery($amount, $decimals, $target["username"], $target["xuid"]);
         $query->setTable(QueryManager::$table);
         $query->setUsername($source["username"]);
         $query->setXuid($source["xuid"]);
