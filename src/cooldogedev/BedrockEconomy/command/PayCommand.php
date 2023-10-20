@@ -31,6 +31,7 @@ declare(strict_types=1);
 namespace cooldogedev\BedrockEconomy\command;
 
 use cooldogedev\BedrockEconomy\api\BedrockEconomyAPI;
+use cooldogedev\BedrockEconomy\command\argument\FloatArgument;
 use cooldogedev\BedrockEconomy\command\constant\PermissionList;
 use cooldogedev\BedrockEconomy\currency\CurrencyFormatter;
 use cooldogedev\BedrockEconomy\database\exception\InsufficientFundsException;
@@ -39,7 +40,6 @@ use cooldogedev\BedrockEconomy\language\KnownMessages;
 use cooldogedev\BedrockEconomy\language\LanguageManager;
 use cooldogedev\BedrockEconomy\language\TranslationKeys;
 use cooldogedev\libSQL\exception\SQLException;
-use CortexPE\Commando\args\FloatArgument;
 use CortexPE\Commando\args\IntegerArgument;
 use CortexPE\Commando\args\RawStringArgument;
 use CortexPE\Commando\BaseCommand;
