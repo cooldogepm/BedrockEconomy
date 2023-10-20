@@ -60,6 +60,7 @@ final class InsertionQuery extends MySQLQuery
         $checkQuery->close();
 
         if ($checkResult->num_rows > 0) {
+            $connection->rollback();
             throw new RecordAlreadyExistsException(
                 _message: "Account already exists for xuid " . $this->xuid . " or username " . $this->username
             );
@@ -85,6 +86,6 @@ final class InsertionQuery extends MySQLQuery
         $checkResult->free();
         $insertionResult->free();
 
-        $this->setResult(true);
+        $this->setResult($connection->affected_rows > 0);
     }
 }

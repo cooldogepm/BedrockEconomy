@@ -63,6 +63,7 @@ final class UpdateQuery extends MySQLQuery
         $checkQuery->close();
 
         if ($checkResult->num_rows === 0) {
+            $connection->rollback();
             throw new RecordNotFoundException(
                 _message: "Account not found for xuid " . $this->xuid . " or username " . $this->username
             );
@@ -93,22 +94,24 @@ final class UpdateQuery extends MySQLQuery
         $updateQuery->close();
 
         if ($updateResult->num_rows === 0 && $this->mode === UpdateMode::SUBTRACT) {
+            $connection->rollback();
             throw new InsufficientFundsException(
                 _message: "Insufficient funds for xuid " . $this->xuid . " or username " . $this->username
             );
         }
 
         if ($updateResult->num_rows === 0) {
+            $connection->rollback();
             throw new RecordNotFoundException(
                 _message: "Account not found for xuid " . $this->xuid . " or username " . $this->username
             );
         }
 
-        $this->setResult($connection->affected_rows > 0);
+        $connection->commit();
 
         $checkResult->free();
         $updateResult->free();
 
-        $connection->commit();
+        $this->setResult($connection->affected_rows > 0);
     }
 }

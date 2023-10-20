@@ -52,6 +52,9 @@ final class UpdateQuery extends SQLiteQuery
      */
     public function onRun(SQLite3 $connection): void
     {
+        $connection->exec("BEGIN TRANSACTION");
+
+        // check if account exists
         $checkQuery = $connection->prepare("SELECT * FROM " . $this->table . " WHERE xuid = ? OR username = ?");
         $checkQuery->bindValue(1, $this->xuid);
         $checkQuery->bindValue(2, $this->username);
@@ -59,6 +62,7 @@ final class UpdateQuery extends SQLiteQuery
         $checkResult = $checkQuery->execute();
 
         if ($checkResult->fetchArray(SQLITE3_ASSOC) === false) {
+            $connection->exec("ROLLBACK");
             throw new RecordNotFoundException(
                 _message: "Account not found for xuid " . $this->xuid . " or username " . $this->username
             );
@@ -72,6 +76,7 @@ final class UpdateQuery extends SQLiteQuery
             default => throw new InvalidArgumentException("Invalid mode " . $this->mode)
         };
 
+        // update account
         $updateQuery = $connection->prepare($updateQuery);
         $updateQuery->bindValue(1, $this->amount, SQLITE3_INTEGER);
         $updateQuery->bindValue(2, $this->decimals, SQLITE3_INTEGER);
@@ -85,24 +90,28 @@ final class UpdateQuery extends SQLiteQuery
 
         $updateResult = $updateQuery->execute();
 
-        if ($connection->changes() === 0) {
-            if ($this->mode === UpdateMode::SUBTRACT) {
-                throw new InsufficientFundsException(
-                    _message: "Insufficient funds for xuid " . $this->xuid . " or username " . $this->username
-                );
-            }
+        if ($connection->changes() === 0 && $this->mode === UpdateMode::SUBTRACT) {
+            $connection->exec("ROLLBACK");
+            throw new InsufficientFundsException(
+                _message: "Insufficient funds for xuid " . $this->xuid . " or username " . $this->username
+            );
+        }
 
+        if ($connection->changes() === 0) {
+            $connection->exec("ROLLBACK");
             throw new RecordNotFoundException(
                 _message: "Account not found for xuid " . $this->xuid . " or username " . $this->username
             );
         }
 
-        $this->setResult($connection->changes() > 0);
+        $connection->exec("COMMIT");
 
         $checkResult->finalize();
         $updateResult->finalize();
 
         $checkQuery->close();
         $updateQuery->close();
+
+        $this->setResult($connection->changes() > 0);
     }
 }

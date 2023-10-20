@@ -119,6 +119,6 @@ final class TransferQuery extends MySQLQuery
         $targetUpdateResult->free();
         $sourceUpdateResult->free();
 
-        $this->setResult(true);
+        $this->setResult($connection->affected_rows > 0 );
     }
 }

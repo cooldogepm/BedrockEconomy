@@ -57,6 +57,7 @@ final class InsertionQuery extends SQLiteQuery
         $checkResult = $checkQuery->execute();
 
         if ($checkResult->fetchArray(SQLITE3_ASSOC) !== false) {
+            $connection->exec("ROLLBACK");
             throw new RecordAlreadyExistsException(
                 _message: "Account already exists for xuid " . $this->xuid . " or username " . $this->username
             );
@@ -70,6 +71,7 @@ final class InsertionQuery extends SQLiteQuery
         $insertionQuery->execute();
 
         if ($connection->changes() === 0) {
+            $connection->exec("ROLLBACK");
             throw new RecordAlreadyExistsException(
                 _message: "Account already exists for xuid " . $this->xuid . " or username " . $this->username
             );
@@ -82,6 +84,6 @@ final class InsertionQuery extends SQLiteQuery
         $checkQuery->close();
         $insertionQuery->close();
 
-        $this->setResult(true);
+        $this->setResult($connection->changes() > 0);
     }
 }

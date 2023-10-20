@@ -116,8 +116,6 @@ final class TransferQuery extends SQLiteQuery
 
         $connection->exec("COMMIT");
 
-        $this->setResult($connection->changes() > 0);
-
         $targetResult->finalize();
         $sourceResult->finalize();
         $targetUpdateResult->finalize();
@@ -127,5 +125,7 @@ final class TransferQuery extends SQLiteQuery
         $targetQuery->close();
         $sourceUpdateQuery->close();
         $targetUpdateQuery->close();
+
+        $this->setResult($connection->changes() > 0);
     }
 }
