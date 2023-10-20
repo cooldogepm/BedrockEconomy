@@ -133,6 +133,16 @@ final class EventListener implements Listener
                     decimals: $data["decimals"],
                     position: $data["position"],
                 ));
+
+                if (count(GlobalCache::TOP()->getAll()) < $this->plugin->getConfig()->getNested("cache.rich-rows")) {
+                    GlobalCache::TOP()->set($playerInfo->getUsername(), new CacheEntry(
+                        amount: $data["amount"],
+                        decimals: $data["decimals"],
+                        position: $data["position"],
+                    ));
+                    GlobalCache::TOP()->sort();
+                }
+
                 $this->plugin->getLogger()->debug("Loaded account for " . $playerInfo->getUsername() . " with balance of " . $data["amount"] . " and decimals of " . $data["decimals"]);
             }
         );
