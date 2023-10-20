@@ -34,10 +34,11 @@ use Closure;
 use cooldogedev\BedrockEconomy\api\util\ClosureWrapper;
 use cooldogedev\BedrockEconomy\database\constant\UpdateMode;
 use cooldogedev\BedrockEconomy\database\QueryManager;
-use cooldogedev\BedrockEconomy\event\transaction\AddTransactionEvent;
-use cooldogedev\BedrockEconomy\event\transaction\SetTransactionEvent;
-use cooldogedev\BedrockEconomy\event\transaction\SubtractTransactionEvent;
-use cooldogedev\BedrockEconomy\event\transaction\TransferTransactionEvent;
+use cooldogedev\BedrockEconomy\database\transaction\TransferTransaction;
+use cooldogedev\BedrockEconomy\database\transaction\UpdateTransaction;
+use cooldogedev\BedrockEconomy\event\transaction\TransactionFailEvent;
+use cooldogedev\BedrockEconomy\event\transaction\TransactionSubmitEvent;
+use cooldogedev\BedrockEconomy\event\transaction\TransactionSuccessEvent;
 
 final class ClosureAPI extends BaseAPI
 {
@@ -85,33 +86,69 @@ final class ClosureAPI extends BaseAPI
 
     public function transfer(array $source, array $target, int $amount, int $decimals, Closure $onSuccess, Closure $onError): void
     {
+        $transaction = new TransferTransaction($source, $target, $amount, $decimals);
+
+        $event = new TransactionSubmitEvent($transaction);
+        $event->call();
+
+        if ($event->isCancelled()) {
+            return;
+        }
+
         QueryManager::TRANSFER($source, $target, $amount, $decimals)->execute(
-            onSuccess: ClosureWrapper::combine($onSuccess, static fn() => (new TransferTransactionEvent($source, $target, $amount, $decimals))->call()),
-            onFail: $onError,
+            onSuccess: ClosureWrapper::combine($onSuccess, static fn() => (new TransactionSuccessEvent($transaction))->call()),
+            onFail: ClosureWrapper::combine($onError, static fn() => (new TransactionFailEvent($transaction))->call()),
         );
     }
 
     public function add(string $xuid, string $username, int $amount, int $decimals, Closure $onSuccess, Closure $onError): void
     {
+        $transaction = new UpdateTransaction($username, $xuid, UpdateMode::ADD, $amount, $decimals);
+
+        $event = new TransactionSubmitEvent($transaction);
+        $event->call();
+
+        if ($event->isCancelled()) {
+            return;
+        }
+
         QueryManager::UPDATE($xuid, $username, UpdateMode::ADD, $amount, $decimals)->execute(
-            onSuccess: ClosureWrapper::combine($onSuccess, static fn() => (new AddTransactionEvent($xuid, $username, $amount, $decimals))->call()),
-            onFail: $onError,
+            onSuccess: ClosureWrapper::combine($onSuccess, static fn() => (new TransactionSuccessEvent($transaction))->call()),
+            onFail: ClosureWrapper::combine($onError, static fn() => (new TransactionFailEvent($transaction))->call()),
         );
     }
 
     public function subtract(string $xuid, string $username, int $amount, int $decimals, Closure $onSuccess, Closure $onError): void
     {
+        $transaction = new UpdateTransaction($username, $xuid, UpdateMode::SUBTRACT, $amount, $decimals);
+
+        $event = new TransactionSubmitEvent($transaction);
+        $event->call();
+
+        if ($event->isCancelled()) {
+            return;
+        }
+
         QueryManager::UPDATE($xuid, $username, UpdateMode::SUBTRACT, $amount, $decimals)->execute(
-            onSuccess: ClosureWrapper::combine($onSuccess, static fn() => (new SubtractTransactionEvent($xuid, $username, $amount, $decimals))->call()),
-            onFail: $onError,
+            onSuccess: ClosureWrapper::combine($onSuccess, static fn() => (new TransactionSuccessEvent($transaction))->call()),
+            onFail: ClosureWrapper::combine($onError, static fn() => (new TransactionFailEvent($transaction))->call()),
         );
     }
 
     public function set(string $xuid, string $username, int $amount, int $decimals, Closure $onSuccess, Closure $onError): void
     {
+        $transaction = new UpdateTransaction($username, $xuid, UpdateMode::SET, $amount, $decimals);
+
+        $event = new TransactionSubmitEvent($transaction);
+        $event->call();
+
+        if ($event->isCancelled()) {
+            return;
+        }
+
         QueryManager::UPDATE($xuid, $username, UpdateMode::SET, $amount, $decimals)->execute(
-            onSuccess: ClosureWrapper::combine($onSuccess, static fn() => (new SetTransactionEvent($xuid, $username, $amount, $decimals))->call()),
-            onFail: $onError,
+            onSuccess: ClosureWrapper::combine($onSuccess, static fn() => (new TransactionSuccessEvent($transaction))->call()),
+            onFail: ClosureWrapper::combine($onError, static fn() => (new TransactionFailEvent($transaction))->call()),
         );
     }
 }

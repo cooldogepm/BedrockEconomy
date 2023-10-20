@@ -33,11 +33,11 @@ namespace cooldogedev\BedrockEconomy;
 use cooldogedev\BedrockEconomy\api\BedrockEconomyAPI;
 use cooldogedev\BedrockEconomy\database\cache\CacheEntry;
 use cooldogedev\BedrockEconomy\database\cache\GlobalCache;
+use cooldogedev\BedrockEconomy\database\constant\UpdateMode;
 use cooldogedev\BedrockEconomy\database\exception\RecordAlreadyExistsException;
-use cooldogedev\BedrockEconomy\event\transaction\AddTransactionEvent;
-use cooldogedev\BedrockEconomy\event\transaction\SetTransactionEvent;
-use cooldogedev\BedrockEconomy\event\transaction\SubtractTransactionEvent;
-use cooldogedev\BedrockEconomy\event\transaction\TransferTransactionEvent;
+use cooldogedev\BedrockEconomy\database\transaction\TransferTransaction;
+use cooldogedev\BedrockEconomy\database\transaction\UpdateTransaction;
+use cooldogedev\BedrockEconomy\event\transaction\TransactionSuccessEvent;
 use cooldogedev\libSQL\exception\SQLException;
 use Generator;
 use pocketmine\event\Listener;
@@ -53,6 +53,96 @@ use SOFe\AwaitGenerator\Await;
 final class EventListener implements Listener
 {
     public function __construct(protected BedrockEconomy $plugin) {}
+
+    protected function handleAddTransaction(UpdateTransaction $transaction): void
+    {
+        $online = GlobalCache::ONLINE()->get($transaction->username);
+        $top = GlobalCache::TOP()->get($transaction->username);
+
+        if ($top !== null) {
+            GlobalCache::TOP()->set($transaction->username, new CacheEntry(
+                amount: $top->amount + $transaction->amount,
+                decimals: $top->decimals + $transaction->decimals,
+                position: $top->position,
+            ));
+
+            GlobalCache::TOP()->sort();
+        }
+
+        if ($online !== null) {
+            GlobalCache::ONLINE()->set($transaction->username, new CacheEntry(
+                amount: $online->amount + $transaction->amount,
+                decimals: $online->decimals + $transaction->decimals,
+                position: GlobalCache::TOP()->get($transaction->username)?->position ?? $online->position,
+            ));
+        }
+    }
+
+    protected function handleSubtractTransaction(UpdateTransaction $transaction): void
+    {
+        $online = GlobalCache::ONLINE()->get($transaction->username);
+        $top = GlobalCache::TOP()->get($transaction->username);
+
+        if ($top !== null) {
+            GlobalCache::TOP()->set($transaction->username, new CacheEntry(
+                amount: $top->amount - $transaction->amount,
+                decimals: $top->decimals - $transaction->decimals,
+                position: $top->position,
+            ));
+
+            GlobalCache::TOP()->sort();
+        }
+
+        if ($online !== null) {
+            GlobalCache::ONLINE()->set($transaction->username, new CacheEntry(
+                amount: $online->amount - $transaction->amount,
+                decimals: $online->decimals - $transaction->decimals,
+                position: GlobalCache::TOP()->get($transaction->username)?->position ?? $online->position,
+            ));
+        }
+    }
+
+    protected function handleSetTransaction(UpdateTransaction $transaction): void
+    {
+        $online = GlobalCache::ONLINE()->get($transaction->username);
+        $top = GlobalCache::TOP()->get($transaction->username);
+
+        if ($top !== null) {
+            GlobalCache::TOP()->set($transaction->username, new CacheEntry(
+                amount: $transaction->amount,
+                decimals: $transaction->decimals,
+                position: $top->position,
+            ));
+
+            GlobalCache::TOP()->sort();
+        }
+
+        if ($online !== null) {
+            GlobalCache::ONLINE()->set($transaction->username, new CacheEntry(
+                amount: $transaction->amount,
+                decimals: $transaction->decimals,
+                position: GlobalCache::TOP()->get($transaction->username)?->position ?? $online->position,
+            ));
+        }
+    }
+
+    protected function handleTransferTransaction(TransferTransaction $transaction): void
+    {
+        $this->handleAddTransaction(new UpdateTransaction(
+            username: $transaction->target["username"],
+            xuid: $transaction->target["xuid"],
+            mode: UpdateMode::ADD,
+            amount: $transaction->amount,
+            decimals: $transaction->decimals,
+        ));
+        $this->handleSubtractTransaction(new UpdateTransaction(
+            username: $transaction->source["username"],
+            xuid: $transaction->source["xuid"],
+            mode: UpdateMode::SUBTRACT,
+            amount: $transaction->amount,
+            decimals: $transaction->decimals,
+        ));
+    }
 
     public function onDataPacketReceive(DataPacketReceiveEvent $event): void
     {
@@ -157,100 +247,19 @@ final class EventListener implements Listener
     /**
      * @priority LOWEST
      */
-    public function onAddTransaction(AddTransactionEvent $event): void
+    public function onTransactionSuccess(TransactionSuccessEvent $event): void
     {
-        $online = GlobalCache::ONLINE()->get($event->username);
-        $top = GlobalCache::TOP()->get($event->username);
-
-        if ($top !== null) {
-            GlobalCache::TOP()->set($event->username, new CacheEntry(
-                amount: $top->amount + $event->amount,
-                decimals: $top->decimals + $event->decimals,
-                position: $top->position,
-            ));
-
-            GlobalCache::TOP()->sort();
+        if ($event->transaction instanceof TransferTransaction) {
+            $this->handleTransferTransaction($event->transaction);
+            return;
         }
 
-        if ($online !== null) {
-            GlobalCache::ONLINE()->set($event->username, new CacheEntry(
-                amount: $online->amount + $event->amount,
-                decimals: $online->decimals + $event->decimals,
-                position: GlobalCache::TOP()->get($event->username)?->position ?? $online->position,
-            ));
+        if ($event->transaction instanceof UpdateTransaction) {
+            match ($event->transaction->mode) {
+                UpdateMode::ADD => $this->handleAddTransaction($event->transaction),
+                UpdateMode::SUBTRACT => $this->handleSubtractTransaction($event->transaction),
+                UpdateMode::SET => $this->handleSetTransaction($event->transaction),
+            };
         }
-    }
-
-    /**
-     * @priority LOWEST
-     */
-    public function onSubtractTransaction(SubtractTransactionEvent $event): void
-    {
-        $online = GlobalCache::ONLINE()->get($event->username);
-        $top = GlobalCache::TOP()->get($event->username);
-
-        if ($top !== null) {
-            GlobalCache::TOP()->set($event->username, new CacheEntry(
-                amount: $top->amount - $event->amount,
-                decimals: $top->decimals - $event->decimals,
-                position: $top->position,
-            ));
-
-            GlobalCache::TOP()->sort();
-        }
-
-        if ($online !== null) {
-            GlobalCache::ONLINE()->set($event->username, new CacheEntry(
-                amount: $online->amount - $event->amount,
-                decimals: $online->decimals - $event->decimals,
-                position: GlobalCache::TOP()->get($event->username)?->position ?? $online->position,
-            ));
-        }
-    }
-
-    /**
-     * @priority LOWEST
-     */
-    public function onSetTransaction(SetTransactionEvent $event): void
-    {
-        $online = GlobalCache::ONLINE()->get($event->username);
-        $top = GlobalCache::TOP()->get($event->username);
-
-        if ($top !== null) {
-            GlobalCache::TOP()->set($event->username, new CacheEntry(
-                amount: $event->amount,
-                decimals: $event->decimals,
-                position: $top->position,
-            ));
-
-            GlobalCache::TOP()->sort();
-        }
-
-        if ($online !== null) {
-            GlobalCache::ONLINE()->set($event->username, new CacheEntry(
-                amount: $event->amount,
-                decimals: $event->decimals,
-                position: GlobalCache::TOP()->get($event->username)?->position ?? $online->position,
-            ));
-        }
-    }
-
-    /**
-     * @priority LOWEST
-     */
-    public function onTransferTransaction(TransferTransactionEvent $event): void
-    {
-        $this->onAddTransaction(new AddTransactionEvent(
-            xuid: $event->target["xuid"],
-            username: $event->target["username"],
-            amount: $event->amount,
-            decimals: $event->decimals,
-        ));
-        $this->onSubtractTransaction(new SubtractTransactionEvent(
-            xuid: $event->source["xuid"],
-            username: $event->source["username"],
-            amount: $event->amount,
-            decimals: $event->decimals,
-        ));
     }
 }

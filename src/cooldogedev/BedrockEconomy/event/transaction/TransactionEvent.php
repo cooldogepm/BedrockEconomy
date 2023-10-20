@@ -30,6 +30,10 @@ declare(strict_types=1);
 
 namespace cooldogedev\BedrockEconomy\event\transaction;
 
+use cooldogedev\BedrockEconomy\database\transaction\BaseTransaction;
 use pocketmine\event\Event;
 
-abstract class TransactionEvent extends Event {}
+abstract class TransactionEvent extends Event
+{
+    public function __construct(public readonly BaseTransaction $transaction) {}
+}
