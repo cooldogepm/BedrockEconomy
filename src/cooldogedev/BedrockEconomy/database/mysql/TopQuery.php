@@ -47,8 +47,8 @@ final class TopQuery extends MySQLQuery
     public function onRun(mysqli $connection): void
     {
         $query = match ($this->ascending) {
-            true => "SELECT * FROM " . $this->table . " ORDER BY amount, decimals ASC LIMIT ? OFFSET ?",
-            false => "SELECT * FROM " . $this->table . " ORDER BY amount, decimals DESC LIMIT ? OFFSET ?"
+            true => "SELECT * FROM " . $this->table . " ORDER BY amount ASC, decimals ASC LIMIT ? OFFSET ?",
+            false => "SELECT * FROM " . $this->table . " ORDER BY amount DESC, decimals DESC LIMIT ? OFFSET ?"
         };
 
         $statement = $connection->prepare($query);
