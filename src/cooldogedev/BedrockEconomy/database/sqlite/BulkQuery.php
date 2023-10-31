@@ -39,7 +39,7 @@ final class BulkQuery extends SQLiteQuery
 {
     use TableHolder;
 
-    protected string $list;
+    private readonly string $list;
 
     public function __construct(array $list)
     {

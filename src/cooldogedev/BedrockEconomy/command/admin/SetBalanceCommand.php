@@ -34,6 +34,7 @@ use cooldogedev\BedrockEconomy\api\BedrockEconomyAPI;
 use cooldogedev\BedrockEconomy\command\argument\FloatArgument;
 use cooldogedev\BedrockEconomy\command\constant\PermissionList;
 use cooldogedev\BedrockEconomy\currency\CurrencyFormatter;
+use cooldogedev\BedrockEconomy\database\constant\Limits;
 use cooldogedev\BedrockEconomy\database\exception\RecordNotFoundException;
 use cooldogedev\BedrockEconomy\language\KnownMessages;
 use cooldogedev\BedrockEconomy\language\LanguageManager;
@@ -49,8 +50,8 @@ use function is_numeric;
 
 final class SetBalanceCommand extends BaseCommand
 {
-    protected const ARGUMENT_PLAYER = "player";
-    protected const ARGUMENT_AMOUNT = "amount";
+    private const ARGUMENT_PLAYER = "player";
+    private const ARGUMENT_AMOUNT = "amount";
 
     protected function prepare(): void
     {
@@ -86,7 +87,7 @@ final class SetBalanceCommand extends BaseCommand
             return;
         }
 
-        if ($amount > CurrencyFormatter::INT63_MAX) {
+        if ($amount > Limits::INT63_MAX) {
             $sender->sendMessage(LanguageManager::getTranslation(KnownMessages::ERROR_AMOUNT_LARGE));
             return;
         }

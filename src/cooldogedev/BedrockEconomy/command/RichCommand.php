@@ -42,8 +42,8 @@ use function max;
 
 final class RichCommand extends BaseCommand
 {
-    protected const ARGUMENT_PAGE = "page";
-    protected const DEFAULT_LIMIT = 10;
+    private const ARGUMENT_PAGE = "page";
+    private const DEFAULT_LIMIT = 10;
 
     protected function prepare(): void
     {

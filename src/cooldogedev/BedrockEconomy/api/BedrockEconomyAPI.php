@@ -37,10 +37,10 @@ use cooldogedev\BedrockEconomy\api\type\LegacyAPI;
 
 final class BedrockEconomyAPI
 {
-    protected static AsyncAPI $async;
-    protected static ClosureAPI $closure;
-    protected static LegacyAPI $legacy;
-    protected static BetaAPI $beta;
+    private static AsyncAPI $async;
+    private static ClosureAPI $closure;
+    private static LegacyAPI $legacy;
+    private static BetaAPI $beta;
 
     public static function init(): void
     {

@@ -50,8 +50,8 @@ use cooldogedev\libSQL\query\SQLQuery;
 
 final class QueryManager
 {
-    protected static string $table;
-    protected static bool $isMySQL;
+    private static string $table;
+    private static bool $isMySQL;
 
     public static function init(string $table, bool $isMySQL): void
     {

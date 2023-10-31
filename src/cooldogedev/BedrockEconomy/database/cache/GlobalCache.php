@@ -39,8 +39,8 @@ use SOFe\AwaitGenerator\Await;
 
 final class GlobalCache
 {
-    protected static Cache $online;
-    protected static Cache $top;
+    private static Cache $online;
+    private static Cache $top;
 
     public static function init(): void
     {

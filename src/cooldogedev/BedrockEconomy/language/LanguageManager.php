@@ -35,14 +35,14 @@ use pocketmine\utils\TextFormat;
 
 final class LanguageManager
 {
-    protected const DEFAULT_LANGUAGE = "en-US";
-    protected const SUPPORTED_LANGUAGES = [
+    private const DEFAULT_LANGUAGE = "en-US";
+    private const SUPPORTED_LANGUAGES = [
         "en-US",
         "de-CH",
     ];
 
-    protected static string $language;
-    protected static array $translations;
+    private static string $language;
+    private static array $translations;
 
     public static function init(BedrockEconomy $plugin, ?string $language)
     {
@@ -80,7 +80,7 @@ final class LanguageManager
         return isset(LanguageManager::$translations[$translation]);
     }
 
-    protected static function translate(string $translation, array $variables = []): string
+    private static function translate(string $translation, array $variables = []): string
     {
         return str_replace(array_keys($variables), array_values($variables), LanguageManager::$translations[$translation]);
     }

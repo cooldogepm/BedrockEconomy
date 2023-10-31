@@ -48,7 +48,7 @@ use SOFe\AwaitGenerator\Await;
 
 final class BalanceCommand extends BaseCommand
 {
-    protected const ARGUMENT_PLAYER = "player";
+    private const ARGUMENT_PLAYER = "player";
 
     protected function prepare(): void
     {

@@ -52,9 +52,9 @@ use SOFe\AwaitGenerator\Await;
 
 final class EventListener implements Listener
 {
-    public function __construct(protected BedrockEconomy $plugin) {}
+    public function __construct(private readonly BedrockEconomy $plugin) {}
 
-    protected function handleAddTransaction(UpdateTransaction $transaction): void
+    private function handleAddTransaction(UpdateTransaction $transaction): void
     {
         $online = GlobalCache::ONLINE()->get($transaction->username);
         $top = GlobalCache::TOP()->get($transaction->username);
@@ -78,7 +78,7 @@ final class EventListener implements Listener
         }
     }
 
-    protected function handleSubtractTransaction(UpdateTransaction $transaction): void
+    private function handleSubtractTransaction(UpdateTransaction $transaction): void
     {
         $online = GlobalCache::ONLINE()->get($transaction->username);
         $top = GlobalCache::TOP()->get($transaction->username);
@@ -102,7 +102,7 @@ final class EventListener implements Listener
         }
     }
 
-    protected function handleSetTransaction(UpdateTransaction $transaction): void
+    private function handleSetTransaction(UpdateTransaction $transaction): void
     {
         $online = GlobalCache::ONLINE()->get($transaction->username);
         $top = GlobalCache::TOP()->get($transaction->username);
@@ -126,7 +126,7 @@ final class EventListener implements Listener
         }
     }
 
-    protected function handleTransferTransaction(TransferTransaction $transaction): void
+    private function handleTransferTransaction(TransferTransaction $transaction): void
     {
         $this->handleAddTransaction(new UpdateTransaction(
             username: $transaction->target["username"],

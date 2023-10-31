@@ -32,8 +32,8 @@ namespace cooldogedev\BedrockEconomy\database\helper;
 
 trait AccountHolder
 {
-    protected string $username = "";
-    protected string $xuid = "";
+    private string $username = "";
+    private string $xuid = "";
 
     public function setUsername(string $username): void
     {

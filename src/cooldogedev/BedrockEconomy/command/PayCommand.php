@@ -34,6 +34,7 @@ use cooldogedev\BedrockEconomy\api\BedrockEconomyAPI;
 use cooldogedev\BedrockEconomy\command\argument\FloatArgument;
 use cooldogedev\BedrockEconomy\command\constant\PermissionList;
 use cooldogedev\BedrockEconomy\currency\CurrencyFormatter;
+use cooldogedev\BedrockEconomy\database\constant\Limits;
 use cooldogedev\BedrockEconomy\database\exception\InsufficientFundsException;
 use cooldogedev\BedrockEconomy\database\exception\RecordNotFoundException;
 use cooldogedev\BedrockEconomy\language\KnownMessages;
@@ -51,8 +52,8 @@ use SOFe\AwaitGenerator\Await;
 
 final class PayCommand extends BaseCommand
 {
-    protected const ARGUMENT_TARGET = "target";
-    protected const ARGUMENT_AMOUNT = "amount";
+    private const ARGUMENT_TARGET = "target";
+    private const ARGUMENT_AMOUNT = "amount";
 
     protected function prepare(): void
     {
@@ -98,7 +99,7 @@ final class PayCommand extends BaseCommand
             return;
         }
 
-        if ($amount > CurrencyFormatter::INT63_MAX) {
+        if ($amount > Limits::INT63_MAX) {
             $sender->sendMessage(LanguageManager::getTranslation(KnownMessages::ERROR_AMOUNT_LARGE));
             return;
         }

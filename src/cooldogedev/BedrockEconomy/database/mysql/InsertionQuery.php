@@ -41,7 +41,7 @@ final class InsertionQuery extends MySQLQuery
     use AccountHolder;
     use TableHolder;
 
-    public function __construct(protected int $amount, protected int $decimals) {}
+    public function __construct(private readonly int $amount, private readonly int $decimals) {}
 
     /**
      * @throws RecordAlreadyExistsException

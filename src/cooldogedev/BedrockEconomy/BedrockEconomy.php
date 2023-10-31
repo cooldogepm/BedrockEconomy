@@ -54,41 +54,15 @@ use RuntimeException;
 
 final class BedrockEconomy extends PluginBase
 {
-    protected ConnectionPool $connector;
-    protected Currency $currency;
+    use SingletonTrait;
+
+    private ConnectionPool $connector;
+    private Currency $currency;
 
     /**
      * @var array<int, array{string, string}>|null
      */
-    protected ?array $migrationInfo;
-
-    use SingletonTrait;
-
-    protected function checkConfig(): bool
-    {
-        if ($this->getDescription()->getVersion() === $this->getConfig()->get("config-version")) {
-            return true;
-        }
-
-        $this->getLogger()->warning("An outdated config was found, attempting to generate a new one...");
-
-        if (!rename($this->getDataFolder() . "config.yml", $this->getDataFolder() . "config.old.yml")) {
-            $this->getLogger()->critical("An unknown error occurred while attempting to generate the new config");
-            return false;
-        }
-
-        $this->reloadConfig();
-
-        try {
-            $this->getConfig()->set("config-version", $this->getDescription()->getVersion());
-            $this->getConfig()->save();
-        } catch (JsonException $e) {
-            $this->getLogger()->critical("An error occurred while attempting to generate the new config, " . $e->getMessage());
-            return false;
-        }
-
-        return true;
-    }
+    private ?array $migrationInfo;
 
     protected function onLoad(): void
     {
@@ -164,7 +138,33 @@ final class BedrockEconomy extends PluginBase
         );
     }
 
-    protected function registerCommands(): void
+    private function checkConfig(): bool
+    {
+        if ($this->getDescription()->getVersion() === $this->getConfig()->get("config-version")) {
+            return true;
+        }
+
+        $this->getLogger()->warning("An outdated config was found, attempting to generate a new one...");
+
+        if (!rename($this->getDataFolder() . "config.yml", $this->getDataFolder() . "config.old.yml")) {
+            $this->getLogger()->critical("An unknown error occurred while attempting to generate the new config");
+            return false;
+        }
+
+        $this->reloadConfig();
+
+        try {
+            $this->getConfig()->set("config-version", $this->getDescription()->getVersion());
+            $this->getConfig()->save();
+        } catch (JsonException $e) {
+            $this->getLogger()->critical("An error occurred while attempting to generate the new config, " . $e->getMessage());
+            return false;
+        }
+
+        return true;
+    }
+
+    private function registerCommands(): void
     {
         if (!PacketHooker::isRegistered()) {
             PacketHooker::register($this);

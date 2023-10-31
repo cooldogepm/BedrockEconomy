@@ -44,7 +44,7 @@ final class UpdateQuery extends SQLiteQuery
     use AccountHolder;
     use TableHolder;
 
-    public function __construct(protected int $mode, protected int $amount, protected int $decimals) {}
+    public function __construct(private readonly int $mode, private readonly int $amount, private readonly int $decimals) {}
 
     /**
      * @throws RecordNotFoundException

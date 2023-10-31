@@ -39,7 +39,7 @@ final class BulkQuery extends MySQLQuery
 {
     use TableHolder;
 
-    protected string $list;
+    private readonly string $list;
 
     public function __construct(array $list)
     {

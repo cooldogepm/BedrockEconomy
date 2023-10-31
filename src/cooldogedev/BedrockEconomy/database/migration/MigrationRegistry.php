@@ -36,7 +36,7 @@ use cooldogedev\BedrockEconomy\database\migration\v2_1_2\Migration as v2_1_2;
 
 final class MigrationRegistry
 {
-    protected static array $migrations = [];
+    private static array $migrations = [];
 
     public static function init(): void
     {
@@ -72,7 +72,7 @@ final class MigrationRegistry
         return $migrations;
     }
 
-    protected static function register(string $migration): void
+    private static function register(string $migration): void
     {
         MigrationRegistry::$migrations[] = $migration;
     }

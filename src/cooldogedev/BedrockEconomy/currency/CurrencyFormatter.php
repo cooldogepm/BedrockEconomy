@@ -31,16 +31,13 @@ declare(strict_types=1);
 namespace cooldogedev\BedrockEconomy\currency;
 
 use InvalidArgumentException;
-use pocketmine\utils\Limits as PMLimits;
 
 final class CurrencyFormatter
 {
-    public const INT63_MAX = PMLimits::INT64_MAX >> 1; // 2^63 - 1, 9,223,372,036,854,775,807 (9 quintillion)
+    private const COMPACT = "compact";
+    private const COMMADOT = "commadot";
 
-    public const COMPACT = "compact";
-    public const COMMADOT = "commadot";
-
-    public function __construct(protected Currency $currency) {}
+    public function __construct(private readonly Currency $currency) {}
 
     public function format(int $amount, int $decimals): string
     {

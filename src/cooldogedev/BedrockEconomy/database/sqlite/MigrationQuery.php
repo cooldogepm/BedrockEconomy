@@ -40,7 +40,7 @@ final class MigrationQuery extends SQLiteQuery
     use AccountHolder;
     use TableHolder;
 
-    public function __construct(protected string $_xuid, protected string $_username) {}
+    public function __construct(private readonly string $_xuid, private readonly string $_username) {}
 
     public function onRun(SQLite3 $connection): void
     {

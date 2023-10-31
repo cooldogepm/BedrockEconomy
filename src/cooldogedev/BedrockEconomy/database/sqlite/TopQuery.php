@@ -39,7 +39,7 @@ final class TopQuery extends SQLiteQuery
 {
     use TableHolder;
 
-    public function __construct(protected int $limit, protected int $offset, protected bool $ascending) {}
+    public function __construct(private readonly int $limit, private readonly int $offset, private readonly bool $ascending) {}
 
     /**
      * @throws RecordNotFoundException

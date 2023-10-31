@@ -42,7 +42,13 @@ final class TransferQuery extends SQLiteQuery
     use AccountHolder;
     use TableHolder;
 
-    public function __construct(protected int $amount, protected int $decimals, protected string $targetUsername, protected string $targetXuid) {}
+    public function __construct(
+        private readonly int $amount,
+        private readonly int $decimals,
+
+        private readonly string $targetUsername,
+        private readonly string $targetXuid,
+    ) {}
 
     /**
      * @throws RecordNotFoundException

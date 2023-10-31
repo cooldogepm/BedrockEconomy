@@ -35,7 +35,7 @@ final class Cache
     /**
      * @param CacheEntry[] $entries
      */
-    public function __construct(protected array $entries = []) {}
+    public function __construct(private array $entries = []) {}
 
     public function sort(): void
     {

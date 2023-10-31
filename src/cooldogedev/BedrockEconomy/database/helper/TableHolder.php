@@ -34,7 +34,7 @@ use cooldogedev\BedrockEconomy\database\constant\TablePrefix;
 
 trait TableHolder
 {
-    protected string $table = "";
+    private string $table = "";
 
     public function setTable(string $table): void
     {
