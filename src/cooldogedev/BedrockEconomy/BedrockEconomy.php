@@ -39,6 +39,7 @@ use cooldogedev\BedrockEconomy\command\BalanceCommand;
 use cooldogedev\BedrockEconomy\command\PayCommand;
 use cooldogedev\BedrockEconomy\command\RichCommand;
 use cooldogedev\BedrockEconomy\currency\Currency;
+use cooldogedev\BedrockEconomy\currency\CurrencyManager;
 use cooldogedev\BedrockEconomy\database\cache\GlobalCache;
 use cooldogedev\BedrockEconomy\database\migration\MigrationRegistry;
 use cooldogedev\BedrockEconomy\database\QueryManager;
@@ -58,6 +59,7 @@ final class BedrockEconomy extends PluginBase
 
     private ConnectionPool $connector;
     private Currency $currency;
+    private CurrencyManager $currencyManager;
 
     /**
      * @var array<int, array{string, string}>|null
@@ -100,6 +102,7 @@ final class BedrockEconomy extends PluginBase
             defaultDecimals: $this->getConfig()->getNested("currency.default.decimals"),
             decimals: $this->getConfig()->getNested("currency.decimals")
         );
+        $this->currencyManager = new CurrencyManager($this->currency);
 
         GlobalCache::init();
 
@@ -202,5 +205,10 @@ final class BedrockEconomy extends PluginBase
     public function getCurrency(): Currency
     {
         return $this->currency;
+    }
+
+    public function getCurrencyManager(): CurrencyManager
+    {
+        return $this->currencyManager;
     }
 }
