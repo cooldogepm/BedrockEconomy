@@ -75,4 +75,12 @@ final class BedrockEconomyAPI
     {
         return BedrockEconomyAPI::$beta;
     }
+
+    /**
+     * @deprecated
+     */
+    public static function getInstance(): LegacyAPI
+    {
+        return BedrockEconomyAPI::$legacy;
+    }
 }
