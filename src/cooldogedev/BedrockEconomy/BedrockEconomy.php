@@ -84,7 +84,7 @@ final class BedrockEconomy extends PluginBase
         LanguageManager::init($this, $this->getConfig()->get("language"));
         MigrationRegistry::init();
 
-        class_alias(ClosureContext::class, \cooldogedev\libSQL\context\ClosureContext::class);
+        class_alias(ClosureContext::class, libs\cooldogedev\libSQL\context\ClosureContext::class);
         class_alias(ClosureContext::class, api\legacy\ClosureContext::class);
 
         $this->migrationInfo = [$oldVersion, $oldProvider];
