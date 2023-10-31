@@ -44,7 +44,7 @@ final class LanguageManager
     private static string $language;
     private static array $translations;
 
-    public static function init(BedrockEconomy $plugin, ?string $language)
+    public static function init(BedrockEconomy $plugin, ?string $language): void
     {
         $languagesFolder = $plugin->getDataFolder() . "languages";
         @mkdir($languagesFolder);
@@ -63,26 +63,11 @@ final class LanguageManager
         );
     }
 
-    public static function getTranslations(): array
+    public static function getString(string $translation, array $variables = []): string
     {
-        return LanguageManager::$translations;
-    }
-
-    public static function getTranslation(string $translation, array $variables = []): ?string
-    {
-        return LanguageManager::hasTranslation($translation) ?
+        return isset(LanguageManager::$translations[$translation]) ?
             TextFormat::colorize(LanguageManager::translate($translation, $variables)) :
-            null;
-    }
-
-    public static function hasTranslation(string $translation): bool
-    {
-        return isset(LanguageManager::$translations[$translation]);
-    }
-
-    private static function translate(string $translation, array $variables = []): string
-    {
-        return str_replace(array_keys($variables), array_values($variables), LanguageManager::$translations[$translation]);
+            "Translation not found: " . $translation;
     }
 
     public static function getArray(string $translation): ?array
@@ -93,5 +78,10 @@ final class LanguageManager
     public static function getLanguage(): string
     {
         return LanguageManager::$language;
+    }
+
+    private static function translate(string $translation, array $variables = []): string
+    {
+        return str_replace(array_keys($variables), array_values($variables), LanguageManager::$translations[$translation]);
     }
 }

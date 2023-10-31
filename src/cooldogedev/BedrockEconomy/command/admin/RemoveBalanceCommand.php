@@ -79,17 +79,17 @@ final class RemoveBalanceCommand extends BaseCommand
         }
 
         if (!is_numeric($amount)) {
-            $sender->sendMessage(LanguageManager::getTranslation(KnownMessages::ERROR_AMOUNT_INVALID));
+            $sender->sendMessage(LanguageManager::getString(KnownMessages::ERROR_AMOUNT_INVALID));
             return;
         }
 
         if ($amount <= 0) {
-            $sender->sendMessage(LanguageManager::getTranslation(KnownMessages::ERROR_AMOUNT_SMALL));
+            $sender->sendMessage(LanguageManager::getString(KnownMessages::ERROR_AMOUNT_SMALL));
             return;
         }
 
         if ($amount > Limits::INT63_MAX) {
-            $sender->sendMessage(LanguageManager::getTranslation(KnownMessages::ERROR_AMOUNT_LARGE));
+            $sender->sendMessage(LanguageManager::getString(KnownMessages::ERROR_AMOUNT_LARGE));
             return;
         }
 
@@ -102,16 +102,16 @@ final class RemoveBalanceCommand extends BaseCommand
             function () use ($sender, $player, $balance, $decimals): Generator {
                 try {
                     yield from BedrockEconomyAPI::ASYNC()->subtract($player, $player, $balance, $decimals);
-                    $sender->sendMessage(LanguageManager::getTranslation(KnownMessages::BALANCE_REMOVE, [
+                    $sender->sendMessage(LanguageManager::getString(KnownMessages::BALANCE_REMOVE, [
                         TranslationKeys::PLAYER => $player,
                         TranslationKeys::AMOUNT => $this->getOwningPlugin()->getCurrency()->formatter->format($balance, $decimals),
                     ]));
                 } catch (RecordNotFoundException) {
-                    $sender->sendMessage(LanguageManager::getTranslation(KnownMessages::ERROR_ACCOUNT_NONEXISTENT));
+                    $sender->sendMessage(LanguageManager::getString(KnownMessages::ERROR_ACCOUNT_NONEXISTENT));
                 } catch (InsufficientFundsException) {
-                    $sender->sendMessage(LanguageManager::getTranslation(KnownMessages::ERROR_ACCOUNT_INSUFFICIENT));
+                    $sender->sendMessage(LanguageManager::getString(KnownMessages::ERROR_ACCOUNT_INSUFFICIENT));
                 } catch (SQLException) {
-                    $sender->sendMessage(LanguageManager::getTranslation(KnownMessages::ERROR_DATABASE));
+                    $sender->sendMessage(LanguageManager::getString(KnownMessages::ERROR_DATABASE));
                 }
             }
         );

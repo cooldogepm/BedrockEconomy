@@ -56,7 +56,7 @@ final class RichCommand extends BaseCommand
     {
         if (count(GlobalCache::TOP()->getAll()) === 0) {
             GlobalCache::invalidate();
-            $sender->sendMessage(LanguageManager::getTranslation(KnownMessages::ERROR_RICH_NO_RECORDS));
+            $sender->sendMessage(LanguageManager::getString(KnownMessages::ERROR_RICH_NO_RECORDS));
             return;
         }
 
@@ -68,14 +68,14 @@ final class RichCommand extends BaseCommand
         $entries = array_slice($entries, $offset, RichCommand::DEFAULT_LIMIT);
 
         if (count($entries) === 0) {
-            $sender->sendMessage(LanguageManager::getTranslation(KnownMessages::ERROR_RICH_NO_RECORDS));
+            $sender->sendMessage(LanguageManager::getString(KnownMessages::ERROR_RICH_NO_RECORDS));
             return;
         }
 
-        $sender->sendMessage(LanguageManager::getTranslation(KnownMessages::RICH_HEADER));
+        $sender->sendMessage(LanguageManager::getString(KnownMessages::RICH_HEADER));
 
         foreach ($entries as $username => $entry) {
-            $sender->sendMessage(LanguageManager::getTranslation(KnownMessages::RICH_ENTRY,
+            $sender->sendMessage(LanguageManager::getString(KnownMessages::RICH_ENTRY,
                 [
                     TranslationKeys::PLAYER => $username,
                     TranslationKeys::AMOUNT => $this->getOwningPlugin()->getCurrency()->formatter->format($entry->amount, $entry->decimals),
@@ -84,7 +84,7 @@ final class RichCommand extends BaseCommand
             ));
         }
 
-        $sender->sendMessage(LanguageManager::getTranslation(KnownMessages::RICH_FOOTER, [
+        $sender->sendMessage(LanguageManager::getString(KnownMessages::RICH_FOOTER, [
             TranslationKeys::POSITION => GlobalCache::ONLINE()->get($sender->getName())->position ?? "N/A",
         ]));
     }

@@ -78,17 +78,17 @@ final class AddBalanceCommand extends BaseCommand
         }
 
         if (!is_numeric($amount)) {
-            $sender->sendMessage(LanguageManager::getTranslation(KnownMessages::ERROR_AMOUNT_INVALID));
+            $sender->sendMessage(LanguageManager::getString(KnownMessages::ERROR_AMOUNT_INVALID));
             return;
         }
 
         if ($amount <= 0) {
-            $sender->sendMessage(LanguageManager::getTranslation(KnownMessages::ERROR_AMOUNT_SMALL));
+            $sender->sendMessage(LanguageManager::getString(KnownMessages::ERROR_AMOUNT_SMALL));
             return;
         }
 
         if ($amount > Limits::INT63_MAX) {
-            $sender->sendMessage(LanguageManager::getTranslation(KnownMessages::ERROR_AMOUNT_LARGE));
+            $sender->sendMessage(LanguageManager::getString(KnownMessages::ERROR_AMOUNT_LARGE));
             return;
         }
 
@@ -101,14 +101,14 @@ final class AddBalanceCommand extends BaseCommand
             function () use ($sender, $player, $balance, $decimals): Generator {
                 try {
                     yield from BedrockEconomyAPI::ASYNC()->add($player, $player, $balance, $decimals);
-                    $sender->sendMessage(LanguageManager::getTranslation(KnownMessages::BALANCE_ADD, [
+                    $sender->sendMessage(LanguageManager::getString(KnownMessages::BALANCE_ADD, [
                         TranslationKeys::PLAYER => $player,
                         TranslationKeys::AMOUNT => $this->getOwningPlugin()->getCurrency()->formatter->format($balance, $decimals),
                     ]));
                 } catch (RecordNotFoundException) {
-                    $sender->sendMessage(LanguageManager::getTranslation(KnownMessages::ERROR_ACCOUNT_NONEXISTENT));
+                    $sender->sendMessage(LanguageManager::getString(KnownMessages::ERROR_ACCOUNT_NONEXISTENT));
                 } catch (SQLException) {
-                    $sender->sendMessage(LanguageManager::getTranslation(KnownMessages::ERROR_DATABASE));
+                    $sender->sendMessage(LanguageManager::getString(KnownMessages::ERROR_DATABASE));
                 }
             }
         );
