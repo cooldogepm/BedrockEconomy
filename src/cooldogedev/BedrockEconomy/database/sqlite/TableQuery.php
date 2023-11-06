@@ -40,6 +40,6 @@ final class TableQuery extends SQLiteQuery
 
     public function onRun(SQLite3 $connection): void
     {
-        $connection->exec("CREATE TABLE IF NOT EXISTS " . $this->table . " (xuid VARCHAR(32) PRIMARY KEY, username VARCHAR(32) NOT NULL, amount BIGINT NOT NULL, decimals TINYINT NOT NULL)");
+        $connection->exec("CREATE TABLE IF NOT EXISTS " . $this->table . " (xuid VARCHAR(32) PRIMARY KEY, username VARCHAR(32) COLLATE NOCASE, amount BIGINT, decimals TINYINT)");
     }
 }
