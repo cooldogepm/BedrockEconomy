@@ -70,7 +70,7 @@ final class UpdateQuery extends SQLiteQuery
 
         $updateQuery = match ($this->mode) {
             UpdateMode::ADD => "UPDATE " . $this->table . " SET amount = amount + ?, decimals = decimals + ? WHERE xuid = ? OR username = ?",
-            UpdateMode::SUBTRACT => "UPDATE " . $this->table . " SET amount = amount - ?, decimals = decimals - ? WHERE xuid = ? OR username = ? AND amount >= ? AND decimals >= ?",
+            UpdateMode::SUBTRACT => "UPDATE " . $this->table . " SET amount = amount - ?, decimals = decimals - ? WHERE (xuid = ? OR username = ?) AND amount >= ? AND decimals >= ?",
             UpdateMode::SET => "UPDATE " . $this->table . " SET amount = ?, decimals = ? WHERE xuid = ? OR username = ?",
 
             default => throw new InvalidArgumentException("Invalid mode " . $this->mode)

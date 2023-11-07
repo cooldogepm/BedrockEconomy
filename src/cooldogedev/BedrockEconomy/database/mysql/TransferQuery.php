@@ -89,7 +89,7 @@ final class TransferQuery extends MySQLQuery
         }
 
         // subtract the money from the source account
-        $sourceUpdateQuery = $connection->prepare("UPDATE " . $this->table . " SET amount = amount - ?, decimals = ? WHERE xuid = ? OR username = ? AND amount >= ? AND decimals >= ?");
+        $sourceUpdateQuery = $connection->prepare("UPDATE " . $this->table . " SET amount = amount - ?, decimals = ? WHERE (xuid = ? OR username = ?) AND amount >= ? AND decimals >= ?");
         $sourceUpdateQuery->bind_param("iissii", $this->amount, $this->decimals, $this->xuid, $this->username, $this->amount, $this->decimals);
         $sourceUpdateQuery->execute();
 

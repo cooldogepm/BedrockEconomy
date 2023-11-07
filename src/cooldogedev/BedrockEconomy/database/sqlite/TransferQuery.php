@@ -87,7 +87,7 @@ final class TransferQuery extends SQLiteQuery
         }
 
         // subtract the money from the source account
-        $sourceUpdateQuery = $connection->prepare("UPDATE " . $this->table . " SET amount = amount - ?, decimals = decimals - ? WHERE xuid = ? OR username = ? AND amount >= ? AND decimals >= ?");
+        $sourceUpdateQuery = $connection->prepare("UPDATE " . $this->table . " SET amount = amount - ?, decimals = decimals - ? WHERE (xuid = ? OR username = ?) AND amount >= ? AND decimals >= ?");
         $sourceUpdateQuery->bindValue(1, $this->amount, SQLITE3_INTEGER);
         $sourceUpdateQuery->bindValue(2, $this->decimals, SQLITE3_INTEGER);
         $sourceUpdateQuery->bindValue(3, $this->xuid);
