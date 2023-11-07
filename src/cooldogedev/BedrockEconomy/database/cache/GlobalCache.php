@@ -54,13 +54,16 @@ final class GlobalCache
             function (): Generator {
                 $plugin = BedrockEconomy::getInstance();
 
-                try {
-                    $onlineCache = yield from BedrockEconomyAPI::ASYNC()->bulk(
-                        list: array_map(static fn($player) => $player->getXuid(), $plugin->getServer()->getOnlinePlayers())
-                    );
-                } catch (RecordNotFoundException) {
-                    $onlineCache = [];
-                    $plugin->getLogger()->debug("No online records found");
+                $onlineCache = [];
+
+                if (count($plugin->getServer()->getOnlinePlayers()) > 0) {
+                    try {
+                        $onlineCache = yield from BedrockEconomyAPI::ASYNC()->bulk(
+                            list: array_map(static fn($player) => $player->getXuid(), $plugin->getServer()->getOnlinePlayers())
+                        );
+                    } catch (RecordNotFoundException) {
+                        $plugin->getLogger()->debug("No online records found");
+                    }
                 }
 
                 try {
