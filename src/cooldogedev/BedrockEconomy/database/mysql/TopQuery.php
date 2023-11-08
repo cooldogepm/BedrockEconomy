@@ -31,12 +31,14 @@ declare(strict_types=1);
 namespace cooldogedev\BedrockEconomy\database\mysql;
 
 use cooldogedev\BedrockEconomy\database\exception\RecordNotFoundException;
+use cooldogedev\BedrockEconomy\database\helper\ReferenceHolder;
 use cooldogedev\BedrockEconomy\database\helper\TableHolder;
 use cooldogedev\libSQL\query\MySQLQuery;
 use mysqli;
 
 final class TopQuery extends MySQLQuery
 {
+    use ReferenceHolder;
     use TableHolder;
 
     public function __construct(private readonly int $limit, private readonly int $offset, private readonly bool $ascending) {}
@@ -52,12 +54,10 @@ final class TopQuery extends MySQLQuery
         };
 
         $statement = $connection->prepare($query);
-        $statement->bind_param("ii", $this->limit, $this->offset);
+        $statement->bind_param("ii", $this->getRef($this->limit), $this->getRef($this->offset));
         $statement->execute();
 
         $result = $statement->get_result();
-
-        $statement->close();
 
         if ($result->num_rows === 0) {
             throw new RecordNotFoundException(
@@ -68,5 +68,7 @@ final class TopQuery extends MySQLQuery
         $this->setResult($result->fetch_all(MYSQLI_ASSOC));
 
         $result->free();
+
+        $statement->close();
     }
 }

@@ -32,6 +32,7 @@ namespace cooldogedev\BedrockEconomy\database\mysql;
 
 use cooldogedev\BedrockEconomy\database\exception\RecordAlreadyExistsException;
 use cooldogedev\BedrockEconomy\database\helper\AccountHolder;
+use cooldogedev\BedrockEconomy\database\helper\ReferenceHolder;
 use cooldogedev\BedrockEconomy\database\helper\TableHolder;
 use cooldogedev\libSQL\query\MySQLQuery;
 use mysqli;
@@ -39,6 +40,7 @@ use mysqli;
 final class InsertionQuery extends MySQLQuery
 {
     use AccountHolder;
+    use ReferenceHolder;
     use TableHolder;
 
     public function __construct(private readonly int $amount, private readonly int $decimals) {}
@@ -53,11 +55,10 @@ final class InsertionQuery extends MySQLQuery
 
         // check if account exists
         $checkQuery = $connection->prepare("SELECT * FROM " . $this->table . " WHERE xuid = ? OR username = ?");
-        $checkQuery->bind_param("ss", $this->xuid, $this->username);
+        $checkQuery->bind_param("ss", $this->getRef($this->xuid), $this->getRef($this->username));
         $checkQuery->execute();
 
         $checkResult = $checkQuery->get_result();
-        $checkQuery->close();
 
         if ($checkResult->num_rows > 0) {
             $connection->rollback();
@@ -67,14 +68,11 @@ final class InsertionQuery extends MySQLQuery
         }
 
         // insert account
-        $insertionQuery = $connection->prepare("INSERT IF NOT EXISTS INTO " . $this->table . " (xuid, username, amount, decimals) VALUES (?, ?, ?, ?)");
-        $insertionQuery->bind_param("ssii", $this->xuid, $this->username, $this->amount, $this->decimals);
+        $insertionQuery = $connection->prepare("INSERT IGNORE INTO " . $this->table . " (xuid, username, amount, decimals) VALUES (?, ?, ?, ?)");
+        $insertionQuery->bind_param("ssii", $this->getRef($this->xuid), $this->getRef($this->username), $this->getRef($this->amount), $this->getRef($this->decimals));
         $insertionQuery->execute();
 
-        $insertionResult = $insertionQuery->get_result();
-        $insertionQuery->close();
-
-        if ($insertionResult->num_rows === 0) {
+        if ($insertionQuery->affected_rows === 0) {
             $connection->rollback();
             throw new RecordAlreadyExistsException(
                 _message: "Account already exists for xuid " . $this->xuid . " or username " . $this->username
@@ -83,9 +81,11 @@ final class InsertionQuery extends MySQLQuery
 
         $connection->commit();
 
-        $checkResult->free();
-        $insertionResult->free();
+        $this->setResult($insertionQuery->affected_rows > 0);
 
-        $this->setResult($connection->affected_rows > 0);
+        $checkResult->free();
+
+        $checkQuery->close();
+        $insertionQuery->close();
     }
 }

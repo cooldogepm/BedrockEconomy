@@ -32,6 +32,7 @@ namespace cooldogedev\BedrockEconomy\database\mysql;
 
 use cooldogedev\BedrockEconomy\database\exception\RecordNotFoundException;
 use cooldogedev\BedrockEconomy\database\helper\AccountHolder;
+use cooldogedev\BedrockEconomy\database\helper\ReferenceHolder;
 use cooldogedev\BedrockEconomy\database\helper\TableHolder;
 use cooldogedev\libSQL\query\MySQLQuery;
 use mysqli;
@@ -39,6 +40,7 @@ use mysqli;
 final class RetrieveQuery extends MySQLQuery
 {
     use AccountHolder;
+    use ReferenceHolder;
     use TableHolder;
 
     /**
@@ -46,12 +48,11 @@ final class RetrieveQuery extends MySQLQuery
      */
     public function onRun(mysqli $connection): void
     {
-        $statement = $connection->prepare("SELECT *, COUNT(*) AS position FROM " . $this->table . " WHERE xuid = ? OR username = ? ORDER BY amount, decimals DESC");
-        $statement->bind_param("ss", $this->xuid, $this->username);
+        $statement = $connection->prepare("SELECT *, (SELECT COUNT(*) FROM " . $this->table . " WHERE amount > t.amount) + 1 AS position FROM " . $this->table . " t WHERE xuid = ? OR username = ?");
+        $statement->bind_param("ss", $this->getRef($this->xuid), $this->getRef($this->username));
         $statement->execute();
 
         $result = $statement->get_result();
-        $statement->close();
 
         if ($result->num_rows === 0) {
             throw new RecordNotFoundException(
@@ -62,5 +63,7 @@ final class RetrieveQuery extends MySQLQuery
         $this->setResult($result->fetch_assoc());
 
         $result->free();
+
+        $statement->close();
     }
 }

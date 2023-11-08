@@ -33,6 +33,7 @@ namespace cooldogedev\BedrockEconomy\database\mysql;
 use cooldogedev\BedrockEconomy\database\exception\RecordNotFoundException;
 use cooldogedev\BedrockEconomy\database\exception\InsufficientFundsException;
 use cooldogedev\BedrockEconomy\database\helper\AccountHolder;
+use cooldogedev\BedrockEconomy\database\helper\ReferenceHolder;
 use cooldogedev\BedrockEconomy\database\helper\TableHolder;
 use cooldogedev\libSQL\query\MySQLQuery;
 use mysqli;
@@ -40,6 +41,7 @@ use mysqli;
 final class TransferQuery extends MySQLQuery
 {
     use AccountHolder;
+    use ReferenceHolder;
     use TableHolder;
 
     public function __construct(
@@ -60,11 +62,10 @@ final class TransferQuery extends MySQLQuery
 
         // check if the source account exists
         $sourceQuery = $connection->prepare("SELECT * FROM " . $this->table . " WHERE xuid = ? OR username = ?");
-        $sourceQuery->bind_param("ss", $this->xuid, $this->username);
+        $sourceQuery->bind_param("ss", $this->getRef($this->xuid), $this->getRef($this->username));
         $sourceQuery->execute();
 
         $sourceResult = $sourceQuery->get_result();
-        $sourceQuery->close();
 
         if ($sourceResult->num_rows === 0) {
             $connection->rollback();
@@ -75,11 +76,10 @@ final class TransferQuery extends MySQLQuery
 
         // check if the target account exists
         $targetQuery = $connection->prepare("SELECT * FROM " . $this->table . " WHERE xuid = ? OR username = ?");
-        $targetQuery->bind_param("ss", $this->targetXuid, $this->targetUsername);
+        $targetQuery->bind_param("ss", $this->getRef($this->targetXuid), $this->getRef($this->targetUsername));
         $targetQuery->execute();
 
         $targetResult = $targetQuery->get_result();
-        $targetQuery->close();
 
         if ($targetResult->num_rows === 0) {
             $connection->rollback();
@@ -90,13 +90,10 @@ final class TransferQuery extends MySQLQuery
 
         // subtract the money from the source account
         $sourceUpdateQuery = $connection->prepare("UPDATE " . $this->table . " SET amount = amount - ?, decimals = ? WHERE (xuid = ? OR username = ?) AND amount >= ? AND decimals >= ?");
-        $sourceUpdateQuery->bind_param("iissii", $this->amount, $this->decimals, $this->xuid, $this->username, $this->amount, $this->decimals);
+        $sourceUpdateQuery->bind_param("iissii", $this->getRef($this->amount), $this->getRef($this->decimals), $this->getRef($this->xuid), $this->getRef($this->username), $this->getRef($this->amount), $this->getRef($this->decimals));
         $sourceUpdateQuery->execute();
 
-        $sourceUpdateResult = $sourceUpdateQuery->get_result();
-        $sourceUpdateQuery->close();
-
-        if ($sourceUpdateResult->num_rows === 0) {
+        if ($sourceUpdateQuery->affected_rows === 0) {
             $connection->rollback();
             throw new InsufficientFundsException(
                 _message: "Insufficient funds for xuid " . $this->xuid . " or username " . $this->username
@@ -105,13 +102,10 @@ final class TransferQuery extends MySQLQuery
 
         // add the money to the target account
         $targetUpdateQuery = $connection->prepare("UPDATE " . $this->table . " SET amount = amount + ?, decimals = ? WHERE xuid = ? OR username = ?");
-        $targetUpdateQuery->bind_param("iiss", $this->amount, $this->decimals, $this->targetXuid, $this->targetUsername);
+        $targetUpdateQuery->bind_param("iiss", $this->getRef($this->amount), $this->getRef($this->decimals), $this->getRef($this->targetXuid), $this->getRef($this->targetUsername));
         $targetUpdateQuery->execute();
 
-        $targetUpdateResult = $targetUpdateQuery->get_result();
-        $targetUpdateQuery->close();
-
-        if ($targetUpdateResult->num_rows === 0) {
+        if ($targetUpdateQuery->affected_rows === 0) {
             $connection->rollback();
             throw new RecordNotFoundException(
                 _message: "Account not found for xuid " . $this->targetXuid . " or username " . $this->targetUsername
@@ -122,8 +116,11 @@ final class TransferQuery extends MySQLQuery
 
         $targetResult->free();
         $sourceResult->free();
-        $targetUpdateResult->free();
-        $sourceUpdateResult->free();
+
+        $targetQuery->close();
+        $sourceQuery->close();
+        $targetUpdateQuery->close();
+        $sourceUpdateQuery->close();
 
         $this->setResult($connection->affected_rows > 0 );
     }

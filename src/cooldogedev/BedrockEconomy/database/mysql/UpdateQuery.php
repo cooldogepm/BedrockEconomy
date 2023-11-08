@@ -34,6 +34,7 @@ use cooldogedev\BedrockEconomy\database\constant\UpdateMode;
 use cooldogedev\BedrockEconomy\database\exception\RecordNotFoundException;
 use cooldogedev\BedrockEconomy\database\exception\InsufficientFundsException;
 use cooldogedev\BedrockEconomy\database\helper\AccountHolder;
+use cooldogedev\BedrockEconomy\database\helper\ReferenceHolder;
 use cooldogedev\BedrockEconomy\database\helper\TableHolder;
 use cooldogedev\libSQL\query\MySQLQuery;
 use InvalidArgumentException;
@@ -42,6 +43,7 @@ use mysqli;
 final class UpdateQuery extends MySQLQuery
 {
     use AccountHolder;
+    use ReferenceHolder;
     use TableHolder;
 
     public function __construct(private readonly int $mode, private readonly int $amount, private readonly int $decimals) {}
@@ -56,11 +58,10 @@ final class UpdateQuery extends MySQLQuery
 
         // check if account exists
         $checkQuery = $connection->prepare("SELECT * FROM " . $this->table . " WHERE xuid = ? OR username = ?");
-        $checkQuery->bind_param("ss", $this->xuid, $this->username);
+        $checkQuery->bind_param("ss", $this->getRef($this->xuid), $this->getRef($this->username));
         $checkQuery->execute();
 
         $checkResult = $checkQuery->get_result();
-        $checkQuery->close();
 
         if ($checkResult->num_rows === 0) {
             $connection->rollback();
@@ -68,8 +69,6 @@ final class UpdateQuery extends MySQLQuery
                 _message: "Account not found for xuid " . $this->xuid . " or username " . $this->username
             );
         }
-
-        $checkQuery->close();
 
         $updateQuery = match ($this->mode) {
             UpdateMode::ADD => "UPDATE " . $this->table . " SET amount = amount + ?, decimals = decimals + ? WHERE xuid = ? OR username = ?",
@@ -83,24 +82,21 @@ final class UpdateQuery extends MySQLQuery
         $updateQuery = $connection->prepare($updateQuery);
 
         if ($this->mode === UpdateMode::SUBTRACT) {
-            $updateQuery->bind_param("iissii", $this->amount, $this->decimals, $this->xuid, $this->username, $this->amount, $this->decimals);
+            $updateQuery->bind_param("iissii", $this->getRef($this->amount), $this->getRef($this->decimals), $this->getRef($this->xuid), $this->getRef($this->username), $this->getRef($this->amount), $this->getRef($this->decimals));
         } else {
-            $updateQuery->bind_param("iiss", $this->amount, $this->decimals, $this->xuid, $this->username);
+            $updateQuery->bind_param("iiss", $this->getRef($this->amount), $this->getRef($this->decimals), $this->getRef($this->xuid), $this->getRef($this->username));
         }
 
         $updateQuery->execute();
 
-        $updateResult = $updateQuery->get_result();
-        $updateQuery->close();
-
-        if ($updateResult->num_rows === 0 && $this->mode === UpdateMode::SUBTRACT) {
+        if ($updateQuery->affected_rows === 0 && $this->mode === UpdateMode::SUBTRACT) {
             $connection->rollback();
             throw new InsufficientFundsException(
                 _message: "Insufficient funds for xuid " . $this->xuid . " or username " . $this->username
             );
         }
 
-        if ($updateResult->num_rows === 0) {
+        if ($updateQuery->affected_rows === 0) {
             $connection->rollback();
             throw new RecordNotFoundException(
                 _message: "Account not found for xuid " . $this->xuid . " or username " . $this->username
@@ -110,7 +106,9 @@ final class UpdateQuery extends MySQLQuery
         $connection->commit();
 
         $checkResult->free();
-        $updateResult->free();
+
+        $checkQuery->close();
+        $updateQuery->close();
 
         $this->setResult($connection->affected_rows > 0);
     }
