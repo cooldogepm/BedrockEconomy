@@ -107,6 +107,8 @@ final class GlobalCache
 
                     $position++;
                 }
+
+                $plugin->getLogger()->debug("Cache invalidated");
             }
         );
     }
