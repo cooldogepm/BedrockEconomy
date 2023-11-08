@@ -110,8 +110,9 @@ final class RemoveBalanceCommand extends BaseCommand
                     $sender->sendMessage(LanguageManager::getString(KnownMessages::ERROR_ACCOUNT_NONEXISTENT));
                 } catch (InsufficientFundsException) {
                     $sender->sendMessage(LanguageManager::getString(KnownMessages::ERROR_ACCOUNT_INSUFFICIENT));
-                } catch (SQLException) {
+                } catch (SQLException $exception) {
                     $sender->sendMessage(LanguageManager::getString(KnownMessages::ERROR_DATABASE));
+                    $this->getOwningPlugin()->getLogger()->logException($exception);
                 }
             }
         );

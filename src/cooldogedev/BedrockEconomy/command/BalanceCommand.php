@@ -100,8 +100,9 @@ final class BalanceCommand extends BaseCommand
                     ]));
                 } catch (RecordNotFoundException) {
                     $sender->sendMessage(LanguageManager::getString(KnownMessages::ERROR_ACCOUNT_NONEXISTENT));
-                } catch (SQLException) {
+                } catch (SQLException $exception) {
                     $sender->sendMessage(LanguageManager::getString(KnownMessages::ERROR_DATABASE));
+                    $this->getOwningPlugin()->getLogger()->logException($exception);
                 }
             }
         );
