@@ -66,6 +66,10 @@ final class CurrencyFormatter
             $decimals = "0" . $decimals;
         }
 
+        if ($decimals === "00") {
+            $decimals = null;
+        }
+
         return $this->currency->symbol . $str . ($decimals !== null && $str === (string)$number ? "." . $decimals : "");
     }
 
@@ -86,6 +90,10 @@ final class CurrencyFormatter
 
         if ($decimals !== null && $decimals < 10) {
             $decimals = "0" . $decimals;
+        }
+
+        if ($decimals === "00") {
+            $decimals = null;
         }
 
         return $this->currency->symbol . $formatted . ($decimals !== null ? "." . $decimals : "");
