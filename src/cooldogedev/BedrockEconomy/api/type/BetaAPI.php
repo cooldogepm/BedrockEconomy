@@ -54,43 +54,34 @@ final class BetaAPI extends BaseAPI
     public function get(string $player): Promise
     {
         $promise = new PromiseResolver();
-
         BedrockEconomyAPI::CLOSURE()->get(Search::EMPTY, $player, fn(int $amount) => $promise->resolve($amount), fn() => $promise->reject());
-
         return $promise->getPromise();
     }
 
     public function set(string $player, int $amount): Promise
     {
         $promise = new PromiseResolver();
-
         BedrockEconomyAPI::CLOSURE()->set(Search::EMPTY, $player, $amount, 0, fn(bool $success) => $promise->resolve($success), fn() => $promise->reject());
-
         return $promise->getPromise();
     }
 
     public function add(string $player, int $amount): Promise
     {
         $promise = new PromiseResolver();
-
         BedrockEconomyAPI::CLOSURE()->add(Search::EMPTY, $player, $amount, 0, fn(bool $success) => $promise->resolve($success), fn() => $promise->reject());
-
         return $promise->getPromise();
     }
 
     public function deduct(string $player, int $amount): Promise
     {
         $promise = new PromiseResolver();
-
         BedrockEconomyAPI::CLOSURE()->subtract(Search::EMPTY, $player, $amount, 0, fn(bool $success) => $promise->resolve($success), fn() => $promise->reject());
-
         return $promise->getPromise();
     }
 
     public function transfer(string $source, string $target, int $amount): Promise
     {
         $promise = new PromiseResolver();
-
         BedrockEconomyAPI::CLOSURE()->transfer(
             source: [
                 "xuid" => Search::EMPTY,
@@ -105,7 +96,6 @@ final class BetaAPI extends BaseAPI
             onSuccess: fn() => $promise->resolve(true),
             onError: fn() => $promise->reject()
         );
-
         return $promise->getPromise();
     }
 }
