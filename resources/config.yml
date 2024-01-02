@@ -21,8 +21,8 @@ currency:
 database:
   # The database provider, mysql or sqlite
   provider: sqlite
-  # Number of threads to use for the database query processing, 2 is recommended
-  threads: 2
+  # Number of threads to use for the database query processing, recommended values are 2 for mysql and 1 for sqlite
+  threads: 1
 
   # The database connection information
   mysql:
