@@ -54,7 +54,7 @@ final class BetaAPI extends BaseAPI
     public function get(string $player): Promise
     {
         $promise = new PromiseResolver();
-        BedrockEconomyAPI::CLOSURE()->get(Search::EMPTY, $player, fn(int $amount) => $promise->resolve($amount), fn() => $promise->reject());
+        BedrockEconomyAPI::CLOSURE()->get(Search::EMPTY, $player, fn(array $data) => $promise->resolve($data["amount"]), fn() => $promise->reject());
         return $promise->getPromise();
     }
 

@@ -59,7 +59,7 @@ final class LegacyAPI extends BaseAPI
     public function getPlayerBalance(string $username, ?Closure $handler = null): void
     {
         $handler ??= fn () => null;
-        BedrockEconomyAPI::CLOSURE()->get(Search::EMPTY, $username, fn (int $amount) => $handler($amount), fn () => $handler(null));
+        BedrockEconomyAPI::CLOSURE()->get(Search::EMPTY, $username, fn (array $data) => $handler($data["amount"]), fn () => $handler(null));
     }
 
     public function addToPlayerBalance(string $username, int $amount, ?Closure $handler = null): void
