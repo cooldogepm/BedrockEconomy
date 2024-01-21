@@ -18,7 +18,7 @@
     ],
     "require": {
         "pocketmine/pocketmine-mp": "^5.0.0",
-        "cooldogedev/libsql": "0.2.5",
+        "cooldogedev/libsql": "0.2.6",
 	    "cortexpe/commando": "dev-patch-1",
         "sof3/await-generator": "^3.6",
         "muqsit/simple-packet-handler": "dev-pm5"

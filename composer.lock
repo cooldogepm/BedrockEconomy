@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "31a2e4a0606ed8159ed5cbe05b384ca2",
+    "content-hash": "49810cb974410812055b8f74ddae9aff",
     "packages": [
         {
             "name": "adhocore/json-comment",
@@ -122,16 +122,16 @@
         },
         {
             "name": "cooldogedev/libsql",
-            "version": "v0.2.5",
+            "version": "v0.2.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/cooldogepm/libSQL.git",
-                "reference": "072bda9b0237387923010e3861f09a2b6c89220c"
+                "reference": "9b44cd73fd24ad48a7dbcc434496d7218a000f9d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/cooldogepm/libSQL/zipball/072bda9b0237387923010e3861f09a2b6c89220c",
-                "reference": "072bda9b0237387923010e3861f09a2b6c89220c",
+                "url": "https://api.github.com/repos/cooldogepm/libSQL/zipball/9b44cd73fd24ad48a7dbcc434496d7218a000f9d",
+                "reference": "9b44cd73fd24ad48a7dbcc434496d7218a000f9d",
                 "shasum": ""
             },
             "require": {
@@ -148,9 +148,9 @@
                 }
             },
             "autoload": {
-                "psr-4": {
-                    "cooldogedev\\libSQL\\": "src/cooldogedev/libSQL"
-                }
+                "classmap": [
+                    "src"
+                ]
             },
             "license": [
                 "MIT"
@@ -163,10 +163,10 @@
             ],
             "description": "A minimalistic implementation of asynchronous SQL",
             "support": {
-                "source": "https://github.com/cooldogepm/libSQL/tree/v0.2.5",
+                "source": "https://github.com/cooldogepm/libSQL/tree/v0.2.6",
                 "issues": "https://github.com/cooldogepm/libSQL/issues"
             },
-            "time": "2023-10-18T15:49:39+00:00"
+            "time": "2024-01-21T16:18:12+00:00"
         },
         {
             "name": "cortexpe/commando",
