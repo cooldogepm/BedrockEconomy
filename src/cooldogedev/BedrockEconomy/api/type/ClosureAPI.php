@@ -39,6 +39,9 @@ use cooldogedev\BedrockEconomy\database\transaction\UpdateTransaction;
 use cooldogedev\BedrockEconomy\event\transaction\TransactionFailEvent;
 use cooldogedev\BedrockEconomy\event\transaction\TransactionSubmitEvent;
 use cooldogedev\BedrockEconomy\event\transaction\TransactionSuccessEvent;
+use function array_map;
+use function explode;
+use function number_format;
 
 final class ClosureAPI extends BaseAPI
 {
@@ -54,7 +57,13 @@ final class ClosureAPI extends BaseAPI
 
     public function bulk(array $list, Closure $onSuccess, Closure $onError): void
     {
-        QueryManager::BULK($list)->execute($onSuccess, $onError);
+        QueryManager::BULK($list)->execute(
+            onSuccess: fn (array $rows) => $onSuccess(array_map(fn (array $row) => [
+                ...$row,
+                ... $this->transformAmount($row["amount"]),
+            ], $rows)),
+            onFail: $onError,
+        );
     }
 
     public function insert(string $xuid, string $username, int $balance, int $decimals, Closure $onSuccess, Closure $onError): void
@@ -76,12 +85,25 @@ final class ClosureAPI extends BaseAPI
      */
     public function get(string $xuid, string $username, Closure $onSuccess, Closure $onError): void
     {
-        QueryManager::RETRIEVE($xuid, $username)->execute($onSuccess, $onError);
+        QueryManager::RETRIEVE($xuid, $username)
+            ->execute(
+                onSuccess: fn (array $result) => $onSuccess([
+                    ... $result,
+                    ... $this->transformAmount($result["amount"]),
+                ]),
+                onFail: $onError,
+            );
     }
 
     public function top(int $limit, int $offset, bool $ascending, Closure $onSuccess, Closure $onError): void
     {
-        QueryManager::TOP($limit, $offset, $ascending)->execute($onSuccess, $onError);
+        QueryManager::TOP($limit, $offset, $ascending)->execute(
+            onSuccess: fn (array $rows) => $onSuccess(array_map(fn (array $row) => [
+                ...$row,
+                ... $this->transformAmount($row["amount"]),
+            ], $rows)),
+            onFail: $onError,
+        );
     }
 
     public function transfer(array $source, array $target, int $amount, int $decimals, Closure $onSuccess, Closure $onError): void
@@ -150,5 +172,15 @@ final class ClosureAPI extends BaseAPI
             onSuccess: ClosureWrapper::combine($onSuccess, static fn() => (new TransactionSuccessEvent($transaction))->call()),
             onFail: ClosureWrapper::combine($onError, static fn() => (new TransactionFailEvent($transaction))->call()),
         );
+    }
+
+    private function transformAmount(float $amount): array
+    {
+        $amount = number_format($amount, 2, ".", "");
+        $amount = explode(".", $amount);
+        return [
+            "amount" => (int) $amount[0],
+            "decimals" => (int) $amount[1],
+        ];
     }
 }

@@ -54,6 +54,7 @@ final class UpdateQuery extends MySQLQuery
      */
     public function onRun(mysqli $connection): void
     {
+        $amount = $this->amount . "." . $this->decimals;
         $connection->begin_transaction();
 
         // check if account exists
@@ -71,9 +72,9 @@ final class UpdateQuery extends MySQLQuery
         }
 
         $updateQuery = match ($this->mode) {
-            UpdateMode::ADD => "UPDATE " . $this->table . " SET amount = amount + ?, decimals = decimals + ? WHERE xuid = ? OR username = ?",
-            UpdateMode::SUBTRACT => "UPDATE " . $this->table . " SET amount = amount - ?, decimals = decimals - ? WHERE (xuid = ? OR username = ?) AND amount >= ? AND decimals >= ?",
-            UpdateMode::SET => "UPDATE " . $this->table . " SET amount = ?, decimals = ? WHERE xuid = ? OR username = ?",
+            UpdateMode::ADD => "UPDATE " . $this->table . " SET amount = amount + ? WHERE xuid = ? OR username = ?",
+            UpdateMode::SUBTRACT => "UPDATE " . $this->table . " SET amount = amount - ? WHERE (xuid = ? OR username = ?) AND amount >= ?",
+            UpdateMode::SET => "UPDATE " . $this->table . " SET amount = ? WHERE xuid = ? OR username = ?",
 
             default => throw new InvalidArgumentException("Invalid mode " . $this->mode)
         };
@@ -82,9 +83,9 @@ final class UpdateQuery extends MySQLQuery
         $updateQuery = $connection->prepare($updateQuery);
 
         if ($this->mode === UpdateMode::SUBTRACT) {
-            $updateQuery->bind_param("iissii", $this->getRef($this->amount), $this->getRef($this->decimals), $this->getRef($this->xuid), $this->getRef($this->username), $this->getRef($this->amount), $this->getRef($this->decimals));
+            $updateQuery->bind_param("issi", $amount, $this->getRef($this->xuid), $this->getRef($this->username), $amount);
         } else {
-            $updateQuery->bind_param("iiss", $this->getRef($this->amount), $this->getRef($this->decimals), $this->getRef($this->xuid), $this->getRef($this->username));
+            $updateQuery->bind_param("iss", $amount, $this->getRef($this->xuid), $this->getRef($this->username));
         }
 
         $updateQuery->execute();

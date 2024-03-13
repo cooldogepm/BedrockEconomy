@@ -54,7 +54,7 @@ final class BulkQuery extends MySQLQuery
         $list = igbinary_unserialize($this->list);
         $params = implode(", ", array_fill(0, count($list), "?"));
 
-        $statement = $connection->prepare("SELECT *, COUNT(*) as position FROM " . $this->table . " WHERE xuid IN (" . $params . ") GROUP BY xuid, username, amount, decimals ORDER BY amount, decimals DESC");
+        $statement = $connection->prepare("SELECT *, COUNT(*) as position FROM " . $this->table . " WHERE xuid IN (" . $params . ") GROUP BY xuid, username, amount ORDER BY amount");
         $statement->bind_param(str_repeat("s", count($list)), ...$list);
         $statement->execute();
 

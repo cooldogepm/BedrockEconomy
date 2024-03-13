@@ -28,53 +28,66 @@
 
 declare(strict_types=1);
 
-namespace cooldogedev\BedrockEconomy\database\migration\v2_1_2;
+namespace cooldogedev\BedrockEconomy\database\migration\v4_0_3;
 
 use cooldogedev\BedrockEconomy\api\BedrockEconomyAPI;
+use cooldogedev\BedrockEconomy\BedrockEconomy;
 use cooldogedev\BedrockEconomy\database\exception\RecordAlreadyExistsException;
 use cooldogedev\BedrockEconomy\database\migration\BaseMigration;
+use cooldogedev\BedrockEconomy\database\QueryManager;
 use cooldogedev\libSQL\exception\SQLException;
 use Generator;
 use pocketmine\promise\Promise;
+use pocketmine\promise\PromiseResolver;
 use SOFe\AwaitGenerator\Await;
 
 final class Migration extends BaseMigration
 {
     public static function getName(): string
     {
-        return "<=2.1.2";
+        return "<=4.0.3";
     }
 
     public static function getMin(): string
     {
-        return "0.0.1";
+        return "4.0.0";
     }
 
     public static function getMax(): string
     {
-        return "2.1.2";
+        return "4.0.3";
     }
 
     public function run(string $mode): ?Promise
     {
+        $resolver = new PromiseResolver();
+
         $query = $mode === "mysql" ? new MySQLHandler() : new SQLiteHandler();
+        $query->setTable(BedrockEconomy::getInstance()->getCurrency()->code);
         $query->execute(
-            onSuccess: fn(array $records) => Await::f2c(
-                function () use ($records): Generator {
-                    foreach ($records as $record) {
+            onSuccess: fn(array $result) => QueryManager::TABLE()->execute(
+                onSuccess: fn() => Await::f2c(function () use ($resolver, $result): Generator {
+                    foreach ($result as $record) {
                         try {
-                            yield from BedrockEconomyAPI::ASYNC()->insert($record["username"], $record["username"], (int)$record["balance"], 0);
+                            yield from BedrockEconomyAPI::ASYNC()->insert(
+                                xuid: $record["xuid"],
+                                username: $record["username"],
+                                balance: $record["amount"],
+                                decimals: $record["decimals"],
+                            );
                             $this->logger->debug("Migrated data for player " . $record["username"]);
                         } catch (RecordAlreadyExistsException) {
                             $this->logger->warning("Attempted to migrate data for player " . $record["username"] . " but they already exist");
                         } catch (SQLException) {
                             $this->logger->warning("Failed to migrate data for player " . $record["username"]);
                         }
+                        $resolver->resolve(null);
                     }
-                }
+                }),
+                onFail: fn(SQLException $exception) => $this->logger->logException($exception),
             ),
-            onFail: fn (SQLException $exception) => $this->logger->logException($exception)
+            onFail: fn(SQLException $exception) => $this->logger->logException($exception),
         );
-        return null;
+        return $resolver->getPromise();
     }
 }

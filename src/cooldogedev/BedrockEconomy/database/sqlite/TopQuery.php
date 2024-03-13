@@ -47,8 +47,8 @@ final class TopQuery extends SQLiteQuery
     public function onRun(SQLite3 $connection): void
     {
         $query = match ($this->ascending) {
-            true => "SELECT * FROM " . $this->table . " ORDER BY amount ASC, decimals ASC LIMIT ? OFFSET ?",
-            false => "SELECT * FROM " . $this->table . " ORDER BY amount DESC, decimals DESC LIMIT ? OFFSET ?"
+            true => "SELECT * FROM " . $this->table . " ORDER BY amount LIMIT ? OFFSET ?",
+            false => "SELECT * FROM " . $this->table . " ORDER BY amount DESC LIMIT ? OFFSET ?"
         };
 
         $statement = $connection->prepare($query);

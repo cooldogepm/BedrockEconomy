@@ -56,6 +56,7 @@ final class TransferQuery extends SQLiteQuery
      */
     public function onRun(SQLite3 $connection): void
     {
+        $amount = $this->amount . "." . $this->decimals;
         $connection->exec("BEGIN TRANSACTION");
 
         // check if the source account exists
@@ -87,13 +88,11 @@ final class TransferQuery extends SQLiteQuery
         }
 
         // subtract the money from the source account
-        $sourceUpdateQuery = $connection->prepare("UPDATE " . $this->table . " SET amount = amount - ?, decimals = decimals - ? WHERE (xuid = ? OR username = ?) AND amount >= ? AND decimals >= ?");
-        $sourceUpdateQuery->bindValue(1, $this->amount, SQLITE3_INTEGER);
-        $sourceUpdateQuery->bindValue(2, $this->decimals, SQLITE3_INTEGER);
-        $sourceUpdateQuery->bindValue(3, $this->xuid);
-        $sourceUpdateQuery->bindValue(4, $this->username);
-        $sourceUpdateQuery->bindValue(5, $this->amount, SQLITE3_INTEGER);
-        $sourceUpdateQuery->bindValue(6, $this->decimals, SQLITE3_INTEGER);
+        $sourceUpdateQuery = $connection->prepare("UPDATE " . $this->table . " SET amount = amount - ? WHERE (xuid = ? OR username = ?) AND amount >= ?");
+        $sourceUpdateQuery->bindValue(1, $amount);
+        $sourceUpdateQuery->bindValue(2, $this->xuid);
+        $sourceUpdateQuery->bindValue(3, $this->username);
+        $sourceUpdateQuery->bindValue(4, $amount);
 
         $sourceUpdateResult = $sourceUpdateQuery->execute();
 
@@ -105,11 +104,10 @@ final class TransferQuery extends SQLiteQuery
         }
 
         // add the money to the target account
-        $targetUpdateQuery = $connection->prepare("UPDATE " . $this->table . " SET amount = amount + ?, decimals = decimals + ? WHERE xuid = ? OR username = ?");
-        $targetUpdateQuery->bindValue(1, $this->amount, SQLITE3_INTEGER);
-        $targetUpdateQuery->bindValue(2, $this->decimals, SQLITE3_INTEGER);
-        $targetUpdateQuery->bindValue(3, $this->targetXuid);
-        $targetUpdateQuery->bindValue(4, $this->targetUsername);
+        $targetUpdateQuery = $connection->prepare("UPDATE " . $this->table . " SET amount = amount + ? WHERE xuid = ? OR username = ?");
+        $targetUpdateQuery->bindValue(1, $amount);
+        $targetUpdateQuery->bindValue(2, $this->targetXuid);
+        $targetUpdateQuery->bindValue(3, $this->targetUsername);
 
         $targetUpdateResult = $targetUpdateQuery->execute();
 

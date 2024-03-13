@@ -59,6 +59,10 @@ final class BalanceCommand extends BaseCommand
 
     public function onRun(CommandSender $sender, string $aliasUsed, array $args): void
     {
+        if (!$this->getOwningPlugin()->isReady()) {
+            return;
+        }
+
         $player = $args[BalanceCommand::ARGUMENT_PLAYER] ?? null;
 
         if (!$sender instanceof Player && $player === null) {

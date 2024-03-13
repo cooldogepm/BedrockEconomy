@@ -1,5 +1,5 @@
 name: BedrockEconomy
-version: 4.0.3
+version: 4.0.4
 api: [ 5.0.0 ]
 author: cooldogedev
 main: cooldogedev\BedrockEconomy\BedrockEconomy

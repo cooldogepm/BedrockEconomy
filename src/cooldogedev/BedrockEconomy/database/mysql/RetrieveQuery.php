@@ -48,7 +48,7 @@ final class RetrieveQuery extends MySQLQuery
      */
     public function onRun(mysqli $connection): void
     {
-        $statement = $connection->prepare("SELECT *, (SELECT COUNT(*) FROM " . $this->table . " WHERE amount > t.amount AND decimals > t.decimals) + 1 AS position FROM " . $this->table . " t WHERE xuid = ? OR username = ?");
+        $statement = $connection->prepare("SELECT *, (SELECT COUNT(*) FROM " . $this->table . " WHERE amount > t.amount) + 1 AS position FROM " . $this->table . " t WHERE xuid = ? OR username = ?");
         $statement->bind_param("ss", $this->getRef($this->xuid), $this->getRef($this->username));
         $statement->execute();
 

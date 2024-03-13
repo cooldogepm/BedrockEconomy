@@ -52,6 +52,7 @@ final class UpdateQuery extends SQLiteQuery
      */
     public function onRun(SQLite3 $connection): void
     {
+        $amount = $this->amount . "." . $this->decimals;
         $connection->exec("BEGIN TRANSACTION");
 
         // check if account exists
@@ -69,23 +70,21 @@ final class UpdateQuery extends SQLiteQuery
         }
 
         $updateQuery = match ($this->mode) {
-            UpdateMode::ADD => "UPDATE " . $this->table . " SET amount = amount + ?, decimals = decimals + ? WHERE xuid = ? OR username = ?",
-            UpdateMode::SUBTRACT => "UPDATE " . $this->table . " SET amount = amount - ?, decimals = decimals - ? WHERE (xuid = ? OR username = ?) AND amount >= ? AND decimals >= ?",
-            UpdateMode::SET => "UPDATE " . $this->table . " SET amount = ?, decimals = ? WHERE xuid = ? OR username = ?",
+            UpdateMode::ADD => "UPDATE " . $this->table . " SET amount = amount + ? WHERE xuid = ? OR username = ?",
+            UpdateMode::SUBTRACT => "UPDATE " . $this->table . " SET amount = amount - ? WHERE (xuid = ? OR username = ?) AND amount >= ?",
+            UpdateMode::SET => "UPDATE " . $this->table . " SET amount = ? WHERE xuid = ? OR username = ?",
 
             default => throw new InvalidArgumentException("Invalid mode " . $this->mode)
         };
 
         // update account
         $updateQuery = $connection->prepare($updateQuery);
-        $updateQuery->bindValue(1, $this->amount, SQLITE3_INTEGER);
-        $updateQuery->bindValue(2, $this->decimals, SQLITE3_INTEGER);
-        $updateQuery->bindValue(3, $this->xuid);
-        $updateQuery->bindValue(4, $this->username);
+        $updateQuery->bindValue(1, $amount);
+        $updateQuery->bindValue(2, $this->xuid);
+        $updateQuery->bindValue(3, $this->username);
 
         if ($this->mode === UpdateMode::SUBTRACT) {
-            $updateQuery->bindValue(5, $this->amount, SQLITE3_INTEGER);
-            $updateQuery->bindValue(6, $this->decimals, SQLITE3_INTEGER);
+            $updateQuery->bindValue(4, $amount);
         }
 
         $updateResult = $updateQuery->execute();

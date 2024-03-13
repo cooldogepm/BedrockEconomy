@@ -31,6 +31,8 @@ declare(strict_types=1);
 namespace cooldogedev\BedrockEconomy\database\helper;
 
 use cooldogedev\BedrockEconomy\database\constant\TablePrefix;
+use function strtolower;
+use function str_replace;
 
 trait TableHolder
 {
@@ -38,6 +40,6 @@ trait TableHolder
 
     public function setTable(string $table): void
     {
-        $this->table = strtolower(TablePrefix::PREFIX . $table);;
+        $this->table = strtolower(TablePrefix::PREFIX . str_replace(" ", "_", $table));
     }
 }

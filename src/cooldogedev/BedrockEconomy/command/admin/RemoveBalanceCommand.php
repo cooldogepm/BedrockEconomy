@@ -69,6 +69,10 @@ final class RemoveBalanceCommand extends BaseCommand
 
     public function onRun(CommandSender $sender, string $aliasUsed, array $args): void
     {
+        if (!$this->getOwningPlugin()->isReady()) {
+            return;
+        }
+
         $player = $args[RemoveBalanceCommand::ARGUMENT_PLAYER];
         $amount = $args[RemoveBalanceCommand::ARGUMENT_AMOUNT];
 
@@ -97,6 +101,9 @@ final class RemoveBalanceCommand extends BaseCommand
 
         $balance = (int)$amount[0];
         $decimals = (int)($amount[1] ?? 0);
+        if ($decimals >= 100) {
+            $decimals = 99;
+        }
 
         Await::f2c(
             function () use ($sender, $player, $balance, $decimals): Generator {

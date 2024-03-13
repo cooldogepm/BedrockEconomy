@@ -33,6 +33,7 @@ namespace cooldogedev\BedrockEconomy\database\migration;
 use cooldogedev\BedrockEconomy\database\constant\MigrationVersion;
 use cooldogedev\BedrockEconomy\database\migration\economyapi\Migration as EconomyAPI;
 use cooldogedev\BedrockEconomy\database\migration\v2_1_2\Migration as v2_1_2;
+use cooldogedev\BedrockEconomy\database\migration\v4_0_3\Migration as v_4_0_3;
 
 final class MigrationRegistry
 {
@@ -42,6 +43,7 @@ final class MigrationRegistry
     {
         MigrationRegistry::register(EconomyAPI::class);
         MigrationRegistry::register(v2_1_2::class);
+        MigrationRegistry::register(v_4_0_3::class);
     }
 
     /**

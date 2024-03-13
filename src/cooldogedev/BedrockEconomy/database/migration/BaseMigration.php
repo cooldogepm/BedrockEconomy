@@ -31,6 +31,7 @@ declare(strict_types=1);
 namespace cooldogedev\BedrockEconomy\database\migration;
 
 use cooldogedev\BedrockEconomy\BedrockEconomy;
+use pocketmine\promise\Promise;
 use PrefixedLogger;
 
 abstract class BaseMigration
@@ -46,5 +47,5 @@ abstract class BaseMigration
     abstract static public function getMin(): string;
     abstract static public function getMax(): string;
 
-    abstract public function run(string $mode): bool;
+    abstract public function run(string $mode): ?Promise;
 }

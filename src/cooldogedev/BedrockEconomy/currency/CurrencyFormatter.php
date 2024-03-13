@@ -92,10 +92,6 @@ final class CurrencyFormatter
             $decimals = "0" . $decimals;
         }
 
-        if ($decimals === "00") {
-            $decimals = null;
-        }
-
         return $this->currency->symbol . $formatted . ($decimals !== null ? "." . $decimals : "");
     }
 }

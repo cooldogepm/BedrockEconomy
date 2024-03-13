@@ -48,6 +48,7 @@ final class InsertionQuery extends SQLiteQuery
      */
     public function onRun(SQLite3 $connection): void
     {
+        $amount = $this->amount . "." . $this->decimals;
         $connection->exec("BEGIN TRANSACTION");
 
         // check if account exists
@@ -63,11 +64,10 @@ final class InsertionQuery extends SQLiteQuery
             );
         }
 
-        $insertionQuery = $connection->prepare("INSERT OR IGNORE INTO " . $this->table . " (xuid, username, amount, decimals) VALUES (?, ?, ?, ?)");
+        $insertionQuery = $connection->prepare("INSERT OR IGNORE INTO " . $this->table . " (xuid, username, amount) VALUES (?, ?, ?)");
         $insertionQuery->bindValue(1, $this->xuid);
         $insertionQuery->bindValue(2, $this->username);
-        $insertionQuery->bindValue(3, $this->amount, SQLITE3_INTEGER);
-        $insertionQuery->bindValue(4, $this->decimals, SQLITE3_INTEGER);
+        $insertionQuery->bindValue(3, $amount);
         $insertionQuery->execute();
 
         if ($connection->changes() === 0) {

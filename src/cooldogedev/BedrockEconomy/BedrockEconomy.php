@@ -48,10 +48,14 @@ use cooldogedev\libSQL\ConnectionPool;
 use CortexPE\Commando\PacketHooker;
 use JsonException;
 use pocketmine\plugin\PluginBase;
+use pocketmine\promise\Promise;
 use pocketmine\scheduler\ClosureTask;
 use pocketmine\utils\SingletonTrait;
 use pocketmine\utils\TextFormat;
 use RuntimeException;
+use function class_alias;
+use function count;
+use function rename;
 
 final class BedrockEconomy extends PluginBase
 {
@@ -65,6 +69,8 @@ final class BedrockEconomy extends PluginBase
      * @var array<int, array{string, string}>|null
      */
     private ?array $migrationInfo;
+
+    private bool $ready = false;
 
     protected function onLoad(): void
     {
@@ -105,7 +111,6 @@ final class BedrockEconomy extends PluginBase
         $this->currencyManager = new CurrencyManager($this->currency);
 
         GlobalCache::init();
-
         QueryManager::init($this->currency->code, $this->getConfig()->getNested("database.provider") === "mysql");
         QueryManager::TABLE()->execute();
 
@@ -113,16 +118,22 @@ final class BedrockEconomy extends PluginBase
             task: new ClosureTask(
                 function (): void {
                     [$oldVersion, $oldProvider] = $this->migrationInfo;
+                    $promises = [];
 
                     foreach (MigrationRegistry::get($oldVersion) as $migrationClass) {
                         $migration = new $migrationClass($this);
-
-                        if ($migration->run($oldProvider)) {
-                            $this->getLogger()->debug($migration->getName() . " migration ran successfully");
-                        } else {
-                            $this->getLogger()->debug($migration->getName() . " migration failed to run");
+                        $promise = $migration->run($oldProvider);
+                        if ($promise !== null) {
+                            $promises[] = $promise;
                         }
                     }
+
+                    if (count($promises) === 0) {
+                        $this->ready = true;
+                        return;
+                    }
+
+                    Promise::all($promises)->onCompletion(fn () => $this->ready = true, fn () => $this->ready = true);
                 }
             ),
             delay: 0
@@ -136,7 +147,13 @@ final class BedrockEconomy extends PluginBase
         }
 
         $this->getScheduler()->scheduleRepeatingTask(
-            task: new ClosureTask(static fn() => GlobalCache::invalidate()),
+            task: new ClosureTask(function (): void {
+                if (!$this->ready) {
+                    return;
+                }
+
+                GlobalCache::invalidate();
+            }),
             period: $this->getConfig()->getNested("cache.invalidation") * 20
         );
     }
@@ -210,5 +227,10 @@ final class BedrockEconomy extends PluginBase
     public function getCurrencyManager(): CurrencyManager
     {
         return $this->currencyManager;
+    }
+
+    public function isReady(): bool
+    {
+        return $this->ready;
     }
 }

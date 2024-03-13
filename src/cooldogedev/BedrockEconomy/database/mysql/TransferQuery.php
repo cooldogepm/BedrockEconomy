@@ -58,6 +58,7 @@ final class TransferQuery extends MySQLQuery
      */
     public function onRun(mysqli $connection): void
     {
+        $amount = $this->amount . "." . $this->decimals;
         $connection->begin_transaction();
 
         // check if the source account exists
@@ -89,8 +90,8 @@ final class TransferQuery extends MySQLQuery
         }
 
         // subtract the money from the source account
-        $sourceUpdateQuery = $connection->prepare("UPDATE " . $this->table . " SET amount = amount - ?, decimals = ? WHERE (xuid = ? OR username = ?) AND amount >= ? AND decimals >= ?");
-        $sourceUpdateQuery->bind_param("iissii", $this->getRef($this->amount), $this->getRef($this->decimals), $this->getRef($this->xuid), $this->getRef($this->username), $this->getRef($this->amount), $this->getRef($this->decimals));
+        $sourceUpdateQuery = $connection->prepare("UPDATE " . $this->table . " SET amount = amount - ? WHERE (xuid = ? OR username = ?) AND amount >= ?");
+        $sourceUpdateQuery->bind_param("issi", $amount, $this->getRef($this->xuid), $this->getRef($this->username), $amount);
         $sourceUpdateQuery->execute();
 
         if ($sourceUpdateQuery->affected_rows === 0) {
@@ -101,8 +102,8 @@ final class TransferQuery extends MySQLQuery
         }
 
         // add the money to the target account
-        $targetUpdateQuery = $connection->prepare("UPDATE " . $this->table . " SET amount = amount + ?, decimals = ? WHERE xuid = ? OR username = ?");
-        $targetUpdateQuery->bind_param("iiss", $this->getRef($this->amount), $this->getRef($this->decimals), $this->getRef($this->targetXuid), $this->getRef($this->targetUsername));
+        $targetUpdateQuery = $connection->prepare("UPDATE " . $this->table . " SET amount = amount + ? WHERE xuid = ? OR username = ?");
+        $targetUpdateQuery->bind_param("iss", $amount, $this->getRef($this->targetXuid), $this->getRef($this->targetUsername));
         $targetUpdateQuery->execute();
 
         if ($targetUpdateQuery->affected_rows === 0) {

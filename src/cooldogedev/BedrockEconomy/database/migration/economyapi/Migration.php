@@ -36,6 +36,7 @@ use cooldogedev\BedrockEconomy\database\exception\RecordAlreadyExistsException;
 use cooldogedev\BedrockEconomy\database\migration\BaseMigration;
 use cooldogedev\libSQL\exception\SQLException;
 use Generator;
+use pocketmine\promise\Promise;
 use SOFe\AwaitGenerator\Await;
 
 final class Migration extends BaseMigration
@@ -55,33 +56,28 @@ final class Migration extends BaseMigration
         return MigrationVersion::VERSION_ANY;
     }
 
-    public function run(string $mode): bool
+    public function run(string $mode): ?Promise
     {
         $economyAPI = $this->plugin->getServer()->getPluginManager()->getPlugin("EconomyAPI");
-
-        if ($economyAPI === null) {
-            return false;
-        }
-
-        Await::f2c(
-            function () use ($economyAPI): Generator {
-                foreach ($economyAPI->getAllMoney() as $username => $money) {
-                    $money = explode(".", (string)$money);
-                    $amount = (int)($money[0] ?? 0);
-                    $decimals = (int)($money[1] ?? 0);
-
-                    try {
-                        yield from BedrockEconomyAPI::ASYNC()->insert($username, $username, $amount, $decimals);
-                        $this->logger->info("Migrated data for player " . $username);
-                    } catch (RecordAlreadyExistsException) {
-                        $this->logger->warning("Attempted to migrate data for player " . $username . " but they already exist");
-                    } catch (SQLException) {
-                        $this->logger->warning("Failed to migrate data for player " . $username);
+        if ($economyAPI !== null) {
+            Await::f2c(
+                function () use ($economyAPI): Generator {
+                    foreach ($economyAPI->getAllMoney() as $username => $money) {
+                        $money = explode(".", (string)$money);
+                        $amount = (int)($money[0] ?? 0);
+                        $decimals = (int)($money[1] ?? 0);
+                        try {
+                            yield from BedrockEconomyAPI::ASYNC()->insert($username, $username, $amount, $decimals);
+                            $this->logger->debug("Migrated data for player " . $username);
+                        } catch (RecordAlreadyExistsException) {
+                            $this->logger->warning("Attempted to migrate data for player " . $username . " but they already exist");
+                        } catch (SQLException) {
+                            $this->logger->warning("Failed to migrate data for player " . $username);
+                        }
                     }
                 }
-            }
-        );
-
-        return true;
+            );
+        }
+        return null;
     }
 }

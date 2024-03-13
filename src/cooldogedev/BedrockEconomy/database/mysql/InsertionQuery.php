@@ -50,6 +50,7 @@ final class InsertionQuery extends MySQLQuery
      */
     public function onRun(mysqli $connection): void
     {
+        $amount = $this->amount . "." . $this->decimals;
         // start transaction
         $connection->begin_transaction();
 
@@ -68,8 +69,8 @@ final class InsertionQuery extends MySQLQuery
         }
 
         // insert account
-        $insertionQuery = $connection->prepare("INSERT IGNORE INTO " . $this->table . " (xuid, username, amount, decimals) VALUES (?, ?, ?, ?)");
-        $insertionQuery->bind_param("ssii", $this->getRef($this->xuid), $this->getRef($this->username), $this->getRef($this->amount), $this->getRef($this->decimals));
+        $insertionQuery = $connection->prepare("INSERT IGNORE INTO " . $this->table . " (xuid, username, amount) VALUES (?, ?, ?)");
+        $insertionQuery->bind_param("ssii", $this->getRef($this->xuid), $this->getRef($this->username), $amount);
         $insertionQuery->execute();
 
         if ($insertionQuery->affected_rows === 0) {

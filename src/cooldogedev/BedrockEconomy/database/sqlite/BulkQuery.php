@@ -54,7 +54,7 @@ final class BulkQuery extends SQLiteQuery
         $list = igbinary_unserialize($this->list);
         $params = implode(", ", array_fill(0, count($list), "?"));
 
-        $statement = $connection->prepare("SELECT *, ROW_NUMBER() OVER (ORDER BY amount, decimals DESC) as position FROM " . $this->table . " WHERE xuid IN (" . $params . ")");
+        $statement = $connection->prepare("SELECT *, ROW_NUMBER() OVER (ORDER BY amount DESC) as position FROM " . $this->table . " WHERE xuid IN (" . $params . ")");
 
         for ($i = 0; $i < count($list); $i++) {
             $statement->bindValue($i + 1, $list[$i]);

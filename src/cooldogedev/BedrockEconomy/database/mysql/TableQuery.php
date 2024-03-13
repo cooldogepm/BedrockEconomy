@@ -40,6 +40,6 @@ final class TableQuery extends MySQLQuery
 
     public function onRun(mysqli $connection): void
     {
-        $connection->query("CREATE TABLE IF NOT EXISTS " . $this->table . " (xuid VARCHAR(32) PRIMARY KEY, username VARCHAR(32), amount BIGINT, decimals TINYINT)");
+        $connection->query("CREATE TABLE IF NOT EXISTS " . $this->table . " (xuid VARCHAR(32) PRIMARY KEY, username VARCHAR(32), amount DECIMAL(64, 2))");
     }
 }

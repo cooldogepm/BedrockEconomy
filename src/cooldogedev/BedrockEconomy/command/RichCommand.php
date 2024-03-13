@@ -54,6 +54,10 @@ final class RichCommand extends BaseCommand
 
     public function onRun(CommandSender $sender, string $aliasUsed, array $args): void
     {
+        if (!$this->getOwningPlugin()->isReady()) {
+            return;
+        }
+
         if (count(GlobalCache::TOP()->getAll()) === 0) {
             GlobalCache::invalidate();
             $sender->sendMessage(LanguageManager::getString(KnownMessages::ERROR_RICH_NO_RECORDS));

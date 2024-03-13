@@ -28,39 +28,27 @@
 
 declare(strict_types=1);
 
-namespace cooldogedev\BedrockEconomy\database\sqlite;
+namespace cooldogedev\BedrockEconomy\database\migration\v4_0_3;
 
-use cooldogedev\BedrockEconomy\database\exception\RecordNotFoundException;
-use cooldogedev\BedrockEconomy\database\helper\AccountHolder;
 use cooldogedev\BedrockEconomy\database\helper\TableHolder;
 use cooldogedev\libSQL\query\SQLiteQuery;
 use SQLite3;
+use const SQLITE3_ASSOC;
 
-final class RetrieveQuery extends SQLiteQuery
+final class SQLiteHandler extends SQLiteQuery
 {
-    use AccountHolder;
     use TableHolder;
 
-    /**
-     * @throws RecordNotFoundException
-     */
     public function onRun(SQLite3 $connection): void
     {
-        $statement = $connection->prepare("SELECT *, ROW_NUMBER() OVER (ORDER BY amount) as position FROM " . $this->table . " WHERE xuid = ? OR username = ?");
-        $statement->bindValue(1, $this->xuid);
-        $statement->bindValue(2, $this->username);
-
-        $result = $statement->execute();
-
-        $this->setResult($result->fetchArray(SQLITE3_ASSOC));
-
-        if ($this->getResult() === false) {
-            throw new RecordNotFoundException(
-                _message: "Account not found for xuid " . $this->xuid . " or username " . $this->username
-            );
+        $query = $connection->query("SELECT * FROM " . $this->table);
+        $result = [];
+        while ($row = $query->fetchArray(SQLITE3_ASSOC)) {
+            $result[] = $row;
         }
+        $query->finalize();
+        $connection->query("DROP TABLE IF EXISTS " . $this->table);
 
-        $result->finalize();
-        $statement->close();
+        $this->setResult($result);
     }
 }

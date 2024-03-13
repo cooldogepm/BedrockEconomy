@@ -56,13 +56,26 @@ final class EventListener implements Listener
 
     private function handleAddTransaction(UpdateTransaction $transaction): void
     {
+        $fetcher = static function (CacheEntry $entry) use ($transaction) {
+            $amount = $entry->amount + $transaction->amount;
+            $decimals = $entry->decimals + $transaction->decimals;
+
+            if ($decimals >= 100) {
+                $amount += 1;
+                $decimals -= 100;
+            }
+
+            return [$amount, $decimals];
+        };
+
         $online = GlobalCache::ONLINE()->get($transaction->username);
         $top = GlobalCache::TOP()->get($transaction->username);
 
         if ($top !== null) {
+            [$amount, $decimals] = $fetcher($top);
             GlobalCache::TOP()->set($transaction->username, new CacheEntry(
-                amount: $top->amount + $transaction->amount,
-                decimals: $top->decimals + $transaction->decimals,
+                amount: $amount,
+                decimals: $decimals,
                 position: $top->position,
             ));
 
@@ -70,9 +83,10 @@ final class EventListener implements Listener
         }
 
         if ($online !== null) {
+            [$amount, $decimals] = $fetcher($online);
             GlobalCache::ONLINE()->set($transaction->username, new CacheEntry(
-                amount: $online->amount + $transaction->amount,
-                decimals: $online->decimals + $transaction->decimals,
+                amount: $amount,
+                decimals: $decimals,
                 position: GlobalCache::TOP()->get($transaction->username)?->position ?? $online->position,
             ));
         }
@@ -80,13 +94,26 @@ final class EventListener implements Listener
 
     private function handleSubtractTransaction(UpdateTransaction $transaction): void
     {
+        $fetcher = static function (CacheEntry $entry) use ($transaction) {
+            $amount = $entry->amount - $transaction->amount;
+            $decimals = $entry->decimals - $transaction->decimals;
+
+            if ($decimals < 0) {
+                $amount -= 1;
+                $decimals += 100;
+            }
+
+            return [$amount, $decimals];
+        };
+
         $online = GlobalCache::ONLINE()->get($transaction->username);
         $top = GlobalCache::TOP()->get($transaction->username);
 
         if ($top !== null) {
+            [$amount, $decimals] = $fetcher($top);
             GlobalCache::TOP()->set($transaction->username, new CacheEntry(
-                amount: $top->amount - $transaction->amount,
-                decimals: $top->decimals - $transaction->decimals,
+                amount: $amount,
+                decimals: $decimals,
                 position: $top->position,
             ));
 
@@ -94,9 +121,10 @@ final class EventListener implements Listener
         }
 
         if ($online !== null) {
+            [$amount, $decimals] = $fetcher($online);
             GlobalCache::ONLINE()->set($transaction->username, new CacheEntry(
-                amount: $online->amount - $transaction->amount,
-                decimals: $online->decimals - $transaction->decimals,
+                amount: $amount,
+                decimals: $decimals,
                 position: GlobalCache::TOP()->get($transaction->username)?->position ?? $online->position,
             ));
         }
@@ -170,6 +198,11 @@ final class EventListener implements Listener
     {
         $networkSession = $event->getNetworkSession();
         $playerInfo = $networkSession->getPlayerInfo();
+
+        if (!$this->plugin->isReady()) {
+            $networkSession->disconnect("An error occurred while loading the plugin. Please try again later.");
+            return;
+        }
 
         if (!$playerInfo instanceof XboxLivePlayerInfo) {
             throw new RuntimeException("BedrockEconomy requires xbox authentication.");
