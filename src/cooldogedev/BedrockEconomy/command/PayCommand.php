@@ -40,15 +40,15 @@ use cooldogedev\BedrockEconomy\database\exception\RecordNotFoundException;
 use cooldogedev\BedrockEconomy\language\KnownMessages;
 use cooldogedev\BedrockEconomy\language\LanguageManager;
 use cooldogedev\BedrockEconomy\language\TranslationKeys;
-use cooldogedev\libSQL\exception\SQLException;
-use CortexPE\Commando\args\IntegerArgument;
-use CortexPE\Commando\args\RawStringArgument;
-use CortexPE\Commando\BaseCommand;
-use CortexPE\Commando\constraint\InGameRequiredConstraint;
+use cooldogedev\BedrockEconomy\libs\_1bf65e59a1e61f74\cooldogedev\libSQL\exception\SQLException;
+use cooldogedev\BedrockEconomy\libs\_1bf65e59a1e61f74\CortexPE\Commando\args\IntegerArgument;
+use cooldogedev\BedrockEconomy\libs\_1bf65e59a1e61f74\CortexPE\Commando\args\RawStringArgument;
+use cooldogedev\BedrockEconomy\libs\_1bf65e59a1e61f74\CortexPE\Commando\BaseCommand;
+use cooldogedev\BedrockEconomy\libs\_1bf65e59a1e61f74\CortexPE\Commando\constraint\InGameRequiredConstraint;
 use Generator;
 use pocketmine\command\CommandSender;
 use pocketmine\player\Player;
-use SOFe\AwaitGenerator\Await;
+use cooldogedev\BedrockEconomy\libs\_1bf65e59a1e61f74\SOFe\AwaitGenerator\Await;
 
 final class PayCommand extends BaseCommand
 {

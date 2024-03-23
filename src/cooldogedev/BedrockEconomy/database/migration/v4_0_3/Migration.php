@@ -35,11 +35,11 @@ use cooldogedev\BedrockEconomy\BedrockEconomy;
 use cooldogedev\BedrockEconomy\database\exception\RecordAlreadyExistsException;
 use cooldogedev\BedrockEconomy\database\migration\BaseMigration;
 use cooldogedev\BedrockEconomy\database\QueryManager;
-use cooldogedev\libSQL\exception\SQLException;
+use cooldogedev\BedrockEconomy\libs\_1bf65e59a1e61f74\cooldogedev\libSQL\exception\SQLException;
 use Generator;
 use pocketmine\promise\Promise;
 use pocketmine\promise\PromiseResolver;
-use SOFe\AwaitGenerator\Await;
+use cooldogedev\BedrockEconomy\libs\_1bf65e59a1e61f74\SOFe\AwaitGenerator\Await;
 
 final class Migration extends BaseMigration
 {

@@ -35,8 +35,8 @@ use cooldogedev\BedrockEconomy\database\cache\GlobalCache;
 use cooldogedev\BedrockEconomy\language\KnownMessages;
 use cooldogedev\BedrockEconomy\language\LanguageManager;
 use cooldogedev\BedrockEconomy\language\TranslationKeys;
-use CortexPE\Commando\args\IntegerArgument;
-use CortexPE\Commando\BaseCommand;
+use cooldogedev\BedrockEconomy\libs\_1bf65e59a1e61f74\CortexPE\Commando\args\IntegerArgument;
+use cooldogedev\BedrockEconomy\libs\_1bf65e59a1e61f74\CortexPE\Commando\BaseCommand;
 use pocketmine\command\CommandSender;
 use function max;
 

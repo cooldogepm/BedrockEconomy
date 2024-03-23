@@ -1,12 +1,1 @@
---- # Poggit-CI Manifest. Open the CI at https://poggit.pmmp.io/ci/cooldogepm/BedrockEconomy
-build-by-default: true
-branches:
-- main
-- pm5
-projects:
-  BedrockEconomy:
-    path: ""
-    lint:
-      phpstan: false
-...
-
+{"projects":{"BedrockEconomy":{"path":".","lint":false}}}

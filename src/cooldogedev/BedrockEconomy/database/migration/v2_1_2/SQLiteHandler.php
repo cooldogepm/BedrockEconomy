@@ -30,7 +30,7 @@ declare(strict_types=1);
 
 namespace cooldogedev\BedrockEconomy\database\migration\v2_1_2;
 
-use cooldogedev\libSQL\query\SQLiteQuery;
+use cooldogedev\BedrockEconomy\libs\_1bf65e59a1e61f74\cooldogedev\libSQL\query\SQLiteQuery;
 use SQLite3;
 
 final class SQLiteHandler extends SQLiteQuery

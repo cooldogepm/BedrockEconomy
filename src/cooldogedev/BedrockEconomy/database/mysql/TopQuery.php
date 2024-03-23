@@ -33,7 +33,7 @@ namespace cooldogedev\BedrockEconomy\database\mysql;
 use cooldogedev\BedrockEconomy\database\exception\RecordNotFoundException;
 use cooldogedev\BedrockEconomy\database\helper\ReferenceHolder;
 use cooldogedev\BedrockEconomy\database\helper\TableHolder;
-use cooldogedev\libSQL\query\MySQLQuery;
+use cooldogedev\BedrockEconomy\libs\_1bf65e59a1e61f74\cooldogedev\libSQL\query\MySQLQuery;
 use mysqli;
 
 final class TopQuery extends MySQLQuery
