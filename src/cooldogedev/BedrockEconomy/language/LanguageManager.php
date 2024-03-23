@@ -37,8 +37,9 @@ final class LanguageManager
 {
     private const DEFAULT_LANGUAGE = "en-US";
     private const SUPPORTED_LANGUAGES = [
-        "en-US",
         "de-CH",
+        "en-US",
+        "es-ES",
     ];
 
     private static string $language;

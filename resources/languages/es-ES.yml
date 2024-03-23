@@ -1,0 +1,60 @@
+---
+error.database: "&cHa ocurrido un error mientras se procesaba tu peticion. Intentalo otra vez mas tarde."
+
+error.account.nonexistent: "&cLa cuenta que estas intentando ingresar no existe."
+error.account.insufficient: "&cFondos insuficientes."
+
+error.amount.invalid: "&cLa cantidad que ingresastes es invalida."
+error.amount.small: "&cLa cantidad que ingresastes es muy corta."
+error.amount.large: "&cLa cantidad que ingresastes es muy larga."
+
+error.rich.no_records: "&cNo hay archivos para mostrar."
+
+error.pay.self: "&cNo puedes pagarte a ti mismo."
+
+balance.info: "&aTu dinero actual es &e{amount}&a. (#{position})"
+balance.info.other: "&aEl dinero actual de {player} es &e{amount}&a. (#{position})"
+
+balance.pay: "&aHas pagado &f{amount}&a a {player}."
+balance.pay.receive: "&aHas recibido &f{amount}&a de {player}."
+
+balance.add: "&aAgregaste &e{amount}&a a el jugador: {player}."
+balance.remove: "&aRemoviste &e{amount}&a del jugador: {player}."
+balance.set: "&aPuisite &e{amount} en la cuenta del jugador: {player}."
+
+rich.header: "&aTop personas con mas dinero:"
+rich.entry: "&e{position}. &a{player} - &e{amount}"
+rich.footer: "&aTu estas en la posicion: &e#{position}&a."
+
+commands:
+  balance:
+    name: balance
+    description: Mira cuanto dinero tienes actualmente
+    usage: "&cUso /balance [player: string]"
+    aliases: [ ]
+  pay:
+    name: pay
+    description: Paga a otros jugadores de tu dinero
+    usage: "&cUso /pay <player: string> <amount: number>"
+    aliases: [ ]
+  rich:
+    name: rich
+    description: Observa el top de personas ricas
+    usage: "&cUso /rich [page: number]"
+    aliases: [ ]
+  add-balance:
+    name: addbalance
+    description: Agrega dinero a un usuario
+    usage: "&cUso /addbalance <player: string> <amount: number>"
+    aliases: [ ]
+  remove-balance:
+    name: removebalance
+    description: Remueve dinero de la cuenta de un usuario
+    usage: "&cUsage /removebalance <player: string> <amount: number>"
+    aliases: [ ]
+  set-balance:
+    name: setbalance
+    description: Pon una cantidad de dinero a un jugador
+    usage: "&cUso /setbalance <player: string> <amount: number>"
+    aliases: [ ]
+...
