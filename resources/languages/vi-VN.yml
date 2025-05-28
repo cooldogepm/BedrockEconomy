@@ -1,0 +1,60 @@
+---
+error.database: "&cĐã xảy ra lỗi khi xử lý yêu cầu của bạn. Vui lòng thử lại sau."
+
+error.account.nonexistent: "&cTài khoản bạn đang truy cập không tồn tại."
+error.account.insufficient: "&cKhông đủ tiền."
+
+error.amount.invalid: "&cSố tiền bạn nhập không hợp lệ."
+error.amount.small: "&cSố tiền bạn nhập quá nhỏ."
+error.amount.large: "&cSố tiền bạn nhập quá lớn."
+
+error.rich.no_records: "&cKhông có dữ liệu để hiển thị."
+
+error.pay.self: "&cBạn không thể tự trả tiền cho chính mình."
+
+balance.info: "&aSố dư hiện tại của bạn là &e{amount}&a. (Hạng #{position})"
+balance.info.other: "&aSố dư hiện tại của {player} là &e{amount}&a. (Hạng #{position})"
+
+balance.pay: "&aBạn đã trả &f{amount}&a cho {player}."
+balance.pay.receive: "&aBạn đã nhận &f{amount}&a từ {player}."
+
+balance.add: "&aBạn đã thêm &e{amount}&a vào tài khoản của {player}."
+balance.remove: "&aBạn đã trừ &e{amount}&a từ tài khoản của {player}."
+balance.set: "&aBạn đã đặt số dư của {player} thành &e{amount}&a."
+
+rich.header: "&aNhững người giàu nhất:"
+rich.entry: "&e{position}. &a{player} - &e{amount}"
+rich.footer: "&aHiện tại bạn đang xếp hạng &e#{position}&a."
+
+commands:
+  balance:
+    name: balance
+    description: Hiển thị số dư hiện tại của bạn
+    usage: "&cCách dùng /balance [người chơi: string]"
+    aliases: [ ]
+  pay:
+    name: pay
+    description: Trả tiền cho người khác từ số dư của bạn
+    usage: "&cCách dùng /pay <người chơi: string> <số tiền: number>"
+    aliases: [ ]
+  rich:
+    name: rich
+    description: Hiển thị danh sách người giàu nhất
+    usage: "&cCách dùng /rich [trang: number]"
+    aliases: [ ]
+  add-balance:
+    name: addbalance
+    description: Thêm tiền vào tài khoản của người chơi
+    usage: "&cCách dùng /addbalance <người chơi: string> <số tiền: number>"
+    aliases: [ ]
+  remove-balance:
+    name: removebalance
+    description: Trừ tiền từ tài khoản của người chơi
+    usage: "&cCách dùng /removebalance <người chơi: string> <số tiền: number>"
+    aliases: [ ]
+  set-balance:
+    name: setbalance
+    description: Đặt số dư của người chơi
+    usage: "&cCách dùng /setbalance <người chơi: string> <số tiền: number>"
+    aliases: [ ]
+... 

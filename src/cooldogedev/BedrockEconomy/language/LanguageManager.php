@@ -40,6 +40,7 @@ final class LanguageManager
         "de-CH",
         "en-US",
         "es-ES",
+        "vi-VN"
     ];
 
     private static string $language;
