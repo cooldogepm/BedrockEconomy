@@ -1,0 +1,60 @@
+---
+error.database: "&cBilinmeyen bir hata meydana geldi. Lütfen daha sonra tekrar deneyiniz."
+
+error.account.nonexistent: "&cAradığınız hesap mevcut değil."
+error.account.insufficient: "&cYetersiz bakiye."
+
+error.amount.invalid: "&cGirdiğiniz miktar geçersiz."
+error.amount.small: "&cGirdiğiniz miktar çok küçük."
+error.amount.large: "&cGirdiğiniz miktar çok büyük."
+
+error.rich.no_records: "&cGörüntülenecek kayıt yok."
+
+error.pay.self: "&cKendine ödeme yapamazsın."
+
+balance.info: "&aMevcut bakiyen &e{amount}&a. (#{position})"
+balance.info.other: "&a{player} adlı oyuncunun mevcut bakiyesi &e{amount}&a. (#{position})"
+
+balance.pay: "&a{player} adlı oyuncuya &f{amount}&a ödedin."
+balance.pay.receive: "&a{player} adlı oyuncu size &f{amount}&a ödedi."
+
+balance.add: "&a{player} adlı oyuncuya &e{amount}&a bakiye eklendi."
+balance.remove: "&a{player} adlı oyuncudan &e{amount}&a bakiye alındı."
+balance.set: "&a{player} adlı oyuncunun bakiyesi &e{amount}&a olarak güncellendi."
+
+rich.header: "&aZenginler Listesi:"
+rich.entry: "&e{position}. &a{player} - &e{amount}"
+rich.footer: "&aŞu anda &e#{position}&a sıradasın."
+
+commands:
+  balance:
+    name: balance
+    description: Mevcut bakiyenizi gösterir
+    usage: "&cKullanım /balance [player: string]"
+    aliases: [ ]
+  pay:
+    name: pay
+    description: Kendi bakiyenizi başkalarına aktarır
+    usage: "&cKullanım /pay <player: string> <amount: number>"
+    aliases: [ ]
+  rich:
+    name: rich
+    description: Zenginleri sıralar
+    usage: "&cKullanım /rich [page: number]"
+    aliases: [ ]
+  add-balance:
+    name: addbalance
+    description: Bir oyuncuya bakiye ekler
+    usage: "&cKullanım /addbalance <player: string> <amount: number>"
+    aliases: [ ]
+  remove-balance:
+    name: removebalance
+    description: Bir oyuncudan bakiye çıkarır
+    usage: "&cKullanım /removebalance <player: string> <amount: number>"
+    aliases: [ ]
+  set-balance:
+    name: setbalance
+    description: Bir oyuncunun bakiyesini ayarlar
+    usage: "&cKullanım /setbalance <player: string> <amount: number>"
+    aliases: [ ]
+...
