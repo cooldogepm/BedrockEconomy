@@ -15,7 +15,7 @@ error.pay.self: "&cВы не можете платить самому себе."
 balance.info: "&aВаш текущий баланс: &e{amount}&a. (#{position})"
 balance.info.other: "&aТекущий баланс {player}: &e{amount}&a. (#{position})"
 
-balance.pay: "&aВы заплатили &f{amount}&a игроку {player}."
+balance.pay: "&aВы перевели &f{amount}&a игроку {player}."
 balance.pay.receive: "&aВы получили &f{amount}&a от игрока {player}."
 
 balance.add: "&aВы добавили &e{amount}&a на баланс игрока {player}."
@@ -34,7 +34,7 @@ commands:
     aliases: [ ]
   pay:
     name: pay
-    description: "Переводит деньги другим игрокам с вашего баланса"
+    description: "Перевести деньги другому игроку"
     usage: "&cИспользование: /pay <игрок: string> <сумма: number>"
     aliases: [ ]
   rich:
