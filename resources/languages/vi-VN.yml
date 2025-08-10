@@ -30,31 +30,31 @@ commands:
   balance:
     name: balance
     description: Hiển thị số dư hiện tại của bạn
-    usage: "&cCách dùng /balance [người chơi: string]"
+    usage: "&cCách dùng /balance [player: string]"
     aliases: [ ]
   pay:
     name: pay
     description: Trả tiền cho người khác từ số dư của bạn
-    usage: "&cCách dùng /pay <người chơi: string> <số tiền: number>"
+    usage: "&cCách dùng /pay <player: string> <amount: number>"
     aliases: [ ]
   rich:
     name: rich
     description: Hiển thị danh sách người giàu nhất
-    usage: "&cCách dùng /rich [trang: number]"
+    usage: "&cCách dùng /rich [page: number]"
     aliases: [ ]
   add-balance:
     name: addbalance
     description: Thêm tiền vào tài khoản của người chơi
-    usage: "&cCách dùng /addbalance <người chơi: string> <số tiền: number>"
+    usage: "&cCách dùng /addbalance <player: string> <amount: number>"
     aliases: [ ]
   remove-balance:
     name: removebalance
     description: Trừ tiền từ tài khoản của người chơi
-    usage: "&cCách dùng /removebalance <người chơi: string> <số tiền: number>"
+    usage: "&cCách dùng /removebalance <player: string> <amount: number>"
     aliases: [ ]
   set-balance:
     name: setbalance
     description: Đặt số dư của người chơi
-    usage: "&cCách dùng /setbalance <người chơi: string> <số tiền: number>"
+    usage: "&cCách dùng /setbalance <player: string> <amount: number>"
     aliases: [ ]
 ... 

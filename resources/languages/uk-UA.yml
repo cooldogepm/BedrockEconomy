@@ -1,0 +1,60 @@
+---
+error.database: "&cВиникла невідома помилка під час обробки вашого запиту. Будь ласка, спробуйте ще раз пізніше."
+
+error.account.nonexistent: "&cОбліковий запис, до якого ви намагаєтеся отримати доступ, не існує."
+error.account.insufficient: "&cНедостатньо коштів."
+
+error.amount.invalid: "&cВведена сума недійсна."
+error.amount.small: "&cВведена сума занадто мала."
+error.amount.large: "&cВведена сума занадто велика."
+
+error.rich.no_records: "&cНемає записів для відображення."
+
+error.pay.self: "&cВи не можете переказувати самому собі."
+
+balance.info: "&aВаш поточний баланс: &e{amount}&a. (#{position})"
+balance.info.other: "&aПоточний баланс {player}: &e{amount}&a. (#{position})"
+
+balance.pay: "&aВи переказали &f{amount}&a гравцю {player}."
+balance.pay.receive: "&aВи отримали &f{amount}&a від гравця {player}."
+
+balance.add: "&aВи додали &e{amount}&a до балансу гравця {player}."
+balance.remove: "&aВи зняли &e{amount}&a з балансу гравця {player}."
+balance.set: "&aВи встановили баланс гравця {player} на &e{amount}&a."
+
+rich.header: "&aНайбагатші гравці:"
+rich.entry: "&e{position}. &a{player} - &e{amount}"
+rich.footer: "&aВи наразі на &e#{position}&a місці."
+
+commands:
+  balance:
+    name: balance
+    description: "Відображає ваш поточний баланс"
+    usage: "&cВикористання: /balance [player: string]"
+    aliases: [ ]
+  pay:
+    name: pay
+    description: "Переказати гроші іншому гравцю"
+    usage: "&cВикористання: /pay <player: string> <amount: number>"
+    aliases: [ ]
+  rich:
+    name: rich
+    description: "Відображає найбагатших гравців"
+    usage: "&cВикористання: /rich [page: number]"
+    aliases: [ ]
+  add-balance:
+    name: addbalance
+    description: "Додає гроші на баланс гравця"
+    usage: "&cВикористання: /addbalance <player: string> <amount: number>"
+    aliases: [ ]
+  remove-balance:
+    name: removebalance
+    description: "Знімає гроші з балансу гравця"
+    usage: "&cВикористання: /removebalance <player: string> <amount: number>"
+    aliases: [ ]
+  set-balance:
+    name: setbalance
+    description: "Встановлює баланс гравця"
+    usage: "&cВикористання: /setbalance <player: string> <amount: number>"
+    aliases: [ ]
+...
