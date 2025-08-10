@@ -10,7 +10,7 @@ error.amount.large: "&cВведена сума занадто велика."
 
 error.rich.no_records: "&cНемає записів для відображення."
 
-error.pay.self: "&cВи не можете платити самому собі."
+error.pay.self: "&cВи не можете переказувати самому собі."
 
 balance.info: "&aВаш поточний баланс: &e{amount}&a. (#{position})"
 balance.info.other: "&aПоточний баланс {player}: &e{amount}&a. (#{position})"
