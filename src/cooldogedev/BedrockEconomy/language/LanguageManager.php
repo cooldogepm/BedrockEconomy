@@ -40,6 +40,8 @@ final class LanguageManager
         "de-CH",
         "en-US",
         "es-ES",
+        "ru-RU",
+        "uk-UA",
         "vi-VN"
     ];
 
