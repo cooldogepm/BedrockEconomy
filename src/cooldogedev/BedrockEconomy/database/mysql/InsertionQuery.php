@@ -70,7 +70,7 @@ final class InsertionQuery extends MySQLQuery
 
         // insert account
         $insertionQuery = $connection->prepare("INSERT IGNORE INTO " . $this->table . " (xuid, username, amount) VALUES (?, ?, ?)");
-        $insertionQuery->bind_param("ssii", $this->getRef($this->xuid), $this->getRef($this->username), $amount);
+        $insertionQuery->bind_param("sss", $this->getRef($this->xuid), $this->getRef($this->username), $amount);
         $insertionQuery->execute();
 
         if ($insertionQuery->affected_rows === 0) {
