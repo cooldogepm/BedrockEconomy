@@ -30,31 +30,31 @@ commands:
   balance:
     name: balance
     description: "Отображает ваш текущий баланс"
-    usage: "&cИспользование: /balance [игрок: string]"
+    usage: "&cИспользование: /balance [player: string]"
     aliases: [ ]
   pay:
     name: pay
     description: "Перевести деньги другому игроку"
-    usage: "&cИспользование: /pay <игрок: string> <сумма: number>"
+    usage: "&cИспользование: /pay <player: string> <amount: number>"
     aliases: [ ]
   rich:
     name: rich
     description: "Отображает самых богатых игроков"
-    usage: "&cИспользование: /rich [страница: number]"
+    usage: "&cИспользование: /rich [page: number]"
     aliases: [ ]
   add-balance:
     name: addbalance
     description: "Добавляет деньги на баланс игрока"
-    usage: "&cИспользование: /addbalance <игрок: string> <сумма: number>"
+    usage: "&cИспользование: /addbalance <player: string> <amount: number>"
     aliases: [ ]
   remove-balance:
     name: removebalance
     description: "Снимает деньги с баланса игрока"
-    usage: "&cИспользование: /removebalance <игрок: string> <сумма: number>"
+    usage: "&cИспользование: /removebalance <player: string> <amount: number>"
     aliases: [ ]
   set-balance:
     name: setbalance
     description: "Устанавливает баланс игрока"
-    usage: "&cИспользование: /setbalance <игрок: string> <сумма: number>"
+    usage: "&cИспользование: /setbalance <player: string> <amount: number>"
     aliases: [ ]
 ...
