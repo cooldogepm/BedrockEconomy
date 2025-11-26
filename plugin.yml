@@ -1,6 +1,6 @@
 name: BedrockEconomy
 version: 4.0.4
-api: [ 5.0.0 ]
+api: [ 5.36.0 ]
 author: cooldogedev
 main: cooldogedev\BedrockEconomy\BedrockEconomy
 description: An economy plugin focused on stability and simplicity
